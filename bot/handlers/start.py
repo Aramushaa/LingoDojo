@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppI
 from telegram.ext import ContextTypes
 from bot.config import WEBAPP_URL
 from bot.db import get_connection
+from bot.handlers.menu import main_menu_keyboard
 
 def utc_now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -28,3 +29,5 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Welcome {user.first_name}! 👋\nYour profile is saved.",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+    
+    await update.message.reply_text("Quick menu 👇", reply_markup=main_menu_keyboard())

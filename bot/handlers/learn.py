@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from bot.db import get_user_languages
+from bot.db import get_user_languages,ensure_review_row,apply_grade
 from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
@@ -44,6 +44,8 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     activate_pack(user.id, pack_id)
 
     item = pick_one_item_from_pack(pack_id)
+    ensure_review_row(user.id, item_id)
+
     if not item:
         await query.edit_message_text("This pack has no items.")
         return
@@ -86,6 +88,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"• *Oggi vorrei prendere un caffè.*\n\n"
             f"Type /learn for another task."
         )
+        apply_grade(user.id, item_id, "good")
 
         clear_session(user.id)
         await update.message.reply_text(reply, parse_mode="Markdown")

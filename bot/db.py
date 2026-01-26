@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 
 
 # Path to database file
@@ -83,6 +83,22 @@ def init_db():
     )
     """)
 
+    # spaced repetition reviews
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reviews (
+        user_id INTEGER NOT NULL,
+        item_id INTEGER NOT NULL,
+        status TEXT NOT NULL,              -- new | learning | mature
+        interval_days INTEGER NOT NULL,    -- days until next review
+        due_date TEXT NOT NULL,            -- YYYY-MM-DD
+        last_reviewed_at TEXT,             -- ISO timestamp
+        reps INTEGER NOT NULL DEFAULT 0,   -- number of successful reviews
+        lapses INTEGER NOT NULL DEFAULT 0, -- number of failures
+        PRIMARY KEY (user_id, item_id)
+    )
+    """)
+
+
     def _add_column_if_missing(cursor, table: str, column: str, col_def: str):
         cursor.execute(f"PRAGMA table_info({table})")
         cols = [row[1] for row in cursor.fetchall()]
@@ -97,9 +113,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-
-
-def utc_now_iso():
+def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 def get_user_languages(user_id: int):
@@ -269,3 +283,99 @@ def set_user_ui_language(user_id: int, ui_language: str):
     )
     conn.commit()
     conn.close()
+
+
+def today_str() -> str:
+    return date.today().isoformat()  # "2026-01-26"
+
+
+def ensure_review_row(user_id: int, item_id: int):
+    """
+    Make sure an item exists in the user's review queue.
+    If it doesn't exist, create it as 'new' due today.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT OR IGNORE INTO reviews (user_id, item_id, status, interval_days, due_date, last_reviewed_at, reps, lapses)
+        VALUES (?, ?, 'new', 0, ?, NULL, 0, 0)
+    """, (user_id, item_id, today_str()))
+    conn.commit()
+    conn.close()
+
+def get_due_item(user_id: int):
+    """
+    Return one item_id that is due today (or overdue), else None.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT item_id
+        FROM reviews
+        WHERE user_id = ? AND due_date <= ?
+        ORDER BY due_date ASC
+        LIMIT 1
+    """, (user_id, today_str()))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+def get_review_state(user_id: int, item_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT status, interval_days, due_date, reps, lapses
+        FROM reviews
+        WHERE user_id = ? AND item_id = ?
+    """, (user_id, item_id))
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+def apply_grade(user_id: int, item_id: int, grade: str):
+    """
+    grade: 'good' or 'again'
+    Minimal scheduling:
+      - good  -> interval grows, due moves forward
+      - again -> interval resets, due today (repeat soon)
+    """
+    state = get_review_state(user_id, item_id)
+    if not state:
+        ensure_review_row(user_id, item_id)
+        state = get_review_state(user_id, item_id)
+
+    status, interval_days, due_date, reps, lapses = state
+
+    if grade == "good":
+        # growth rule (simple MVP):
+        # new -> 1 day
+        # learning/mature -> double (min 1)
+        new_interval = 1 if interval_days < 1 else interval_days * 2
+        new_reps = reps + 1
+        new_lapses = lapses
+
+        # promote status slowly
+        new_status = "learning"
+        if new_reps >= 5 and new_interval >= 16:
+            new_status = "mature"
+
+        new_due = (date.today() + timedelta(days=new_interval)).isoformat()
+
+    else:  # again
+        new_interval = 1
+        new_reps = reps
+        new_lapses = lapses + 1
+        new_status = "learning"
+        new_due = date.today().isoformat()  # due again today
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE reviews
+        SET status = ?, interval_days = ?, due_date = ?, last_reviewed_at = ?, reps = ?, lapses = ?
+        WHERE user_id = ? AND item_id = ?
+    """, (new_status, new_interval, new_due, utc_now_iso(), new_reps, new_lapses, user_id, item_id))
+    conn.commit()
+    conn.close()
+
+    return new_status, new_interval, new_due
