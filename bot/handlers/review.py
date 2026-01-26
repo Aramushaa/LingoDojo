@@ -34,7 +34,7 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"(Hint EN: {translation_en or '-'})\n\n"
         f"👉 Write *one sentence* using the chunk."
     )
-    await update.message.reply_text(msg, parse_mode="Markdown")
+    await update.message.reply_text(msg)
 
 async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user

@@ -12,11 +12,10 @@ DB_PATH = Path("data/app.db")
 PACKS_DIR = Path("data/packs")
 
 def get_connection():
-    """
-    Opens a connection to the SQLite database.
-    If the file does not exist, SQLite will create it.
-    """
-    return sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
+
 
 def init_db():
     conn = get_connection()

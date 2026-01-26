@@ -63,7 +63,7 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"👉 Now you: write *one Italian sentence* using the chunk.\n"
         f"(Just type it as a normal message.)"
     )
-    await query.edit_message_text(msg, parse_mode="Markdown")
+    await query.edit_message_text(msg)
 
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -93,4 +93,4 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         apply_grade(user.id, item_id, "good")
 
         clear_session(user.id)
-        await update.message.reply_text(reply, parse_mode="Markdown")
+        await update.message.reply_text(reply)
