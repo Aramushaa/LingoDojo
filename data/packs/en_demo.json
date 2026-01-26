@@ -1,0 +1,19 @@
+{
+  "pack_id": "en_demo_a1_core",
+  "target_language": "en",
+  "level": "A1",
+  "title": "English Demo Pack (A1 Core)",
+  "description": "Tiny starter pack for MVP testing: common verbs + useful chunks.",
+  "items": [
+    {"term": "make", "chunk": "make a decision", "translation_en": "make a decision", "note": "collocation"},
+    {"term": "take", "chunk": "take a break", "translation_en": "rest for a short time", "note": ""},
+    {"term": "get", "chunk": "get ready", "translation_en": "prepare", "note": ""},
+    {"term": "go", "chunk": "go home", "translation_en": "return home", "note": ""},
+    {"term": "have", "chunk": "have time", "translation_en": "possess time", "note": ""},
+    {"term": "need", "chunk": "need help", "translation_en": "require help", "note": ""},
+    {"term": "want", "chunk": "want to learn", "translation_en": "desire to learn", "note": ""},
+    {"term": "say", "chunk": "say hello", "translation_en": "greet", "note": ""},
+    {"term": "know", "chunk": "I don't know", "translation_en": "uncertainty", "note": "chunk > single word"},
+    {"term": "can", "chunk": "Can I have…?", "translation_en": "polite request", "note": ""}
+  ]
+}

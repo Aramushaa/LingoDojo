@@ -22,14 +22,19 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
+    
+
     # users
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY,
         first_name TEXT,
-        created_at TEXT
+        created_at TEXT,
+        target_language TEXT NOT NULL DEFAULT 'it',
+        ui_language TEXT NOT NULL DEFAULT 'en'
     )
     """)
+
 
     # packs metadata
     cursor.execute("""
@@ -78,6 +83,17 @@ def init_db():
     )
     """)
 
+    def _add_column_if_missing(cursor, table: str, column: str, col_def: str):
+        cursor.execute(f"PRAGMA table_info({table})")
+        cols = [row[1] for row in cursor.fetchall()]
+        if column not in cols:
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_def}")
+    
+    _add_column_if_missing(cursor, "users", "target_language", "TEXT NOT NULL DEFAULT 'it'")
+    _add_column_if_missing(cursor, "users", "ui_language", "TEXT NOT NULL DEFAULT 'en'")
+
+
+
     conn.commit()
     conn.close()
 
@@ -85,6 +101,15 @@ def init_db():
 
 def utc_now_iso():
     return datetime.now(timezone.utc).isoformat()
+
+def get_user_languages(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT target_language, ui_language FROM users WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row  # (target_language, ui_language) or None
+
 
 def import_packs_from_folder():
     """
@@ -224,3 +249,23 @@ def get_item_by_id(item_id: int):
     row = cursor.fetchone()
     conn.close()
     return row
+
+def set_user_target_language(user_id: int, target_language: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET target_language = ? WHERE user_id = ?",
+        (target_language, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+def set_user_ui_language(user_id: int, ui_language: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET ui_language = ? WHERE user_id = ?",
+        (ui_language, user_id)
+    )
+    conn.commit()
+    conn.close()

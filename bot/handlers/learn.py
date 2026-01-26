@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from bot.config import TARGET_LANG
+from bot.db import get_user_languages
 from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
@@ -9,7 +9,14 @@ from bot.db import (
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    packs = list_packs(TARGET_LANG)
+    langs = get_user_languages(user.id)
+    if not langs:
+        await update.message.reply_text("Use /start first.")
+        return
+
+    target_language, ui_language = langs
+    packs = list_packs(target_language)
+
 
     if not packs:
         await update.message.reply_text("No packs found. (Import failed?)")
