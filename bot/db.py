@@ -378,3 +378,36 @@ def apply_grade(user_id: int, item_id: int, grade: str):
     conn.close()
 
     return new_status, new_interval, new_due
+
+def get_due_count(user_id: int) -> int:
+    """How many items are due today (or overdue) for this user?"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM reviews
+        WHERE user_id = ? AND due_date <= ?
+    """, (user_id, date.today().isoformat()))
+    (count,) = cursor.fetchone()
+    conn.close()
+    return int(count)
+
+def get_status_counts(user_id: int) -> dict:
+    """Return counts grouped by status: new/learning/mature."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT status, COUNT(*)
+        FROM reviews
+        WHERE user_id = ?
+        GROUP BY status
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    # default 0 for missing statuses
+    out = {"new": 0, "learning": 0, "mature": 0}
+    for status, cnt in rows:
+        if status in out:
+            out[status] = int(cnt)
+    return out

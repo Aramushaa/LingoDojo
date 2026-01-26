@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppI
 from telegram.ext import ContextTypes
 from bot.config import WEBAPP_URL
 from bot.db import get_connection
-from bot.handlers.menu import main_menu_keyboard
+
 
 def utc_now_iso():
     return datetime.now(timezone.utc).isoformat()
