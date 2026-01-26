@@ -45,9 +45,11 @@ def main():
     app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^SET_(TARGET|UI)\|"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text_router))
 
+    app.add_error_handler(on_error)
+
     app.run_polling(drop_pending_updates=True)
 
-    app.add_error_handler(on_error)
+   
 
 
 if __name__ == "__main__":

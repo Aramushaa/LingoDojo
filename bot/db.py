@@ -5,13 +5,14 @@ import json
 from datetime import date, datetime, timezone, timedelta
 
 
-# Path to database file
-DB_PATH = Path("data/app.db")
-
-# Directory containing pack JSON files
-PACKS_DIR = Path("data/packs")
+REPO_ROOT = Path(__file__).resolve().parents[1]  # LingoDojo/
+DATA_DIR = REPO_ROOT / "data"
+DB_PATH = DATA_DIR / "app.db"
+PACKS_DIR = DATA_DIR / "packs"
 
 def get_connection():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn

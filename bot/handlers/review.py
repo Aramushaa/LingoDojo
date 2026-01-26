@@ -62,6 +62,17 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, grade, item_id_str = query.data.split("|", 2)
     item_id = int(item_id_str)
 
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("No active review session. Type /review.")
+        return
+
+    mode, session_item_id, stage = session
+    if mode != "review" or stage != "await_grade" or session_item_id != item_id:
+        await query.edit_message_text("Invalid grading action. Type /review again.")
+        return
+
+
     new_status, new_interval, new_due = apply_grade(user.id, item_id, grade)
 
     clear_session(user.id)
