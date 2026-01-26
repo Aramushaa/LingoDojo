@@ -29,5 +29,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Welcome {user.first_name}! 👋\nYour profile is saved.",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
-    
-    await update.message.reply_text("Quick menu 👇", reply_markup=main_menu_keyboard())
+
+    await update.message.reply_text(
+    "Quick commands:\n"
+    "• /learn\n"
+    "• /review\n"
+    "• /stats\n"
+    "• /settings\n"
+    )
+

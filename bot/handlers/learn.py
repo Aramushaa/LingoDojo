@@ -44,13 +44,15 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     activate_pack(user.id, pack_id)
 
     item = pick_one_item_from_pack(pack_id)
-    ensure_review_row(user.id, item_id)
 
     if not item:
         await query.edit_message_text("This pack has no items.")
         return
 
     item_id, term, chunk, translation_en, note = item
+
+    ensure_review_row(user.id, item_id)
+    
     set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence")
 
     msg = (
