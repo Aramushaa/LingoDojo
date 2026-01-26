@@ -5,6 +5,7 @@ from bot.config import WEBAPP_URL
 from bot.db import get_connection
 
 
+
 def utc_now_iso():
     return datetime.now(timezone.utc).isoformat()
 
@@ -23,7 +24,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
 
-    keyboard = [[InlineKeyboardButton("🚀 Open Mini WebApp", web_app=WebAppInfo(url=WEBAPP_URL))]]
+    keyboard = [[InlineKeyboardButton("🚀 Open Mini WebApp", web_app=WebAppInfo(url=f"{WEBAPP_URL}/stats"))]]
 
     await update.message.reply_text(
         f"Welcome {user.first_name}! 👋\nYour profile is saved.",
