@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
+from bot.config import BOT_TOKEN
+from webapp.telegram_auth import verify_telegram_webapp_init_data
 from pathlib import Path
 
-from bot.db import init_db, import_packs_from_folder, get_due_count, get_status_counts
+from bot.db import init_db, import_packs_from_folder, get_due_count, get_status_counts  
 
 
 app = FastAPI()
@@ -22,7 +24,15 @@ def home():
     """
 
 @app.get("/api/stats")
-def api_stats(user_id: int = Query(..., description="Telegram user id")):
+def api_stats(x_telegram_init_data: str = Header(default="")):
+    parsed = verify_telegram_webapp_init_data(x_telegram_init_data, BOT_TOKEN)
+    if not parsed:
+        raise HTTPException(status_code=401, detail="Invalid Telegram initData")
+
+    import json
+    user = json.loads(parsed["user"])
+    user_id = int(user["id"])
+
     due_today = get_due_count(user_id)
     counts = get_status_counts(user_id)
 
@@ -31,6 +41,7 @@ def api_stats(user_id: int = Query(..., description="Telegram user id")):
         "due_today": due_today,
         "counts": counts
     }
+
 
 @app.get("/stats", response_class=HTMLResponse)
 def stats_page():
@@ -72,42 +83,82 @@ def stats_page():
   <button onclick="loadStats()">🔄 Refresh</button>
 
   <script>
-    // MVP: you can hardcode a user_id for testing.
-    // Later: we'll read Telegram user id from Telegram.WebApp.initDataUnsafe.
-    const TEST_USER_ID = 94367831; // <-- replace with your Telegram numeric user id to test quickly
-
-    function getUserId() {
+    function getInitData() {
       try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-          const u = window.Telegram.WebApp.initDataUnsafe.user;
-          if (u && u.id) return u.id;
+        if (window.Telegram && window.Telegram.WebApp) {
+          // Expand the WebApp for better UX
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+
+          return window.Telegram.WebApp.initData || "";
         }
       } catch (e) {}
-      return TEST_USER_ID;
+      return "";
+    }
+
+    async function apiGet(path) {
+      const initData = getInitData();
+      const res = await fetch(path, {
+        headers: {
+          "X-Telegram-Init-Data": initData
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error ${res.status}: ${text}`);
+      }
+      return await res.json();
     }
 
     async function loadStats() {
-      const userId = getUserId();
-      document.getElementById("userLine").textContent = `user_id=${userId}`;
+      try {
+        const me = await apiGet("/api/me");
+        document.getElementById("userLine").textContent =
+          `@${me.username || "-"} | ${me.first_name || ""} | id=${me.user_id}`;
 
-      if (!userId || userId === 0) {
-        document.getElementById("dueToday").textContent = "🔁 Due today: (set TEST_USER_ID)";
-        return;
+        const data = await apiGet("/api/stats");
+
+        document.getElementById("dueToday").textContent = `🔁 Due today: ${data.due_today}`;
+        document.getElementById("newCount").textContent = `⚪ New: ${data.counts.new ?? 0}`;
+        document.getElementById("learningCount").textContent = `🟡 Learning: ${data.counts.learning ?? 0}`;
+        document.getElementById("matureCount").textContent = `🟢 Mature: ${data.counts.mature ?? 0}`;
+      } catch (err) {
+        document.getElementById("userLine").textContent = "Not inside Telegram WebApp (or auth failed).";
+        document.getElementById("dueToday").textContent = "🔁 Due today: -";
+        console.error(err);
       }
-
-      const res = await fetch(`/api/stats?user_id=${userId}`);
-      const data = await res.json();
-
-      document.getElementById("dueToday").textContent = `🔁 Due today: ${data.due_today}`;
-      document.getElementById("newCount").textContent = `⚪ New: ${data.counts.new ?? 0}`;
-      document.getElementById("learningCount").textContent = `🟡 Learning: ${data.counts.learning ?? 0}`;
-      document.getElementById("matureCount").textContent = `🟢 Mature: ${data.counts.mature ?? 0}`;
     }
 
     loadStats();
   </script>
+
 </body>
 </html>
 """
     return HTMLResponse(html)
 
+@app.get("/api/me")
+def api_me(x_telegram_init_data: str = Header(default="")):
+    """
+    Client sends Telegram initData in header.
+    Backend verifies signature and returns user identity.
+    """
+    parsed = verify_telegram_webapp_init_data(x_telegram_init_data, BOT_TOKEN)
+    if not parsed:
+        raise HTTPException(status_code=401, detail="Invalid Telegram initData")
+
+    # Telegram gives user as JSON string in 'user'
+    # It's a JSON string inside querystring, so parse it safely:
+    import json
+    user_raw = parsed.get("user")
+    if not user_raw:
+        raise HTTPException(status_code=401, detail="Missing user in initData")
+
+    user = json.loads(user_raw)
+    return {
+        "user_id": user.get("id"),
+        "first_name": user.get("first_name"),
+        "username": user.get("username"),
+        "language_code": user.get("language_code"),
+    }
