@@ -6,12 +6,15 @@ from bot.db import (
     pick_one_item_from_pack, set_session, get_session,
     clear_session, get_item_by_id
 )
+from telegram.constants import ParseMode
+from bot.utils.telegram import get_chat_sender
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     langs = get_user_languages(user.id)
     if not langs:
-        await update.message.reply_text("Use /start first.")
+        msg = get_chat_sender(update)
+        await msg.reply_text("Use /start first.")
         return
 
     target_language, ui_language = langs
@@ -19,7 +22,8 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
     if not packs:
-        await update.message.reply_text("No packs found. (Import failed?)")
+        msg = get_chat_sender(update)
+        await msg.reply_text("No packs found. (Import failed?)")
         return
 
     active = set(get_user_active_packs(user.id))
@@ -28,8 +32,8 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for pack_id, level, title, description in packs:
         label = f"✅ {title}" if pack_id in active else f"📦 {title}"
         buttons.append([InlineKeyboardButton(label, callback_data=f"PACK|{pack_id}")])
-
-    await update.message.reply_text(
+    msg = get_chat_sender(update)
+    await msg.reply_text(
         "Choose a pack to activate (✅ means active):",
         reply_markup=InlineKeyboardMarkup(buttons),
     )
@@ -63,7 +67,7 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"👉 Now you: write *one Italian sentence* using the chunk.\n"
         f"(Just type it as a normal message.)"
     )
-    await query.edit_message_text(msg)
+    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -78,7 +82,8 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         item = get_item_by_id(item_id)
         if not item:
             clear_session(user.id)
-            await update.message.reply_text("Session error. Try /learn again.")
+            msg = get_chat_sender(update)
+            await msg.reply_text("Session error. Try /learn again.")
             return
 
         _, term, chunk, translation_en, note = item
@@ -93,4 +98,5 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         apply_grade(user.id, item_id, "good")
 
         clear_session(user.id)
-        await update.message.reply_text(reply)
+        msg = get_chat_sender(update)
+        await msg.reply_text(reply)

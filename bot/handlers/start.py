@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ContextTypes
-from bot.config import WEBAPP_URL
-from bot.db import get_connection
 
+from bot.db import get_connection
+from bot.ui import home_keyboard
+from bot.utils.telegram import get_chat_sender
 
 
 def utc_now_iso():
@@ -24,18 +25,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
 
-    keyboard = [[InlineKeyboardButton("🚀 Open Mini WebApp", web_app=WebAppInfo(url=f"{WEBAPP_URL}/stats"))]]
-
-    await update.message.reply_text(
-        f"Welcome {user.first_name}! 👋\nYour profile is saved.",
-        reply_markup=InlineKeyboardMarkup(keyboard),
+    msg = get_chat_sender(update)
+    await msg.reply_text(
+    "Welcome to LingoDojo 🥋\nPick a mode:",
+    reply_markup=home_keyboard()
     )
 
-    await update.message.reply_text(
-    "Quick commands:\n"
-    "• /learn\n"
-    "• /review\n"
-    "• /stats\n"
-    "• /settings\n"
-    )
 

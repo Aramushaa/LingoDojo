@@ -9,12 +9,14 @@ from bot.db import init_db, import_packs_from_folder, get_due_count, get_status_
 
 app = FastAPI()
 
+print("BOT_TOKEN loaded, length:", len(BOT_TOKEN or ""))
+
 
 @app.on_event("startup")
 def startup():
     init_db()
     import_packs_from_folder()
-    
+
 
 def get_verified_user(x_telegram_init_data: str) -> dict:
     parsed = verify_telegram_webapp_init_data(x_telegram_init_data, BOT_TOKEN)
@@ -373,6 +375,7 @@ def stats_page():
     function getInitData(){
       const hasTG = !!(window.Telegram && window.Telegram.WebApp);
       const initData = hasTG ? (window.Telegram.WebApp.initData || "") : "";
+      console.log("initDataLen:", initData.length);
       diagSet(`TG=${hasTG} | initDataLen=${initData.length}`);
       return initData;
     }
@@ -491,3 +494,37 @@ def api_me(x_telegram_init_data: str = Header(default="")):
         "username": user.get("username"),
         "language_code": user.get("language_code"),
     }
+
+@app.get("/api/debug-init")
+def debug_init(x_telegram_init_data: str = Header(default="")):
+    return {
+        "has_header": bool(x_telegram_init_data),
+        "header_len": len(x_telegram_init_data or ""),
+        "header_preview": (x_telegram_init_data[:80] + "...") if x_telegram_init_data else "",
+        "contains_hash": ("hash=" in (x_telegram_init_data or "")),
+    }
+
+@app.get("/debug", response_class=HTMLResponse)
+def debug_page():
+    html = """
+    <!doctype html>
+    <html>
+    <body style="font-family:system-ui;padding:16px;">
+      <h3>Telegram WebApp Debug</h3>
+      <pre id="out">Loading...</pre>
+      <script>
+        const hasTG = !!(window.Telegram && window.Telegram.WebApp);
+        const initData = hasTG ? (window.Telegram.WebApp.initData || "") : "";
+        const user = hasTG ? (window.Telegram.WebApp.initDataUnsafe?.user || null) : null;
+
+        document.getElementById("out").textContent = JSON.stringify({
+          hasTG,
+          initDataLen: initData.length,
+          hasUnsafeUser: !!user,
+          unsafeUser: user
+        }, null, 2);
+      </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(html)

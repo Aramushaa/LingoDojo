@@ -1,7 +1,9 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-
+from telegram.constants import ParseMode
 from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade
+from bot.utils.telegram import get_chat_sender
+
 
 def grade_keyboard(item_id: int):
     return InlineKeyboardMarkup([
@@ -15,26 +17,30 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     item_id = get_due_item(user.id)
+    msg = get_chat_sender(update)
+
     if not item_id:
-        await update.message.reply_text("🎉 Nothing due today. Use /learn to add more words.")
+        await msg.reply_text("🎉 Nothing due today. Use /learn to add more words.")
         return
 
     item = get_item_by_id(item_id)
     if not item:
-        await update.message.reply_text("Review error. Try /review again.")
+        await msg.reply_text("Review error. Try /review again.")
         return
 
     _, term, chunk, translation_en, note = item
 
     set_session(user.id, mode="review", item_id=item_id, stage="await_sentence")
 
-    msg = (
+    text = (
         f"🧠 *Review*\n\n"
         f"Chunk: *{chunk}*\n"
         f"(Hint EN: {translation_en or '-'})\n\n"
         f"👉 Write *one sentence* using the chunk."
     )
-    await update.message.reply_text(msg)
+
+    await msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+
 
 async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -49,8 +55,9 @@ async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # now ask the user to grade themselves (fast UX)
         set_session(user.id, mode="review", item_id=item_id, stage="await_grade")
 
-        await update.message.reply_text(
-            "How did it feel?",
+        msg = get_chat_sender(update)
+        await msg.reply_text(
+            "How did it go?",
             reply_markup=grade_keyboard(item_id)
         )
 

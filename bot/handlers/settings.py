@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from bot.db import get_user_languages, set_user_target_language, set_user_ui_language
+from bot.utils.telegram import get_chat_sender
 
 # MVP options (we can add more later)
 TARGET_LANG_OPTIONS = [("it", "🇮🇹 Italian"), ("en", "🇬🇧 English")]
@@ -43,12 +44,14 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     langs = get_user_languages(user.id)
     if not langs:
-        await update.message.reply_text("Use /start first.")
+        msg = get_chat_sender(update)
+        await msg.reply_text("Use /start first.")
         return
 
     current_target, current_ui = langs
 
-    await update.message.reply_text(
+    msg = get_chat_sender(update)
+    await msg.reply_text(
         build_settings_text(current_target, current_ui),
         reply_markup=build_settings_keyboard(current_target, current_ui),
     )

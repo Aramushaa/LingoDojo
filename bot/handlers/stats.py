@@ -25,7 +25,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
 
     if row is None:
-        await update.message.reply_text("No profile found. Use /start first.")
+        await update.effective_message.reply_text("No profile found. Use /start first.")
         return
 
     first_name, created_at_iso = row
@@ -33,7 +33,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     
 
-    await update.message.reply_text(
+    await update.effective_message.reply_text(
     f"📊 Your Stats\n"
     f"👤 Name: {first_name}\n"
     f"🆔 User ID: {user.id}\n"
