@@ -2,161 +2,148 @@
 
 Telegram Bot + Mini WebApp for Active Recall
 
-LingoDojo is a personal language practice system, designed as a "gym" for your brain rather than a traditional linear course. It focuses on forcing production and active recall rather than passive consumption.
+LingoDojo is a personal language practice system designed as a "gym" for your brain: it forces production and active recall instead of passive consumption.
 
 🎯 Core Philosophy
 
-Active Recall First: Users must produce language before seeing examples.
+Active Recall First — Users must produce language before seeing examples.
 
-Units of Meaning: Focus on word + chunk combinations rather than isolated words.
+Units of Meaning — Focus on word + chunk combinations rather than isolated words.
 
-Contextual Mastery: Real usage through scenarios, register, and cultural context.
+Contextual Mastery — Real usage through scenarios, register, and cultural context.
 
-Telegram-First: High-frequency, low-friction interactions via Telegram and Mini WebApps (TWA).
+Telegram-First — High-frequency, low-friction interactions via Telegram + Mini WebApp.
 
-🏗 Architecture
+✨ Features (Current)
 
-The system consists of two tightly integrated components:
+✅ User Profiles — SQLite-backed storage for user preferences and target/UI languages.
 
-1. Telegram Bot (The Controller)
+✅ Vocabulary Packs — Modular JSON-based packs (demo English & Italian packs included).
 
-Fast Interaction: Handles commands and sends reminders.
+✅ Active Learning — /learn flow that requires composing sentences with chunks.
 
-Practice Flow: Manages the logic for active recall sessions.
+✅ SRS Reviews — /review flow with basic spaced repetition scheduling.
 
-Gatekeeper: Launches the Mini WebApp and handles user authentication.
+✅ Dynamic Settings — Change target/UI languages via /settings.
 
-2. Telegram Mini WebApp (The UI)
-
-Rich Interface: A visual dashboard for deeper interactions.
-
-Current State: Minimal scaffold ready for expansion into packs and stats visualization.
-
-✨ Features (MVP Progress)
-
-✅ User Profiles: SQLite-backed storage for user preferences and target languages.
-
-✅ Vocabulary Packs: Modular JSON-based packs (Demo English & Italian packs included).
-
-✅ Active Learning: A /learn flow that requires users to compose sentences using specific chunks.
-
-✅ Dynamic Settings: Real-time switching of UI and Target languages via /settings.
-
-✅ Extensible Engine: Language-agnostic core capable of supporting any language pair.
+✅ Web Stats UI — Mini WebApp dashboard at `/stats`.
 
 🛠 Tech Stack
 
-Component
+Language: Python 3.10+
 
-Technology
+Bot Framework: python-telegram-bot
 
-Language
+Web Framework: FastAPI + Uvicorn
 
-Python 3.10+
+Database: SQLite
 
-Bot Framework
-
-python-telegram-bot
-
-Web Framework
-
-FastAPI + Uvicorn
-
-Database
-
-SQLite
-
-Tunneling
-
-ngrok (for local development)
-
-Data Format
-
-JSON
+Tunneling: ngrok (for local Telegram WebApp)
 
 📂 Project Structure
 
 LingoDojo/
 ├── bot/
-│   ├── handlers/          # Command logic (start, learn, settings, etc.)
-│   ├── config.py          # Environment & Bot config
+│   ├── handlers/          # Command logic (start, learn, review, stats, settings, home)
+│   ├── utils/             # Telegram helpers (shared UI utilities)
+│   ├── config.py          # Environment & bot config
 │   ├── db.py              # Database models & queries
+│   ├── ui.py              # Inline keyboards (home menu)
 │   └── main.py            # Bot entry point
 ├── webapp/
-│   └── app.py             # FastAPI application
+│   ├── app.py             # FastAPI application
+│   └── telegram_auth.py   # Telegram WebApp initData verification
 ├── data/
 │   └── packs/             # JSON vocabulary packs
 ├── .env.example           # Template for environment variables
 ├── requirements.txt       # Project dependencies
 └── README.md
 
+🚀 Getting Started (Full Setup)
 
-🚀 Getting Started
+1) Prerequisites
 
-1. Prerequisites
+- Telegram bot token from @BotFather.
+- Python 3.10+ installed.
+- ngrok installed (to expose the WebApp over HTTPS).
 
-A Telegram Bot Token from @BotFather.
+2) Install
 
-Python 3.10 or higher installed.
-
-ngrok installed (to expose your local WebApp to Telegram).
-
-2. Installation
-
-# Clone the repository
-git clone [https://github.com/yourusername/LingoDojo.git](https://github.com/yourusername/LingoDojo.git)
-cd LingoDojo
-
-# Create and activate virtual environment
+# Create and activate a virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
+3) Configure Environment
 
-3. Configuration
-
-Copy the example environment file:
+Copy the example env file:
 
 cp .env.example .env
 
+Set:
+- TELEGRAM_BOT_TOKEN=your_bot_token_here
+- WEBAPP_PUBLIC_URL=https://your-ngrok-domain.ngrok-free.app
 
-Open .env and add your BOT_TOKEN.
+Note: `WEBAPP_PUBLIC_URL` is required because `bot/config.py` validates it on import.
 
-4. Running the Project
+4) Run the WebApp (Terminal 1)
 
-You will need two terminal windows:
-
-Terminal 1: Start the WebApp & Tunnel
-
-# Start the FastAPI server
 uvicorn webapp.app:app --reload --port 8001
 
-# In a separate prompt, start ngrok
+5) Expose WebApp to Telegram (Terminal 1, new tab)
+
 ngrok http 8001
 
+Copy the HTTPS URL from ngrok and paste it into:
+- `.env` as `WEBAPP_PUBLIC_URL`
+- BotFather `/setdomain` (must match exactly)
 
-Note: Copy the https://... URL from ngrok and paste it as WEBAPP_PUBLIC_URL in your .env.
-
-Terminal 2: Start the Bot
+6) Run the Bot (Terminal 2)
 
 python -m bot.main
 
+✅ You should see: "🚀 Bot is starting..."
+
+7) Use the Bot in Telegram
+
+- Open your bot chat
+- Send `/start`
+- Use the inline menu:
+  - 🧠 Learn
+  - 🔁 Review
+  - 📊 Stats
+  - ⚙️ Settings
+
+WebApp access:
+- The Mini WebApp is served at `https://<ngrok-domain>/stats`
+- It only shows real data when opened inside Telegram (initData auth)
+
+Optional: Add a WebApp button
+
+If you want `/start` to include a Telegram WebApp button, add a button in `bot/handlers/start.py`
+using `WebAppInfo(url=f"{WEBAPP_PUBLIC_URL}/stats")`.
+
+Troubleshooting
+
+- WebApp shows “Invalid Telegram initData”:
+  - Make sure you opened the URL inside Telegram (via a WebApp button), not a normal browser tab.
+  - Confirm BotFather `/setdomain` matches your current HTTPS ngrok URL.
+  - Ensure your WebApp URL is HTTPS (Telegram requires HTTPS).
+
+- Bot crashes on startup:
+  - Check `.env` and ensure both `TELEGRAM_BOT_TOKEN` and `WEBAPP_PUBLIC_URL` are set.
 
 🗺 Roadmap
 
-[ ] SRS Integration: Spaced Repetition System logic using a /review command.
-
-[ ] Vocabulary States: Tracking words from "Learning" to "Mature."
-
-[ ] Multimedia Context: Integrating YouGlish for video-based pronunciation context.
-
-[ ] Culture Capsules: Short interactive notes on cultural nuances.
+- Multimedia Context: Integrate YouGlish for pronunciation examples.
+- Culture Capsules: Short interactive notes on cultural nuances.
+- Smarter SRS Scheduling: More robust review intervals and ease factors.
 
 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+PRs are welcome! Open an issue or submit a PR with improvements.
 
 📄 License
 

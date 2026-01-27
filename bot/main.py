@@ -2,7 +2,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 import logging
 
 from bot.config import BOT_TOKEN
-from bot.db import init_db, import_packs_from_folder
+from bot.db import init_db, import_packs_from_folder,get_session
 from bot.handlers.start import start
 from bot.handlers.stats import stats
 from bot.handlers.learn import learn, on_pack_button
@@ -21,10 +21,21 @@ async def on_error(update, context):
 
 
 async def on_text_router(update, context):
-    # try learn handler
-    await on_learn_text(update, context)
-    # try review handler
-    await on_review_text(update, context)
+    user = update.effective_user
+    if not user:
+        return
+
+    session = get_session(user.id)
+    if not session:
+        return
+
+    mode, item_id, stage = session
+
+    if mode == "learn":
+        await on_learn_text(update, context)
+    elif mode == "review":
+        await on_review_text(update, context)
+
 
 
 
