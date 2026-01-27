@@ -100,6 +100,32 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=undo_keyboard(item_id)
     )
 
+    # Auto-continue: immediately send the next due item (keeps the undo message intact)
+    next_item_id = get_due_item(user.id)
+
+    if not next_item_id:
+        await query.message.reply_text("🎉 All done for today. Type /learn to add more.")
+        return
+
+    next_item = get_item_by_id(next_item_id)
+    if not next_item:
+        await query.message.reply_text("Review error loading next item. Type /review.")
+        return
+
+    _, term, chunk, translation_en, note = next_item
+
+    set_session(user.id, mode="review", item_id=next_item_id, stage="await_sentence")
+
+    next_text = (
+        f"🧠 *Review*\n\n"
+        f"Chunk: *{chunk}*\n"
+        f"(Hint EN: {translation_en or '-'})\n\n"
+        f"👉 Write *one sentence* using the chunk."
+    )
+
+    await query.message.reply_text(next_text, parse_mode=ParseMode.MARKDOWN)
+
+
 
 async def on_undo_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
