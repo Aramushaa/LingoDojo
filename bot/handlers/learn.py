@@ -8,6 +8,8 @@ from bot.db import (
 )
 from telegram.constants import ParseMode
 from bot.utils.telegram import get_chat_sender
+from bot.services.dictionary_it import validate_it_term
+from bot.config import SHOW_DICT_DEBUG
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -88,15 +90,36 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         _, term, chunk, translation_en, note = item
 
+
+        # --- Dictionary validation (silent) ---
+        validation = {"ok": True}
+        try:
+            validation = validate_it_term(term)  # validate TERM only
+        except Exception:
+            validation = {"ok": True}  # never break Learn
+
+        debug_line = ""
+        if SHOW_DICT_DEBUG and not validation.get("ok"):
+            debug_line = (
+                f"\n🛠 dict check failed for '{term}'. "
+                f"Suggestion: {validation.get('suggestion')}\n"
+            )
+
+
+
+
         reply = (
             f"✅ Nice! You did the active part (you produced output).\n\n"
-            f"Your sentence:\n“{text}”\n\n"
+            f"Your sentence:\n“{text}”\n"
+            f"{debug_line}\n"
             f"Native-ish example:\n"
             f"• *Oggi vorrei prendere un caffè.*\n\n"
             f"Type /learn for another task."
         )
-        apply_grade(user.id, item_id, "good")
 
+
+        ensure_review_row(user.id, item_id)
         clear_session(user.id)
         msg = get_chat_sender(update)
-        await msg.reply_text(reply)
+        await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
+

@@ -6,6 +6,8 @@ load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_PUBLIC_URL")
 TARGET_LANG = "it"  # MVP: later will come from user profile
+SHOW_DICT_DEBUG = os.getenv("SHOW_DICT_DEBUG", "0") == "1"
+
 
 if not BOT_TOKEN:
     raise RuntimeError("TELEGRAM_BOT_TOKEN missing in .env")
