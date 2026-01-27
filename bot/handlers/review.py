@@ -9,9 +9,11 @@ def grade_keyboard(item_id: int):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton("✅ Good", callback_data=f"GRADE|good|{item_id}"),
+            InlineKeyboardButton("😅 Hard", callback_data=f"GRADE|hard|{item_id}"),
             InlineKeyboardButton("❌ Again", callback_data=f"GRADE|again|{item_id}")
         ]
     ])
+
 
 async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -85,7 +87,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_session(user.id)
 
     await query.edit_message_text(
-        f"✅ Saved.\n"
+        f"✅ Saved ({grade}).\n"
         f"Status: {new_status}\n"
         f"Next due: {new_due} (in {new_interval} day(s))\n\n"
         f"Type /review for the next due item or /learn to add more."

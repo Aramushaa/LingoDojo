@@ -3,6 +3,8 @@ from pathlib import Path
 
 import json
 from datetime import date, datetime, timezone, timedelta
+import math
+
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]  # LingoDojo/
@@ -334,7 +336,7 @@ def get_review_state(user_id: int, item_id: int):
 
 def apply_grade(user_id: int, item_id: int, grade: str):
     """
-    grade: 'good' or 'again'
+    grade: 'good' | 'hard' | 'again'
     Minimal scheduling:
       - good  -> interval grows, due moves forward
       - again -> interval resets, due today (repeat soon)
@@ -347,18 +349,24 @@ def apply_grade(user_id: int, item_id: int, grade: str):
     status, interval_days, due_date, reps, lapses = state
 
     if grade == "good":
-        # growth rule (simple MVP):
-        # new -> 1 day
-        # learning/mature -> double (min 1)
+        # good -> grows fast (double)
         new_interval = 1 if interval_days < 1 else interval_days * 2
         new_reps = reps + 1
         new_lapses = lapses
-
-        # promote status slowly
         new_status = "learning"
         if new_reps >= 5 and new_interval >= 16:
             new_status = "mature"
+        new_due = (date.today() + timedelta(days=new_interval)).isoformat()
 
+    elif grade == "hard":
+        # hard -> grows slower than good
+        # 0 -> 1, 1 -> 2, 2 -> 3, 4 -> 6, 8 -> 12 ...
+        new_interval = 1 if interval_days < 1 else max(1, math.ceil(interval_days * 1.5))
+        new_reps = reps + 1
+        new_lapses = lapses
+        new_status = "learning"
+        if new_reps >= 6 and new_interval >= 20:
+            new_status = "mature"
         new_due = (date.today() + timedelta(days=new_interval)).isoformat()
 
     else:  # again
@@ -366,7 +374,8 @@ def apply_grade(user_id: int, item_id: int, grade: str):
         new_reps = reps
         new_lapses = lapses + 1
         new_status = "learning"
-        new_due = date.today().isoformat()  # due again today
+        new_due = date.today().isoformat()
+
 
     conn = get_connection()
     cursor = conn.cursor()
