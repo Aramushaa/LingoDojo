@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade
+from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade,undo_last_grade
 from bot.utils.telegram import get_chat_sender
 
 
@@ -13,6 +13,12 @@ def grade_keyboard(item_id: int):
             InlineKeyboardButton("❌ Again", callback_data=f"GRADE|again|{item_id}")
         ]
     ])
+
+def undo_keyboard(item_id: int):
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("↩️ Undo last grade", callback_data=f"UNDO|{item_id}")]
+    ])
+
 
 
 async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -90,5 +96,28 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ Saved ({grade}).\n"
         f"Status: {new_status}\n"
         f"Next due: {new_due} (in {new_interval} day(s))\n\n"
-        f"Type /review for the next due item or /learn to add more."
+        f"Type /review for the next due item or /learn to add more.",
+        reply_markup=undo_keyboard(item_id)
+    )
+
+
+async def on_undo_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+    _, item_id_str = query.data.split("|", 1)
+    item_id = int(item_id_str)
+
+    restored = undo_last_grade(user.id, item_id)
+    if not restored:
+        await query.edit_message_text("⚠️ Undo not available (already used or expired). Type /review.")
+        return
+
+    status, interval_days, due_date = restored
+    await query.edit_message_text(
+        f"↩️ Undone.\n"
+        f"Restored status: {status}\n"
+        f"Restored due: {due_date} (interval {interval_days} day(s))\n\n"
+        f"Type /review to continue."
     )

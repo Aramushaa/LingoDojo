@@ -8,7 +8,7 @@ from bot.handlers.stats import stats
 from bot.handlers.learn import learn, on_pack_button
 from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
-from bot.handlers.review import review, on_review_text, on_grade_button
+from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
 
 
@@ -56,11 +56,12 @@ def main():
     app.add_handler(CommandHandler("settings", settings))
     app.add_handler(CommandHandler("review", review))
 
-
     app.add_handler(CallbackQueryHandler(on_grade_button, pattern=r"^GRADE\|"))
     app.add_handler(CallbackQueryHandler(on_pack_button, pattern=r"^PACK\|"))
     app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^SET_(TARGET|UI)\|"))
     app.add_handler(CallbackQueryHandler(on_home_button, pattern=r"^home:"))
+    app.add_handler(CallbackQueryHandler(on_undo_button, pattern=r"^UNDO\|"))
+
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text_router))
 
     app.add_error_handler(on_error)

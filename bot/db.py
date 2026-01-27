@@ -109,6 +109,15 @@ def init_db():
     
     _add_column_if_missing(cursor, "users", "target_language", "TEXT NOT NULL DEFAULT 'it'")
     _add_column_if_missing(cursor, "users", "ui_language", "TEXT NOT NULL DEFAULT 'en'")
+        # --- reviews undo support ---
+    _add_column_if_missing(cursor, "reviews", "prev_status", "TEXT")
+    _add_column_if_missing(cursor, "reviews", "prev_interval_days", "INTEGER")
+    _add_column_if_missing(cursor, "reviews", "prev_due_date", "TEXT")
+    _add_column_if_missing(cursor, "reviews", "prev_last_reviewed_at", "TEXT")
+    _add_column_if_missing(cursor, "reviews", "prev_reps", "INTEGER")
+    _add_column_if_missing(cursor, "reviews", "prev_lapses", "INTEGER")
+    _add_column_if_missing(cursor, "reviews", "undo_available", "INTEGER NOT NULL DEFAULT 0")
+
 
 
 
@@ -348,6 +357,25 @@ def apply_grade(user_id: int, item_id: int, grade: str):
 
     status, interval_days, due_date, reps, lapses = state
 
+    # Save "previous state" for Undo
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE reviews
+        SET
+            prev_status = ?,
+            prev_interval_days = ?,
+            prev_due_date = ?,
+            prev_last_reviewed_at = last_reviewed_at,
+            prev_reps = ?,
+            prev_lapses = ?,
+            undo_available = 1
+        WHERE user_id = ? AND item_id = ?
+    """, (status, interval_days, due_date, reps, lapses, user_id, item_id))
+    conn.commit()
+    conn.close()
+
+
     if grade == "good":
         # good -> grows fast (double)
         new_interval = 1 if interval_days < 1 else interval_days * 2
@@ -388,6 +416,76 @@ def apply_grade(user_id: int, item_id: int, grade: str):
     conn.close()
 
     return new_status, new_interval, new_due
+
+def undo_last_grade(user_id: int, item_id: int):
+    """
+    Restores the previous review state if undo is available.
+    Returns (status, interval_days, due_date) after undo, or None if not possible.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            undo_available,
+            prev_status, prev_interval_days, prev_due_date,
+            prev_last_reviewed_at, prev_reps, prev_lapses
+        FROM reviews
+        WHERE user_id = ? AND item_id = ?
+    """, (user_id, item_id))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        return None
+
+    (
+        undo_available,
+        prev_status, prev_interval_days, prev_due_date,
+        prev_last_reviewed_at, prev_reps, prev_lapses
+    ) = row
+
+    if int(undo_available or 0) != 1 or prev_status is None:
+        conn.close()
+        return None
+
+    # Restore previous values
+    cursor.execute("""
+        UPDATE reviews
+        SET
+            status = ?,
+            interval_days = ?,
+            due_date = ?,
+            last_reviewed_at = ?,
+            reps = ?,
+            lapses = ?,
+            -- Clear undo snapshot so it can't be spammed repeatedly
+            prev_status = NULL,
+            prev_interval_days = NULL,
+            prev_due_date = NULL,
+            prev_last_reviewed_at = NULL,
+            prev_reps = NULL,
+            prev_lapses = NULL,
+            undo_available = 0
+        WHERE user_id = ? AND item_id = ?
+    """, (
+        prev_status, prev_interval_days, prev_due_date,
+        prev_last_reviewed_at, prev_reps, prev_lapses,
+        user_id, item_id
+    ))
+
+    conn.commit()
+
+    cursor.execute("""
+        SELECT status, interval_days, due_date
+        FROM reviews
+        WHERE user_id = ? AND item_id = ?
+    """, (user_id, item_id))
+    restored = cursor.fetchone()
+    conn.close()
+
+    return restored  # (status, interval_days, due_date)
+
 
 def get_due_count(user_id: int) -> int:
     """How many items are due today (or overdue) for this user?"""
