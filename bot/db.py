@@ -99,6 +99,14 @@ def init_db():
         PRIMARY KEY (user_id, item_id)
     )
     """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS lexicon_cache_it (
+        term TEXT PRIMARY KEY,
+        data_json TEXT NOT NULL,
+        fetched_at TEXT NOT NULL
+    )
+    """)
+
 
 
     def _add_column_if_missing(cursor, table: str, column: str, col_def: str):
@@ -519,3 +527,23 @@ def get_status_counts(user_id: int) -> dict:
         if status in out:
             out[status] = int(cnt)
     return out
+
+def get_lexicon_cache_it(term: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT data_json FROM lexicon_cache_it WHERE term = ?", (term,))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return None
+    return json.loads(row[0])
+
+def set_lexicon_cache_it(term: str, data: dict):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT OR REPLACE INTO lexicon_cache_it(term, data_json, fetched_at) VALUES(?,?,?)",
+        (term, json.dumps(data, ensure_ascii=False), datetime.utcnow().isoformat()),
+    )
+    conn.commit()
+    conn.close()

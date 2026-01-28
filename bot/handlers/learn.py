@@ -1,16 +1,23 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from bot.db import get_user_languages,ensure_review_row,apply_grade
+from telegram.constants import ParseMode
+
+from bot.utils.telegram import get_chat_sender
+from bot.config import SHOW_DICT_DEBUG
+
 from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
-    clear_session, get_item_by_id,ensure_review_row
+    clear_session, get_item_by_id, ensure_review_row,
+    get_user_languages, get_lexicon_cache_it
 )
-from telegram.constants import ParseMode
-from bot.utils.telegram import get_chat_sender
+
 from bot.services.dictionary_it import validate_it_term
-from bot.config import SHOW_DICT_DEBUG
 from bot.services.ai_feedback import generate_learn_feedback
+from bot.services.lexicon_it import get_or_fetch_lexicon_it
+
+
+
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -58,6 +65,13 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     item_id, term, chunk, translation_en, note = item
 
+    try:
+        get_or_fetch_lexicon_it(term)  # prefetch/cache; don't block UX
+    except Exception:
+        pass
+
+
+
     ensure_review_row(user.id, item_id)
     
     set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence")
@@ -72,6 +86,8 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN)
 
+
+
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = (update.message.text or "").strip()
@@ -81,79 +97,68 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     mode, item_id, stage = session
-    if mode == "learn" and stage == "await_sentence" and item_id is not None:
-        item = get_item_by_id(item_id)
-        if not item:
-            clear_session(user.id)
-            msg = get_chat_sender(update)
-            await msg.reply_text("Session error. Try /learn again.")
-            return
+    if not (mode == "learn" and stage == "await_sentence" and item_id is not None):
+        return
 
-        _, term, chunk, translation_en, note = item
+    # 1) Load the current learning item
+    item = get_item_by_id(item_id)
+    if not item:
+        clear_session(user.id)
+        msg = get_chat_sender(update)
+        await msg.reply_text("Session error. Try /learn again.")
+        return
 
+    _, term, chunk, translation_en, note = item
 
-        # 1) Silent dictionary validation (guardrails)
-        validation = {"ok": True}
+    # 2) Get cached lexicon facts (silent grounding)
+    lexicon = get_lexicon_cache_it(term)  # may be None if not cached yet
+
+    # Optional: add a soft validation result (debug only)
+    debug_line = ""
+    if SHOW_DICT_DEBUG:
         try:
             validation = validate_it_term(term)
+            if not validation.get("ok"):
+                debug_line = (
+                    f"\n🛠 dict check failed for '{term}', "
+                    f"suggestion: {validation.get('suggestion')}\n"
+                )
         except Exception:
-            validation = {"ok": True}
+            pass
 
-        # 2) AI feedback (safe: fallback if not configured)
-        ai = await generate_learn_feedback(
-            target_language="it",
-            term=term,
-            chunk=chunk,
-            translation_en=translation_en,
-            user_sentence=text,
-            dict_validation=validation,
-        )
+    # 3) AI feedback (safe fallback if not configured)
+    ai = await generate_learn_feedback(
+        target_language="it",
+        term=term,
+        chunk=chunk,
+        translation_en=translation_en,
+        user_sentence=text,
+        lexicon=lexicon,
+    )
 
-        # 3) Ensure item enters SRS queue, but do NOT grade it here
-        ensure_review_row(user.id, item_id)
+    examples = ai.get("examples") or []
+    examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
 
-        debug_line = ""
-        if SHOW_DICT_DEBUG and not validation.get("ok"):
-            debug_line = f"\n🛠 dict check failed for '{term}', suggestion: {validation.get('suggestion')}\n"
+    reply = (
+        f"✅ *Learn — Feedback*\n\n"
+        f"Chunk: *{chunk}*\n"
+        f"Your sentence:\n“{text}”\n"
+        f"{debug_line}"
+    )
 
+    if ai.get("correction"):
+        reply += f"\n🛠 *Correction*: {ai['correction']}\n"
+    if ai.get("rewrite"):
+        reply += f"\n✨ *Rewrite*: {ai['rewrite']}\n"
+    if ai.get("notes"):
+        reply += f"\n💡 {ai['notes']}\n"
 
+    reply += (
+        f"\n📌 *Examples*:\n{examples_block}\n\n"
+        f"Type /review to practice or /learn for another item."
+    )
 
+    msg = get_chat_sender(update)
+    await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
 
-
-        examples = ai.get("examples") or []
-        examples_block = "\n".join([f"• {ex}" for ex in examples[:3]]) if examples else "• (no examples)"
-
-        correction = ai.get("correction")
-        rewrite = ai.get("rewrite")
-        notes = ai.get("notes") or ""
-
-        reply = (
-            f"✅ *Learn — Feedback*\n\n"
-            f"Chunk: *{chunk}*\n"
-            f"Your sentence:\n“{text}”\n"
-            f"{debug_line}\n"
-        )
-
-        if correction:
-            reply += f"\n🛠 *Correction*: {correction}\n"
-        if rewrite:
-            reply += f"\n✨ *Native rewrite*: {rewrite}\n"
-        if notes:
-            reply += f"\n💡 {notes}\n"
-
-        reply += (
-            f"\n📌 *Examples*:\n{examples_block}\n\n"
-            f"Type /review to practice or /learn for another item."
-        )
-
-        msg = get_chat_sender(update)
-        await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
-        clear_session(user.id)
-
-
-
-        ensure_review_row(user.id, item_id)
-        clear_session(user.id)
-        msg = get_chat_sender(update)
-        await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
-
+    clear_session(user.id)

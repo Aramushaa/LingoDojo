@@ -10,6 +10,10 @@ from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 
