@@ -4,12 +4,13 @@ from bot.db import get_user_languages,ensure_review_row,apply_grade
 from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
-    clear_session, get_item_by_id
+    clear_session, get_item_by_id,ensure_review_row
 )
 from telegram.constants import ParseMode
 from bot.utils.telegram import get_chat_sender
 from bot.services.dictionary_it import validate_it_term
 from bot.config import SHOW_DICT_DEBUG
+from bot.services.ai_feedback import generate_learn_feedback
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -91,31 +92,64 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         _, term, chunk, translation_en, note = item
 
 
-        # --- Dictionary validation (silent) ---
+        # 1) Silent dictionary validation (guardrails)
         validation = {"ok": True}
         try:
-            validation = validate_it_term(term)  # validate TERM only
+            validation = validate_it_term(term)
         except Exception:
-            validation = {"ok": True}  # never break Learn
+            validation = {"ok": True}
+
+        # 2) AI feedback (safe: fallback if not configured)
+        ai = await generate_learn_feedback(
+            target_language="it",
+            term=term,
+            chunk=chunk,
+            translation_en=translation_en,
+            user_sentence=text,
+            dict_validation=validation,
+        )
+
+        # 3) Ensure item enters SRS queue, but do NOT grade it here
+        ensure_review_row(user.id, item_id)
 
         debug_line = ""
         if SHOW_DICT_DEBUG and not validation.get("ok"):
-            debug_line = (
-                f"\n🛠 dict check failed for '{term}'. "
-                f"Suggestion: {validation.get('suggestion')}\n"
-            )
+            debug_line = f"\n🛠 dict check failed for '{term}', suggestion: {validation.get('suggestion')}\n"
 
 
 
+
+
+        examples = ai.get("examples") or []
+        examples_block = "\n".join([f"• {ex}" for ex in examples[:3]]) if examples else "• (no examples)"
+
+        correction = ai.get("correction")
+        rewrite = ai.get("rewrite")
+        notes = ai.get("notes") or ""
 
         reply = (
-            f"✅ Nice! You did the active part (you produced output).\n\n"
+            f"✅ *Learn — Feedback*\n\n"
+            f"Chunk: *{chunk}*\n"
             f"Your sentence:\n“{text}”\n"
             f"{debug_line}\n"
-            f"Native-ish example:\n"
-            f"• *Oggi vorrei prendere un caffè.*\n\n"
-            f"Type /learn for another task."
         )
+
+        if correction:
+            reply += f"\n🛠 *Correction*: {correction}\n"
+        if rewrite:
+            reply += f"\n✨ *Native rewrite*: {rewrite}\n"
+        if notes:
+            reply += f"\n💡 {notes}\n"
+
+        reply += (
+            f"\n📌 *Examples*:\n{examples_block}\n\n"
+            f"Type /review to practice or /learn for another item."
+        )
+
+        msg = get_chat_sender(update)
+        await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
+        clear_session(user.id)
+
 
 
         ensure_review_row(user.id, item_id)
