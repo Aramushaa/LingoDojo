@@ -26,6 +26,23 @@ def _fallback_feedback(user_sentence: str, reason: str = "unknown") -> Dict[str,
     }
 
 
+def _extract_json(text: str) -> Optional[dict]:
+    text = (text or "").strip()
+    if not text:
+        return None
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return None
+
+    chunk = text[start:end+1]
+    try:
+        return json.loads(chunk)
+    except Exception:
+        return None
+
+
 def _build_prompt(
     *,
     term: str,
@@ -52,6 +69,12 @@ RULES:
 - Do NOT invent meanings.
 - If grounding is missing/uncertain, say so briefly in notes.
 - Output MUST be valid JSON only. No markdown.
+IMPORTANT RULES:
+- Do NOT change the grammatical person/subject (io/tu/Lei/lui/lei/noi/voi/loro) unless the user sentence is clearly impossible.
+- "correction" is ONLY for true grammar/spelling errors. If the sentence is acceptable, set correction = null.
+- If you want to suggest a more polite version (e.g., "vorrei"), put it in "rewrite" and explain it's optional in notes.
+- Do NOT assume we are practicing a specific form like "vorrei" unless the scenario explicitly says so.
+
 
 Return JSON with exactly these keys:
 {{
@@ -147,3 +170,107 @@ def debug_list_models() -> str:
         return "\n".join(names[:30])
     except Exception as e:
         return f"(could not list models: {type(e).__name__}: {e})"
+
+async def generate_reverse_context_quiz(
+    *,
+    term: str,
+    translation_en: Optional[str],
+    lexicon: Optional[dict] = None,
+) -> Dict[str, Any]:
+    """
+    Returns:
+    {
+      "ok": bool,
+      "context_it": str,
+      "meaning_en": str,
+      "options_en": [str, str, str],
+      "correct_index": 0|1|2,
+      "clue": str
+    }
+    """
+    # If AI not enabled, return a simple fallback quiz
+    if AI_PROVIDER != "gemini" or not GEMINI_API_KEY:
+        meaning = translation_en or "(meaning not available)"
+        return {
+            "ok": False,
+            "context_it": f"Uso comune: {term}.",
+            "meaning_en": meaning,
+            "options_en": [meaning, "Something else", "Unrelated meaning"],
+            "correct_index": 0,
+            "clue": "Fallback (AI off).",
+        }
+
+    try:
+        import google.genai as genai  # type: ignore
+
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        model = os.getenv("GEMINI_MODEL", "gemini-flash-latest").strip()
+
+        lex_str = json.dumps(lexicon or {}, ensure_ascii=False)
+
+        prompt = f"""
+Create a reverse-context meaning quiz for an Italian beginner.
+
+WORD: "{term}"
+Optional English hint (may be empty): "{translation_en or ""}"
+
+GROUNDING (may be partial):
+{lex_str}
+
+Rules:
+- Output MUST be valid JSON only.
+- Make ONE short Italian context sentence that strongly implies the meaning.
+- Provide 3 English options (A,B,C) with ONLY ONE correct.
+- If hint is present, the correct option must align with it.
+- Keep it beginner-friendly.
+
+Return JSON:
+{{
+  "context_it": "...",
+  "meaning_en": "...",
+  "options_en": ["...","...","..."],
+  "correct_index": 0,
+  "clue": "short explanation of the clue"
+}}
+""".strip()
+
+        resp = client.models.generate_content(model=model, contents=prompt)
+        data = _extract_json((resp.text or "").strip())
+        if not data:
+            return {
+                "ok": False,
+                "context_it": f"Uso comune: {term}.",
+                "meaning_en": translation_en or "(meaning not available)",
+                "options_en": [translation_en or "Meaning", "Other", "Other"],
+                "correct_index": 0,
+                "clue": "AI returned invalid JSON.",
+            }
+
+        options = data.get("options_en") or []
+        if not isinstance(options, list) or len(options) != 3:
+            options = [translation_en or "Meaning", "Other", "Other"]
+
+        idx = data.get("correct_index")
+        if idx not in [0, 1, 2]:
+            idx = 0
+
+        return {
+            "ok": True,
+            "context_it": str(data.get("context_it") or "").strip(),
+            "meaning_en": str(data.get("meaning_en") or (translation_en or "")).strip(),
+            "options_en": [str(x).strip() for x in options],
+            "correct_index": idx,
+            "clue": str(data.get("clue") or "").strip(),
+        }
+
+    except Exception:
+        # Never crash UX
+        meaning = translation_en or "(meaning not available)"
+        return {
+            "ok": False,
+            "context_it": f"Uso comune: {term}.",
+            "meaning_en": meaning,
+            "options_en": [meaning, "Something else", "Unrelated meaning"],
+            "correct_index": 0,
+            "clue": "AI error; fallback quiz.",
+        }

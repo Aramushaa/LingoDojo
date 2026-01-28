@@ -81,9 +81,11 @@ def init_db():
         mode TEXT NOT NULL,
         item_id INTEGER,
         stage TEXT NOT NULL,
-        updated_at TEXT
+        meta_json TEXT,
+        updated_at TEXT NOT NULL
     )
     """)
+
 
     # spaced repetition reviews
     cursor.execute("""
@@ -106,6 +108,18 @@ def init_db():
         fetched_at TEXT NOT NULL
     )
     """)
+
+
+    def _ensure_column(conn, table: str, col: str, coltype: str):
+        cur = conn.cursor()
+        cur.execute(f"PRAGMA table_info({table})")
+        cols = [row[1] for row in cur.fetchall()]
+        if col not in cols:
+            cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {coltype}")
+            conn.commit()
+
+    _ensure_column(conn, "user_session", "meta_json", "TEXT")
+
 
 
 
@@ -239,30 +253,48 @@ def pick_one_item_from_pack(pack_id: str):
     conn.close()
     return row
 
-def set_session(user_id: int, mode: str, item_id: int | None, stage: str):
+def set_session(user_id: int, mode: str, item_id: int | None, stage: str, meta: dict | None = None):
     conn = get_connection()
     cursor = conn.cursor()
+
+    meta_json = json.dumps(meta or {}, ensure_ascii=False)
+
     cursor.execute("""
-        INSERT INTO user_session (user_id, mode, item_id, stage, updated_at)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO user_session (user_id, mode, item_id, stage, meta_json, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id) DO UPDATE SET
             mode=excluded.mode,
             item_id=excluded.item_id,
             stage=excluded.stage,
+            meta_json=excluded.meta_json,
             updated_at=excluded.updated_at
-    """, (user_id, mode, item_id, stage, utc_now_iso()))
+    """, (user_id, mode, item_id, stage, meta_json, utc_now_iso()))
+
     conn.commit()
     conn.close()
 
 def get_session(user_id: int):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT mode, item_id, stage FROM user_session WHERE user_id = ?
-    """, (user_id,))
+
+    cursor.execute(
+        "SELECT mode, item_id, stage, meta_json FROM user_session WHERE user_id = ?",
+        (user_id,)
+    )
     row = cursor.fetchone()
     conn.close()
-    return row  # (mode, item_id, stage) or None
+
+    if not row:
+        return None
+
+    mode, item_id, stage, meta_json = row
+
+    try:
+        meta = json.loads(meta_json) if meta_json else {}
+    except Exception:
+        meta = {}
+
+    return mode, item_id, stage, meta
 
 def clear_session(user_id: int):
     conn = get_connection()

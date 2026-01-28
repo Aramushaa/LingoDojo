@@ -1,4 +1,4 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup,InputFile
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
@@ -13,8 +13,9 @@ from bot.db import (
 )
 
 from bot.services.dictionary_it import validate_it_term
-from bot.services.ai_feedback import generate_learn_feedback
+from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz
 from bot.services.lexicon_it import get_or_fetch_lexicon_it
+from bot.services.tts_edge import tts_it
 
 
 
@@ -65,26 +66,47 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     item_id, term, chunk, translation_en, note = item
 
+        # Prefetch/cache lexicon (silent)
     try:
-        get_or_fetch_lexicon_it(term)  # prefetch/cache; don't block UX
+        get_or_fetch_lexicon_it(term)
     except Exception:
         pass
 
-
-
     ensure_review_row(user.id, item_id)
-    
-    set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence")
+
+    lexicon = get_lexicon_cache_it(term)
+    quiz = await generate_reverse_context_quiz(
+        term=term,
+        translation_en=translation_en,
+        lexicon=lexicon,
+    )
+
+    meta = {
+        "term": term,
+        "chunk": chunk,
+        "translation_en": translation_en,
+        "quiz": quiz,
+    }
+
+    set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+
+    # Buttons: A/B/C + Pronounce
+    opts = quiz.get("options_en", ["A", "B", "C"])
+    keyboard = [
+        [InlineKeyboardButton(f"A) {opts[0]}", callback_data="GUESS|0")],
+        [InlineKeyboardButton(f"B) {opts[1]}", callback_data="GUESS|1")],
+        [InlineKeyboardButton(f"C) {opts[2]}", callback_data="GUESS|2")],
+        [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
+    ]
 
     msg = (
-        f"🧩 *Learn Task*\n\n"
-        f"Word: *{term}*\n"
-        f"Chunk: *{chunk}*\n"
-        f"Meaning (EN): {translation_en or '-'}\n\n"
-        f"👉 Now you: write *one Italian sentence* using the chunk.\n"
-        f"(Just type it as a normal message.)"
+        f"🕵️ *Guess the meaning*\n\n"
+        f"Word: *{term}*\n\n"
+        f"Context:\n_{quiz.get('context_it','')}_\n\n"
+        f"Pick the best meaning:"
     )
-    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN)
+    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(keyboard))
+
 
 
 
@@ -96,11 +118,11 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not session:
         return
 
-    mode, item_id, stage = session
+    mode, item_id, stage, meta = session
     if not (mode == "learn" and stage == "await_sentence" and item_id is not None):
         return
 
-    # 1) Load the current learning item
+    # 1) Load item (fallback source)
     item = get_item_by_id(item_id)
     if not item:
         clear_session(user.id)
@@ -108,12 +130,18 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_text("Session error. Try /learn again.")
         return
 
-    _, term, chunk, translation_en, note = item
+    _, term_db, chunk_db, translation_en_db, note = item
 
-    # 2) Get cached lexicon facts (silent grounding)
-    lexicon = get_lexicon_cache_it(term)  # may be None if not cached yet
+    # 2) Meta (preferred source)
+    meta = meta or {}
+    term = meta.get("term") or term_db
+    chunk = meta.get("chunk") or chunk_db
+    translation_en = meta.get("translation_en") or translation_en_db
 
-    # Optional: add a soft validation result (debug only)
+    # 3) Cached lexicon facts (silent grounding)
+    lexicon = get_lexicon_cache_it(term)
+
+    # Optional debug only
     debug_line = ""
     if SHOW_DICT_DEBUG:
         try:
@@ -126,7 +154,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-    # 3) AI feedback (safe fallback if not configured)
+    # 4) AI feedback
     ai = await generate_learn_feedback(
         target_language="it",
         term=term,
@@ -141,7 +169,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply = (
         f"✅ *Learn — Feedback*\n\n"
-        f"Chunk: *{chunk}*\n"
+        f"Word: *{term}*\n"
         f"Your sentence:\n“{text}”\n"
         f"{debug_line}"
     )
@@ -162,3 +190,75 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
 
     clear_session(user.id)
+
+
+async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+    data = query.data  # "GUESS|1"
+    _, idx_str = data.split("|", 1)
+    picked = int(idx_str)
+
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("Session expired. Type /learn again.")
+        return
+
+    mode, item_id, stage, meta = session
+    if mode != "learn" or stage != "await_guess":
+        return
+
+    quiz = (meta or {}).get("quiz") or {}
+    correct = quiz.get("correct_index", 0)
+    meaning = quiz.get("meaning_en", meta.get("translation_en") or "-")
+    clue = quiz.get("clue", "")
+
+    ok = (picked == correct)
+    status = "🎯 Correct!" if ok else "😅 Not quite."
+
+    # Move to sentence stage
+    set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence", meta=meta)
+
+    msg = (
+        f"{status}\n"
+        f"*Meaning:* {meaning}\n"
+    )
+    if clue:
+        msg += f"_Clue:_ {clue}\n"
+
+    msg += (
+        f"\n✍️ Now you:\n"
+        f"Write *one Italian sentence* using the *word* **{meta.get('term')}**.\n"
+        f"(Any sentence you want — your choice.)"
+    )
+
+    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN)
+
+
+async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+    session = get_session(user.id)
+    if not session:
+        return
+
+    mode, item_id, stage, meta = session
+    if mode != "learn":
+        return
+
+    term = (meta or {}).get("term")
+    if not term:
+        return
+
+    try:
+        path = await tts_it(term)
+        await query.message.reply_audio(
+            audio=InputFile(str(path), filename=f"{term}.wav"),
+            title=f"{term}",
+        )
+    except Exception:
+        await query.message.reply_text("TTS failed right now 😵‍💫 (try again)")

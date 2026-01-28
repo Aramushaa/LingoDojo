@@ -5,12 +5,14 @@ from bot.config import BOT_TOKEN
 from bot.db import init_db, import_packs_from_folder,get_session
 from bot.handlers.start import start
 from bot.handlers.stats import stats
-from bot.handlers.learn import learn, on_pack_button
+from bot.handlers.learn import learn, on_pack_button, on_guess_button, on_pronounce_button
 from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
 from dotenv import load_dotenv
+
+from webapp import app
 
 
 load_dotenv()
@@ -33,7 +35,7 @@ async def on_text_router(update, context):
     if not session:
         return
 
-    mode, item_id, stage = session
+    mode, item_id, stage, meta = session  # meta added
 
     if mode == "learn":
         await on_learn_text(update, context)
@@ -65,6 +67,9 @@ def main():
     app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^SET_(TARGET|UI)\|"))
     app.add_handler(CallbackQueryHandler(on_home_button, pattern=r"^home:"))
     app.add_handler(CallbackQueryHandler(on_undo_button, pattern=r"^UNDO\|"))
+    app.add_handler(CallbackQueryHandler(on_guess_button, pattern=r"^GUESS\|"))
+    app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))
+
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text_router))
 
