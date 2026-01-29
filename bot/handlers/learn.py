@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from telegram.helpers import escape_markdown
+from html import escape
 
 from bot.utils.telegram import get_chat_sender
 from bot.config import SHOW_DICT_DEBUG
@@ -10,7 +10,7 @@ from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
     clear_session, get_item_by_id, ensure_review_row,
-    get_user_languages, get_lexicon_cache_it
+    get_user_languages, get_lexicon_cache_it,pick_one_item_for_user
 )
 
 from bot.services.dictionary_it import validate_it_term
@@ -19,8 +19,8 @@ from bot.services.lexicon_it import get_or_fetch_lexicon_it
 from bot.services.tts_edge import tts_it
 
 
-def md(text: str) -> str:
-    return escape_markdown(text or "", version=2)
+def h(text: str) -> str:
+    return escape(text or "")
 
 
 
@@ -34,44 +34,20 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     target_language, ui_language = langs
-    packs = list_packs(target_language)
 
-
-    if not packs:
-        msg = get_chat_sender(update)
-        await msg.reply_text("No packs found. (Import failed?)")
-        return
-
-    active = set(get_user_active_packs(user.id))
-
-    buttons = []
-    for pack_id, level, title, description in packs:
-        label = f"✅ {title}" if pack_id in active else f"📦 {title}"
-        buttons.append([InlineKeyboardButton(label, callback_data=f"PACK|{pack_id}")])
-    msg = get_chat_sender(update)
-    await msg.reply_text(
-        "Choose a pack to activate (✅ means active):",
-        reply_markup=InlineKeyboardMarkup(buttons),
-    )
-
-async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    user = query.from_user
-    _, pack_id = query.data.split("|", 1)
-
-    activate_pack(user.id, pack_id)
-
-    item = pick_one_item_from_pack(pack_id)
-
+    # NEW: pick from active packs (no pack selection screen)
+    item = pick_one_item_for_user(user.id, target_language)
     if not item:
-        await query.edit_message_text("This pack has no items.")
+        msg = get_chat_sender(update)
+        await msg.reply_text(
+            "You have no active packs yet.\n"
+            "Go to /settings → Packs and activate at least one pack ✅"
+        )
         return
 
     item_id, term, chunk, translation_en, note = item
 
-        # Prefetch/cache lexicon (silent)
+    # Prefetch/cache lexicon (silent)
     try:
         get_or_fetch_lexicon_it(term)
     except Exception:
@@ -87,7 +63,6 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lexicon=lexicon,
     )
 
-
     meta = {
         "term": term,
         "chunk": chunk,
@@ -97,7 +72,6 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
 
-    # Buttons: A/B/C + Pronounce
     opts = quiz.get("options_en", ["A", "B", "C"])
     keyboard = [
         [InlineKeyboardButton(f"A) {opts[0]}", callback_data="GUESS|0")],
@@ -107,12 +81,15 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     msg = (
-        f"🕵️ *Guess the meaning*\n\n"
-        f"Word: *{md(term)}*\n\n"
-        f"Context:\n_{md(quiz.get('context_it',''))}_\n\n"
+        f"🕵️ <b>Guess the meaning</b>\n\n"
+        f"Word: <b>{h(term)}</b>\n\n"
+        f"Context:\n<i>{h(quiz.get('context_it',''))}</i>\n\n"
         f"Pick the best meaning:"
     )
-    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=InlineKeyboardMarkup(keyboard))
+
+    msg_sender = get_chat_sender(update)
+    await msg_sender.reply_text(msg, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
+
 
 
 
@@ -175,26 +152,26 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
 
     reply = (
-        f"✅ *Learn — Feedback*\n\n"
-        f"Word: *{md(term)}*\n"
-        f"Your sentence:\n“{md(text)}”\n"
-        f"{md(debug_line)}"
+        f"✅ <b>Learn — Feedback</b>\n\n"
+        f"Word: <b>{h(term)}</b>\n"
+        f"Your sentence:\n“{h(text)}”\n"
+        f"{h(debug_line)}"
     )
 
     if ai.get("correction"):
-        reply += f"\n🛠 *Correction*: {md(ai['correction'])}\n"
+        reply += f"\n🛠 <b>Correction</b>: {h(ai['correction'])}\n"
     if ai.get("rewrite"):
-        reply += f"\n✨ *Rewrite*: {md(ai['rewrite'])}\n"
+        reply += f"\n✨ <b>Rewrite</b>: {h(ai['rewrite'])}\n"
     if ai.get("notes"):
-        reply += f"\n💡 {md(ai['notes'])}\n"
+        reply += f"\n💡 {h(ai['notes'])}\n"
 
     reply += (
-        f"\n📌 *Examples*:\n{md(examples_block)}\n\n"
+        f"\n📌 <b>Examples</b>:\n{h(examples_block)}\n\n"
         f"Type /review to practice or /learn for another item."
     )
 
     msg = get_chat_sender(update)
-    await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN_V2)
+    await msg.reply_text(reply, parse_mode=ParseMode.HTML)
 
     clear_session(user.id)
 
@@ -230,18 +207,18 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = (
         f"{status}\n"
-        f"*Meaning:* {md(meaning)}\n"
+        f"<b>Meaning:</b> {h(meaning)}\n"
     )
     if clue:
-        msg += f"_Clue:_ {md(clue)}\n"
+        msg += f"<i>Clue:</i> {h(clue)}\n"
 
     msg += (
         f"\n✍️ Now you:\n"
-        f"Write *one Italian sentence* using the *word* *{md(meta.get('term') or '')}*.\n"
+        f"Write <b>one Italian sentence</b> using the word <b>{h(meta.get('term') or '')}</b>.\n"
         f"(Any sentence you want — your choice.)"
     )
 
-    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
+    await query.edit_message_text(msg, parse_mode=ParseMode.HTML)
 
 
 async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE):

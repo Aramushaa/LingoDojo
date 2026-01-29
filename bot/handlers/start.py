@@ -17,10 +17,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT OR IGNORE INTO users (user_id, first_name, created_at, target_language, ui_language)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO users (user_id, first_name, created_at, target_language, ui_language, helper_language)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (user.id, user.first_name, utc_now_iso(), "it", "en")
+        (user.id, user.first_name, utc_now_iso(), "it", "en", None)
+
     )
     conn.commit()
     conn.close()

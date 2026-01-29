@@ -1,13 +1,13 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from telegram.helpers import escape_markdown
+from html import escape
 from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade, undo_last_grade
 from bot.utils.telegram import get_chat_sender
 
 
-def md(text: str) -> str:
-    return escape_markdown(text or "", version=2)
+def h(text: str) -> str:
+    return escape(text or "")
 
 
 def grade_keyboard(item_id: int):
@@ -46,13 +46,13 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
     set_session(user.id, mode="review", item_id=item_id, stage="await_sentence")
 
     text = (
-        f"🧠 *Review*\n\n"
-        f"Chunk: *{md(chunk)}*\n"
-        f"(Hint EN: {md(translation_en or '-')})\n\n"
-        f"👉 Write *one sentence* using the chunk."
+        f"🧠 <b>Review</b>\n\n"
+        f"Chunk: <b>{h(chunk)}</b>\n"
+        f"(Hint EN: {h(translation_en or '-')})\n\n"
+        f"👉 Write <b>one sentence</b> using the chunk."
     )
 
-    await msg.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
+    await msg.reply_text(text, parse_mode=ParseMode.HTML)
 
 
 async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -122,13 +122,13 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     set_session(user.id, mode="review", item_id=next_item_id, stage="await_sentence")
 
     next_text = (
-        f"🧠 *Review*\n\n"
-        f"Chunk: *{md(chunk)}*\n"
-        f"(Hint EN: {md(translation_en or '-')})\n\n"
-        f"👉 Write *one sentence* using the chunk."
+        f"🧠 <b>Review</b>\n\n"
+        f"Chunk: <b>{h(chunk)}</b>\n"
+        f"(Hint EN: {h(translation_en or '-')})\n\n"
+        f"👉 Write <b>one sentence</b> using the chunk."
     )
 
-    await query.message.reply_text(next_text, parse_mode=ParseMode.MARKDOWN_V2)
+    await query.message.reply_text(next_text, parse_mode=ParseMode.HTML)
 
 
 

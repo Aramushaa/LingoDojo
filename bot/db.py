@@ -33,7 +33,8 @@ def init_db():
         first_name TEXT,
         created_at TEXT,
         target_language TEXT NOT NULL DEFAULT 'it',
-        ui_language TEXT NOT NULL DEFAULT 'en'
+        ui_language TEXT NOT NULL DEFAULT 'en',
+        helper_language TEXT DEFAULT NULL
     )
     """)
 
@@ -139,6 +140,8 @@ def init_db():
     _add_column_if_missing(cursor, "reviews", "prev_reps", "INTEGER")
     _add_column_if_missing(cursor, "reviews", "prev_lapses", "INTEGER")
     _add_column_if_missing(cursor, "reviews", "undo_available", "INTEGER NOT NULL DEFAULT 0")
+    _add_column_if_missing(cursor, "users", "helper_language", "TEXT DEFAULT NULL")
+
 
 
 
@@ -579,3 +582,64 @@ def set_lexicon_cache_it(term: str, data: dict):
     )
     conn.commit()
     conn.close()
+
+def get_user_profile(user_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT target_language, ui_language, helper_language FROM users WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row  # (target, ui, helper) or None
+
+
+def set_user_helper_language(user_id: int, helper_language: str | None):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET helper_language = ? WHERE user_id = ?",
+        (helper_language, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def toggle_pack(user_id: int, pack_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM user_packs WHERE user_id=? AND pack_id=?", (user_id, pack_id))
+    exists = cur.fetchone() is not None
+
+    if exists:
+        cur.execute("DELETE FROM user_packs WHERE user_id=? AND pack_id=?", (user_id, pack_id))
+    else:
+        cur.execute(
+            "INSERT OR IGNORE INTO user_packs (user_id, pack_id, activated_at) VALUES (?, ?, ?)",
+            (user_id, pack_id, utc_now_iso())
+        )
+
+    conn.commit()
+    conn.close()
+    return (not exists)
+
+
+def pick_one_item_for_user(user_id: int, target_language: str):
+    """
+    Picks a random item from ANY active pack of the user (filtered by target_language).
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note
+        FROM pack_items pi
+        JOIN packs p ON p.pack_id = pi.pack_id
+        JOIN user_packs up ON up.pack_id = p.pack_id
+        WHERE up.user_id = ? AND p.target_language = ?
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (user_id, target_language))
+    row = cur.fetchone()
+    conn.close()
+    return row

@@ -289,11 +289,12 @@ async def generate_reverse_context_quiz(
         return {
             "ok": True,
             "context_it": str(data.get("context_it") or "").strip(),
-            "meaning_en": str(data.get("meaning_en") or (translation_en or "")).strip(),
+            "meaning_en": meaning_en,  # ✅ use the guarded one
             "options_en": [str(x).strip() for x in options],
             "correct_index": idx,
             "clue": str(data.get("clue") or "").strip(),
         }
+
 
     except Exception:
         # Never crash UX
