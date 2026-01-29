@@ -1,6 +1,7 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup,InputFile
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
+from telegram.helpers import escape_markdown
 
 from bot.utils.telegram import get_chat_sender
 from bot.config import SHOW_DICT_DEBUG
@@ -16,6 +17,10 @@ from bot.services.dictionary_it import validate_it_term
 from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz
 from bot.services.lexicon_it import get_or_fetch_lexicon_it
 from bot.services.tts_edge import tts_it
+
+
+def md(text: str) -> str:
+    return escape_markdown(text or "", version=2)
 
 
 
@@ -103,11 +108,11 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = (
         f"🕵️ *Guess the meaning*\n\n"
-        f"Word: *{term}*\n\n"
-        f"Context:\n_{quiz.get('context_it','')}_\n\n"
+        f"Word: *{md(term)}*\n\n"
+        f"Context:\n_{md(quiz.get('context_it',''))}_\n\n"
         f"Pick the best meaning:"
     )
-    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 
@@ -171,25 +176,25 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply = (
         f"✅ *Learn — Feedback*\n\n"
-        f"Word: *{term}*\n"
-        f"Your sentence:\n“{text}”\n"
-        f"{debug_line}"
+        f"Word: *{md(term)}*\n"
+        f"Your sentence:\n“{md(text)}”\n"
+        f"{md(debug_line)}"
     )
 
     if ai.get("correction"):
-        reply += f"\n🛠 *Correction*: {ai['correction']}\n"
+        reply += f"\n🛠 *Correction*: {md(ai['correction'])}\n"
     if ai.get("rewrite"):
-        reply += f"\n✨ *Rewrite*: {ai['rewrite']}\n"
+        reply += f"\n✨ *Rewrite*: {md(ai['rewrite'])}\n"
     if ai.get("notes"):
-        reply += f"\n💡 {ai['notes']}\n"
+        reply += f"\n💡 {md(ai['notes'])}\n"
 
     reply += (
-        f"\n📌 *Examples*:\n{examples_block}\n\n"
+        f"\n📌 *Examples*:\n{md(examples_block)}\n\n"
         f"Type /review to practice or /learn for another item."
     )
 
     msg = get_chat_sender(update)
-    await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN)
+    await msg.reply_text(reply, parse_mode=ParseMode.MARKDOWN_V2)
 
     clear_session(user.id)
 
@@ -225,18 +230,18 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = (
         f"{status}\n"
-        f"*Meaning:* {meaning}\n"
+        f"*Meaning:* {md(meaning)}\n"
     )
     if clue:
-        msg += f"_Clue:_ {clue}\n"
+        msg += f"_Clue:_ {md(clue)}\n"
 
     msg += (
         f"\n✍️ Now you:\n"
-        f"Write *one Italian sentence* using the *word* **{meta.get('term')}**.\n"
+        f"Write *one Italian sentence* using the *word* *{md(meta.get('term') or '')}*.\n"
         f"(Any sentence you want — your choice.)"
     )
 
-    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN)
+    await query.edit_message_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE):

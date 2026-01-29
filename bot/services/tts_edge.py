@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 def _cache_path(text: str, suffix: str) -> Path:
-    h = hashlib.sha1(text.encode("utf-8")).hexdigest()[:16]
+    # Include voice + format in cache key to avoid stale audio after changes.
+    key = f"{VOICE_IT}|{OUTPUT_FORMAT}|{text}"
+    h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
     return CACHE_DIR / f"{h}.{suffix}"
 
 
@@ -48,8 +50,15 @@ async def tts_it(text: str) -> Path:
 
     out = _cache_path(text, suffix)
     if out.exists():
-        logger.info("TTS cache hit: %s (%d bytes)", out, out.stat().st_size)
-        return out
+        size = out.stat().st_size
+        if size >= 512:
+            logger.info("TTS cache hit: %s (%d bytes)", out, size)
+            return out
+        # Stale/corrupt cache file: delete and regenerate.
+        try:
+            out.unlink(missing_ok=True)
+        except Exception:
+            pass
 
     if suffix == "wav":
         logger.info("TTS generating: voice=%s format=%s text=%r", VOICE_IT, OUTPUT_FORMAT, text)

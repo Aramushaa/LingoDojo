@@ -1,8 +1,13 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
-from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade,undo_last_grade
+from telegram.helpers import escape_markdown
+from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade, undo_last_grade
 from bot.utils.telegram import get_chat_sender
+
+
+def md(text: str) -> str:
+    return escape_markdown(text or "", version=2)
 
 
 def grade_keyboard(item_id: int):
@@ -42,12 +47,12 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = (
         f"🧠 *Review*\n\n"
-        f"Chunk: *{chunk}*\n"
-        f"(Hint EN: {translation_en or '-'})\n\n"
+        f"Chunk: *{md(chunk)}*\n"
+        f"(Hint EN: {md(translation_en or '-')})\n\n"
         f"👉 Write *one sentence* using the chunk."
     )
 
-    await msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    await msg.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -58,7 +63,7 @@ async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not session:
         return
 
-    mode, item_id, stage = session
+    mode, item_id, stage, meta = session
     if mode == "review" and stage == "await_sentence" and item_id is not None:
         # now ask the user to grade themselves (fast UX)
         set_session(user.id, mode="review", item_id=item_id, stage="await_grade")
@@ -82,7 +87,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("No active review session. Type /review.")
         return
 
-    mode, session_item_id, stage = session
+    mode, session_item_id, stage, meta = session
     if mode != "review" or stage != "await_grade" or session_item_id != item_id:
         await query.edit_message_text("Invalid grading action. Type /review again.")
         return
@@ -118,12 +123,12 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     next_text = (
         f"🧠 *Review*\n\n"
-        f"Chunk: *{chunk}*\n"
-        f"(Hint EN: {translation_en or '-'})\n\n"
+        f"Chunk: *{md(chunk)}*\n"
+        f"(Hint EN: {md(translation_en or '-')})\n\n"
         f"👉 Write *one sentence* using the chunk."
     )
 
-    await query.message.reply_text(next_text, parse_mode=ParseMode.MARKDOWN)
+    await query.message.reply_text(next_text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 

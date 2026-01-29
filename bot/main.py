@@ -12,7 +12,6 @@ from bot.handlers.review import review, on_review_text, on_grade_button, on_undo
 from bot.handlers.home import on_home_button
 from dotenv import load_dotenv
 
-from webapp import app
 
 
 load_dotenv()
