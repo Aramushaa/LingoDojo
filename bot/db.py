@@ -12,6 +12,7 @@ DATA_DIR = REPO_ROOT / "data"
 DB_PATH = DATA_DIR / "app.db"
 PACKS_DIR = DATA_DIR / "packs"
 
+
 def get_connection():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -34,7 +35,8 @@ def init_db():
         created_at TEXT,
         target_language TEXT NOT NULL DEFAULT 'it',
         ui_language TEXT NOT NULL DEFAULT 'en',
-        helper_language TEXT DEFAULT NULL
+        helper_language TEXT DEFAULT NULL,
+        user_level TEXT DEFAULT 'A1'
     )
     """)
 
@@ -120,6 +122,8 @@ def init_db():
             conn.commit()
 
     _ensure_column(conn, "user_session", "meta_json", "TEXT")
+    _ensure_column(conn, "users", "user_level", "TEXT")
+
 
 
 
@@ -627,8 +631,10 @@ def toggle_pack(user_id: int, pack_id: str):
 
 def pick_one_item_for_user(user_id: int, target_language: str):
     """
-    Picks a random item from ANY active pack of the user (filtered by target_language).
+    Picks one random item from active packs, filtered by user level.
     """
+    user_level = get_user_level(user_id)
+
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -636,10 +642,29 @@ def pick_one_item_for_user(user_id: int, target_language: str):
         FROM pack_items pi
         JOIN packs p ON p.pack_id = pi.pack_id
         JOIN user_packs up ON up.pack_id = p.pack_id
-        WHERE up.user_id = ? AND p.target_language = ?
+        WHERE up.user_id = ?
+          AND p.target_language = ?
+          AND (pi.level IS NULL OR pi.level = '' OR pi.level <= ?)
         ORDER BY RANDOM()
         LIMIT 1
-    """, (user_id, target_language))
+    """, (user_id, target_language, user_level))
     row = cur.fetchone()
     conn.close()
     return row
+
+
+def get_user_level(user_id: int) -> str:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT user_level FROM users WHERE user_id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    return (row[0] if row and row[0] else "A1")
+
+
+def set_user_level(user_id: int, level: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET user_level = ? WHERE user_id = ?", (level, user_id))
+    conn.commit()
+    conn.close()

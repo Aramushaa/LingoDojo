@@ -11,6 +11,7 @@ from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
 from dotenv import load_dotenv
+from bot.handlers.setlevel import setlevel, on_setlevel_button
 
 
 
@@ -60,6 +61,9 @@ def main():
     app.add_handler(CommandHandler("learn", learn))
     app.add_handler(CommandHandler("settings", settings))
     app.add_handler(CommandHandler("review", review))
+    app.add_handler(CommandHandler("setlevel", setlevel))
+
+
 
     app.add_handler(CallbackQueryHandler(on_grade_button, pattern=r"^GRADE\|"))
     app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^SET_(TARGET|UI)\|"))
@@ -70,7 +74,7 @@ def main():
     # Learn callbacks
     app.add_handler(CallbackQueryHandler(on_guess_button, pattern=r"^GUESS\|"))
     app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))
-
+    app.add_handler(CallbackQueryHandler(on_setlevel_button, pattern=r"^SETLEVEL\|"))
 
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text_router))
