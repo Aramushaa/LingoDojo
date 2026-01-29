@@ -51,44 +51,68 @@ def _build_prompt(
     user_sentence: str,
     lexicon: Optional[dict],
 ) -> str:
-    # We keep it short and strict: JSON output only.
     lex_str = json.dumps(lexicon or {}, ensure_ascii=False)
 
     return f"""
-You are an Italian tutor. The user is a beginner. Be concise.
+You are a professional Italian language tutor.
 
-TASK:
-- The user must practice this chunk: "{chunk}" (term: "{term}")
-- English hint: "{translation_en or ""}"
-- User sentence: "{user_sentence}"
+The user is a BEGINNER.
+Your role is to help them learn naturally, without overcorrecting.
 
-GROUNDING (dictionary/lexicon cache, may be partial):
+LEARNING CONTEXT:
+- Target word: "{term}"
+- Optional related chunk (reference only): "{chunk}"
+- English hint for the word: "{translation_en or ""}"
+- User's sentence (free form, any person allowed):
+"{user_sentence}"
+
+DICTIONARY / LEXICON FACTS (ground truth, may be partial):
 {lex_str}
 
-RULES:
-- Do NOT invent meanings.
-- If grounding is missing/uncertain, say so briefly in notes.
-- Output MUST be valid JSON only. No markdown.
-IMPORTANT RULES:
-- Do NOT change the grammatical person/subject (io/tu/Lei/lui/lei/noi/voi/loro) unless the user sentence is clearly impossible.
-- "correction" is ONLY for true grammar/spelling errors. If the sentence is acceptable, set correction = null.
-- If you want to suggest a more polite version (e.g., "vorrei"), put it in "rewrite" and explain it's optional in notes.
-- Do NOT assume we are practicing a specific form like "vorrei" unless the scenario explicitly says so.
+CORE RULES (VERY IMPORTANT):
+1) The user is practicing the WORD, not a specific tense or structure.
+2) Do NOT change the grammatical person or subject
+   (io / tu / lui / lei / Lei / noi / voi / loro)
+   unless the sentence is grammatically impossible.
+3) If the user's sentence is grammatically acceptable Italian,
+   DO NOT correct it.
+4) "correction" is ONLY for true grammar or spelling errors.
+   If the sentence is acceptable, set correction = null.
+5) Style improvements (politeness, register, naturalness)
+   MUST go in "rewrite" and are OPTIONAL suggestions.
+6) Never invent meanings or usages.
+   If dictionary grounding is missing or uncertain, say so briefly in notes.
 
+OUTPUT FORMAT:
+- Output MUST be valid JSON ONLY.
+- No markdown, no explanations outside JSON.
+- Use EXACTLY these keys:
 
-Return JSON with exactly these keys:
 {{
-  "correction": string|null,
-  "rewrite": string|null,
+  "correction": string | null,
+  "rewrite": string | null,
   "notes": string,
   "examples": [string, string, string]
 }}
 
-Guidance:
-- correction: only fix the minimum (articles/prepositions/verb form), short.
-- rewrite: a natural version of the user sentence (if user sentence is already good, can be null).
-- notes: 1–2 lines max.
-- examples: 3 short natural Italian examples using the chunk (neutral/formal/informal if possible).
+FIELD GUIDELINES:
+- correction:
+  Minimal fix only (articles, prepositions, verb form, spelling).
+- rewrite:
+  A more natural or polite alternative with the SAME meaning
+  (optional; may be null).
+- notes:
+  Max 2 short lines.
+  Explain meaning, register, or a useful real-life tip.
+- examples:
+  Exactly 3 short, natural Italian examples
+  that clearly reflect the SAME meaning of the word
+  (neutral / spoken / polite if possible).
+
+TEACHING STYLE:
+- Respect correct answers.
+- Do not turn this into a grammar lecture.
+- Be supportive, clear, and practical.
 """.strip()
 
 
@@ -111,7 +135,6 @@ async def generate_learn_feedback(
             return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY missing/empty")
 
 
-        from google import genai  # type: ignore
 
         client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -174,6 +197,7 @@ def debug_list_models() -> str:
 async def generate_reverse_context_quiz(
     *,
     term: str,
+    chunk: Optional[str],
     translation_en: Optional[str],
     lexicon: Optional[dict] = None,
 ) -> Dict[str, Any]:
@@ -209,30 +233,32 @@ async def generate_reverse_context_quiz(
         lex_str = json.dumps(lexicon or {}, ensure_ascii=False)
 
         prompt = f"""
-Create a reverse-context meaning quiz for an Italian beginner.
+        Create a reverse-context meaning quiz for an Italian beginner.
 
-WORD: "{term}"
-Optional English hint (may be empty): "{translation_en or ""}"
+        TARGET WORD (TERM): "{term}"
+        Related chunk (reference only, DO NOT teach chunk meaning): "{chunk or ""}"
+        English hint (may be empty or may describe the chunk): "{translation_en or ""}"
 
-GROUNDING (may be partial):
-{lex_str}
+        GROUNDING FACTS (if present, treat as truth):
+        {lex_str}
 
-Rules:
-- Output MUST be valid JSON only.
-- Make ONE short Italian context sentence that strongly implies the meaning.
-- Provide 3 English options (A,B,C) with ONLY ONE correct.
-- If hint is present, the correct option must align with it.
-- Keep it beginner-friendly.
+        NON-NEGOTIABLE RULES:
+        - The quiz is ONLY about the TERM meaning, not the chunk.
+        - For "andare", meaning must be "to go" (NOT "to go home").
+        - If the hint seems chunk-specific (e.g., 'to go home'), IGNORE it and still quiz the TERM.
+        - Context sentence must clearly support the TERM meaning.
+        - Provide exactly 3 English options and exactly one correct.
 
-Return JSON:
-{{
-  "context_it": "...",
-  "meaning_en": "...",
-  "options_en": ["...","...","..."],
-  "correct_index": 0,
-  "clue": "short explanation of the clue"
-}}
-""".strip()
+        Output MUST be valid JSON only with this schema:
+        {{
+        "context_it": "...",
+        "meaning_en": "...",
+        "options_en": ["...","...","..."],
+        "correct_index": 0,
+        "clue": "short explanation of the clue"
+        }}
+        """.strip()
+
 
         resp = client.models.generate_content(model=model, contents=prompt)
         data = _extract_json((resp.text or "").strip())
@@ -245,6 +271,12 @@ Return JSON:
                 "correct_index": 0,
                 "clue": "AI returned invalid JSON.",
             }
+        meaning_en = str(data.get("meaning_en") or (translation_en or "")).strip()
+
+        # Guardrail: prevent chunk meaning leaking into term meaning
+        if term.lower() == "andare" and "home" in meaning_en.lower():
+            meaning_en = "to go"
+
 
         options = data.get("options_en") or []
         if not isinstance(options, list) or len(options) != 3:

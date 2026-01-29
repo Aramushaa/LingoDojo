@@ -77,9 +77,11 @@ async def on_pack_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lexicon = get_lexicon_cache_it(term)
     quiz = await generate_reverse_context_quiz(
         term=term,
+        chunk=chunk,
         translation_en=translation_en,
         lexicon=lexicon,
     )
+
 
     meta = {
         "term": term,
@@ -241,8 +243,7 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
     query = update.callback_query
     await query.answer()
 
-    user = query.from_user
-    session = get_session(user.id)
+    session = get_session(query.from_user.id)
     if not session:
         return
 
@@ -256,9 +257,22 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     try:
         path = await tts_it(term)
-        await query.message.reply_audio(
-            audio=InputFile(str(path), filename=f"{term}.wav"),
-            title=f"{term}",
-        )
-    except Exception:
-        await query.message.reply_text("TTS failed right now 😵‍💫 (try again)")
+
+        # Decide how to send based on extension
+        suffix = path.suffix.lower()
+
+        with open(path, "rb") as f:
+            if suffix == ".ogg":
+                await query.message.reply_voice(
+                    voice=InputFile(f, filename=f"{term}.ogg"),
+                    caption=f"🔊 {term}",
+                )
+            else:
+                # mp3/wav -> send as audio
+                await query.message.reply_audio(
+                    audio=InputFile(f, filename=f"{term}{suffix}"),
+                    title=term,
+                )
+
+    except Exception as e:
+        await query.message.reply_text(f"TTS failed: {type(e).__name__}: {e}")

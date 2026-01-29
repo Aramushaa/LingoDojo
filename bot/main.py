@@ -47,7 +47,7 @@ async def on_text_router(update, context):
 
 def main():  
     print("🚀 Bot is starting...")
-
+    
 
 
 
