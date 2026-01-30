@@ -194,15 +194,30 @@ def import_packs_from_folder():
 
         # Insert items
         for item in pack["items"]:
+            tags = item.get("tags") or []
+            tags_json = json.dumps(tags, ensure_ascii=False)
+
             cursor.execute("""
-                INSERT INTO pack_items (pack_id, term, chunk, translation_en, note)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO pack_items (
+                    pack_id, term, chunk,
+                    translation_en, note,
+                    level, category,
+                    tags_json, cultural_note,
+                    pronunciation_text, translation_helper
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 pack_id,
                 item["term"],
-                item["chunk"],
+                item.get("chunk") or item["term"],  # allow word-only packs
                 item.get("translation_en"),
-                item.get("note", "")
+                item.get("note", ""),
+                item.get("level", pack.get("level", None)),
+                item.get("category", None),
+                tags_json,
+                item.get("cultural_note", None),
+                item.get("pronunciation_text", item.get("term")),
+                item.get("translation_helper", None),
             ))
 
     conn.commit()

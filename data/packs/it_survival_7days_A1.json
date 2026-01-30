@@ -1,0 +1,42 @@
+{
+  "pack_id": "it_survival_7days_A1",
+  "target_language": "it",
+  "level": "A1",
+  "title": "7-Day Survival (A1)",
+  "description": "Core phrases for first week in Italy: greetings, coffee, asking price, directions.",
+  "items": [
+    {
+      "term": "andare",
+      "chunk": "andare",
+      "translation_en": "to go",
+      "translation_helper": "رفتن",
+      "level": "A1",
+      "category": "survival",
+      "tags": ["verb", "movement"],
+      "cultural_note": "Often used with places: andare a casa, andare al lavoro.",
+      "pronunciation_text": "andare"
+    },
+    {
+      "term": "caffè",
+      "chunk": "prendere un caffè",
+      "translation_en": "to have a coffee",
+      "translation_helper": "قهوه خوردن",
+      "level": "A1",
+      "category": "survival_bar",
+      "tags": ["bar", "food"],
+      "cultural_note": "In Italy, 'un caffè' usually means espresso.",
+      "pronunciation_text": "prendere un caffè"
+    },
+    {
+      "term": "prezzo",
+      "chunk": "Quanto costa?",
+      "translation_en": "How much does it cost?",
+      "translation_helper": "چنده؟",
+      "level": "A1",
+      "category": "survival_shopping",
+      "tags": ["shopping"],
+      "cultural_note": "Polite add-on: 'Scusi, quanto costa?'",
+      "pronunciation_text": "Quanto costa?"
+    }
+  ]
+}
