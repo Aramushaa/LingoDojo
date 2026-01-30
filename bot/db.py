@@ -678,3 +678,73 @@ def set_user_level(user_id: int, level: str):
     cur.execute("UPDATE users SET user_level = ? WHERE user_id = ?", (level, user_id))
     conn.commit()
     conn.close()
+
+
+def get_active_items_total(user_id: int, target_language: str) -> int:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM pack_items pi
+        JOIN packs p ON p.pack_id = pi.pack_id
+        JOIN user_packs up ON up.pack_id = p.pack_id
+        WHERE up.user_id = ?
+          AND p.target_language = ?
+    """, (user_id, target_language))
+    (cnt,) = cur.fetchone()
+    conn.close()
+    return int(cnt)
+
+
+def get_active_items_introduced(user_id: int, target_language: str) -> int:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COUNT(DISTINCT pi.item_id)
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        JOIN packs p ON p.pack_id = pi.pack_id
+        JOIN user_packs up ON up.pack_id = p.pack_id
+        WHERE r.user_id = ?
+          AND up.user_id = ?
+          AND p.target_language = ?
+    """, (user_id, user_id, target_language))
+    (cnt,) = cur.fetchone()
+    conn.close()
+    return int(cnt)
+
+
+def pick_next_new_item_for_user(user_id: int, target_language: str):
+    """
+    Pick the next *not-yet-introduced* item from active packs in a stable order.
+    Stable order MVP:
+      - pack level, pack title (so A1 packs first)
+      - then pack_items.item_id (import order)
+    """
+    user_level = get_user_level(user_id)
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note
+        FROM pack_items pi
+        JOIN packs p ON p.pack_id = pi.pack_id
+        JOIN user_packs up ON up.pack_id = p.pack_id
+        WHERE up.user_id = ?
+          AND p.target_language = ?
+          AND (p.level IS NULL OR p.level = '' OR p.level <= ?)
+          AND NOT EXISTS (
+              SELECT 1 FROM reviews r
+              WHERE r.user_id = ? AND r.item_id = pi.item_id
+          )
+        ORDER BY
+          COALESCE(p.level, 'Z') ASC,
+          p.title ASC,
+          pi.item_id ASC
+        LIMIT 1
+    """, (user_id, target_language, user_level, user_id))
+
+    row = cur.fetchone()
+    conn.close()
+    return row
+

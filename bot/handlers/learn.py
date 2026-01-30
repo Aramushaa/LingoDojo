@@ -10,7 +10,10 @@ from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
     clear_session, get_item_by_id, ensure_review_row,
-    get_user_languages, get_lexicon_cache_it,pick_one_item_for_user
+    get_user_languages, get_lexicon_cache_it,pick_one_item_for_user,
+    pick_next_new_item_for_user,
+    get_active_items_total,
+    get_active_items_introduced,
 )
 
 from bot.services.dictionary_it import validate_it_term
@@ -35,13 +38,21 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     target_language, ui_language = langs
 
-    # NEW: pick from active packs (no pack selection screen)
-    item = pick_one_item_for_user(user.id, target_language)
+    active_packs = get_user_active_packs(user.id)
+    if not active_packs:
+        msg = get_chat_sender(update)
+        await msg.reply_text("No active packs. Go to ⚙️ /settings → 📦 Packs and turn one ON.")
+        return
+
+    item = pick_next_new_item_for_user(user.id, target_language)
     if not item:
+        total = get_active_items_total(user.id, target_language)
+        introduced = get_active_items_introduced(user.id, target_language)
         msg = get_chat_sender(update)
         await msg.reply_text(
-            "You have no active packs yet.\n"
-            "Go to /settings → Packs and activate at least one pack ✅"
+            f"✅ You introduced all items in your active packs.\n"
+            f"Progress: {introduced}/{total}\n\n"
+            f"Now do /review 👇",
         )
         return
 

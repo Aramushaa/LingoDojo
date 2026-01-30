@@ -38,13 +38,13 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     f"📊 Your Stats\n"
     f"👤 Name: {first_name}\n"
     f"🆔 User ID: {user.id}\n"
-    f"📅 Joined: {pretty}\n\n"
+    f"📅 Joined: {pretty}\n"
+    f"🎯 Level: {level}\n\n"
     f"🧠 SRS\n"
     f"🔁 Due today: {due_today}\n"
     f"🟡 Learning: {learning_count}\n"
     f"🟢 Mature: {mature_count}\n"
     f"⚪ New: {new_count}\n\n"
-    f"🎯 Level: {level}\n\n"
     f"Next: /review"
     )
 
