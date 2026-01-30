@@ -523,19 +523,34 @@ def ensure_review_row(user_id: int, item_id: int):
 def get_due_item(user_id: int):
     """
     Return one item_id that is due today (or overdue), else None.
+    Skips and cleans stale review rows that point to missing pack_items.
     """
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT item_id
-        FROM reviews
-        WHERE user_id = ? AND due_date <= ?
-        ORDER BY due_date ASC
-        LIMIT 1
-    """, (user_id, today_str()))
-    row = cursor.fetchone()
-    conn.close()
-    return row[0] if row else None
+
+    # loop until we find a valid item or run out
+    while True:
+        cursor.execute("""
+            SELECT item_id
+            FROM reviews
+            WHERE user_id = ? AND due_date <= ?
+            ORDER BY due_date ASC
+            LIMIT 1
+        """, (user_id, today_str()))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return None
+
+        item_id = row[0]
+        cursor.execute("SELECT 1 FROM pack_items WHERE item_id = ?", (item_id,))
+        if cursor.fetchone():
+            conn.close()
+            return item_id
+
+        # stale review row -> delete and continue
+        cursor.execute("DELETE FROM reviews WHERE user_id = ? AND item_id = ?", (user_id, item_id))
+        conn.commit()
 
 def get_review_state(user_id: int, item_id: int):
     conn = get_connection()
@@ -693,29 +708,53 @@ def undo_last_grade(user_id: int, item_id: int):
     return restored  # (status, interval_days, due_date)
 
 
+def _cleanup_stale_reviews(conn, user_id: int):
+    """
+    Remove reviews that point to missing pack_items or inactive packs.
+    """
+    cur = conn.cursor()
+    cur.execute("""
+        DELETE FROM reviews
+        WHERE user_id = ?
+          AND item_id NOT IN (
+            SELECT pi.item_id
+            FROM pack_items pi
+            JOIN user_packs up ON up.pack_id = pi.pack_id
+            WHERE up.user_id = ?
+          )
+    """, (user_id, user_id))
+    conn.commit()
+
+
 def get_due_count(user_id: int) -> int:
-    """How many items are due today (or overdue) for this user?"""
+    """How many items are due today (or overdue) for this user (active packs only)."""
     conn = get_connection()
+    _cleanup_stale_reviews(conn, user_id)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT COUNT(*)
-        FROM reviews
-        WHERE user_id = ? AND due_date <= ?
-    """, (user_id, date.today().isoformat()))
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        JOIN user_packs up ON up.pack_id = pi.pack_id
+        WHERE r.user_id = ? AND up.user_id = ? AND r.due_date <= ?
+    """, (user_id, user_id, date.today().isoformat()))
     (count,) = cursor.fetchone()
     conn.close()
     return int(count)
 
 def get_status_counts(user_id: int) -> dict:
-    """Return counts grouped by status: new/learning/mature."""
+    """Return counts grouped by status for active packs only."""
     conn = get_connection()
+    _cleanup_stale_reviews(conn, user_id)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT status, COUNT(*)
-        FROM reviews
-        WHERE user_id = ?
-        GROUP BY status
-    """, (user_id,))
+        SELECT r.status, COUNT(*)
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        JOIN user_packs up ON up.pack_id = pi.pack_id
+        WHERE r.user_id = ? AND up.user_id = ?
+        GROUP BY r.status
+    """, (user_id, user_id))
     rows = cursor.fetchall()
     conn.close()
 
@@ -897,3 +936,80 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
     conn.close()
     return row
 
+def get_random_context_for_item(item_id: int) -> str | None:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT sentence_it
+        FROM card_contexts
+        WHERE item_id = ?
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (item_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+
+def get_item_holographic_meta(item_id: int) -> dict:
+    """
+    Returns a dict of holographic fields for Learn deconstruct + drills.
+    Safe defaults if missing.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT
+            register,
+            risk,
+            trap,
+            native_sauce,
+            cultural_note,
+            tags_json,
+            drills_json,
+            media_json
+        FROM item_holographic_meta
+        WHERE item_id = ?
+    """, (item_id,))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return {
+            "register": None,
+            "risk": "safe",
+            "trap": None,
+            "native_sauce": None,
+            "cultural_note": None,
+            "tags": [],
+            "drills": {},
+            "media": {},
+        }
+
+    register, risk, trap, native_sauce, cultural_note, tags_json, drills_json, media_json = row
+
+    try:
+        tags = json.loads(tags_json) if tags_json else []
+    except Exception:
+        tags = []
+
+    try:
+        drills = json.loads(drills_json) if drills_json else {}
+    except Exception:
+        drills = {}
+
+    try:
+        media = json.loads(media_json) if media_json else {}
+    except Exception:
+        media = {}
+
+    return {
+        "register": register,
+        "risk": risk or "safe",
+        "trap": trap,
+        "native_sauce": native_sauce,
+        "cultural_note": cultural_note,
+        "tags": tags,
+        "drills": drills,
+        "media": media,
+    }

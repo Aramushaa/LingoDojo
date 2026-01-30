@@ -200,6 +200,7 @@ async def generate_reverse_context_quiz(
     chunk: Optional[str],
     translation_en: Optional[str],
     lexicon: Optional[dict] = None,
+    context_it: Optional[str] = None,   # ✅ NEW
 ) -> Dict[str, Any]:
     """
     Returns:
@@ -234,6 +235,9 @@ async def generate_reverse_context_quiz(
 
         prompt = f"""
         Create a reverse-context meaning quiz for an Italian beginner.
+        FIXED CONTEXT (if provided, USE IT as the context sentence):
+        "{context_it or ""}"
+
 
         TARGET WORD (TERM): "{term}"
         Related chunk (reference only, DO NOT teach chunk meaning): "{chunk or ""}"
@@ -243,6 +247,7 @@ async def generate_reverse_context_quiz(
         {lex_str}
 
         NON-NEGOTIABLE RULES:
+        - If FIXED CONTEXT is provided and non-empty, you MUST use it as "context_it" exactly.
         - The quiz is ONLY about the TERM meaning, not the chunk.
         - For "andare", meaning must be "to go" (NOT "to go home").
         - If the hint seems chunk-specific (e.g., 'to go home'), IGNORE it and still quiz the TERM.

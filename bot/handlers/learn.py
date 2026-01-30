@@ -6,6 +6,7 @@ from html import escape
 from bot.utils.telegram import get_chat_sender
 from bot.config import SHOW_DICT_DEBUG
 
+
 from bot.db import (
     list_packs, activate_pack, get_user_active_packs,
     pick_one_item_from_pack, set_session, get_session,
@@ -14,6 +15,7 @@ from bot.db import (
     pick_next_new_item_for_user,
     get_active_items_total,
     get_active_items_introduced,get_user_profile,
+    get_random_context_for_item,get_item_holographic_meta
 )
 
 from bot.services.dictionary_it import validate_it_term
@@ -71,6 +73,10 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     item_id, term, chunk, translation_en, note = item
 
+    ctx_it = get_random_context_for_item(item_id)
+    holo = get_item_holographic_meta(item_id)
+
+
     # Prefetch/cache lexicon (silent)
     try:
         get_or_fetch_lexicon_it(term)
@@ -81,25 +87,28 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     lexicon = get_lexicon_cache_it(term)
     quiz = await generate_reverse_context_quiz(
-        term=term,
-        chunk=chunk,
-        translation_en=translation_en,
-        lexicon=lexicon,
+    term=term,
+    chunk=chunk,
+    translation_en=translation_en,
+    lexicon=lexicon,
+    context_it=ctx_it,   # ✅ use fixed context if available
     )
+
 
     meta = {
         "term": term,
         "chunk": chunk,
         "translation_en": translation_en,
         "quiz": quiz,
+        "holo": holo,
     }
 
     set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
-    
+
 
     # Progress header
     total = get_active_items_total(user.id, target)
-    introduced = get_active_items_introduced(user.id)
+    introduced = get_active_items_introduced(user.id, target)
     progress_line = f"📦 Progress: {introduced}/{total}"
 
     opts = quiz.get("options_en", ["A", "B", "C"])
@@ -235,20 +244,55 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Move to sentence stage
     set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence", meta=meta)
 
-    msg = (
-        f"{status}\n"
-        f"<b>Meaning:</b> {h(meaning)}\n"
-    )
+    holo = (meta or {}).get("holo") or {}
+    drills = holo.get("drills") or {}
+    scenario = drills.get("scenario_prompt") if isinstance(drills, dict) else None
+
+    term = (meta or {}).get("term") or ""
+
+    lines = []
+    lines.append(f"{status}")
+    lines.append(f"<b>Meaning:</b> {h(meaning)}")
+
     if clue:
-        msg += f"<i>Clue:</i> {h(clue)}\n"
+        lines.append(f"<i>Clue:</i> {h(clue)}")
 
-    msg += (
+    # --- Deconstruct panel (short + native) ---
+    reg = holo.get("register")
+    risk = holo.get("risk")
+    trap = holo.get("trap")
+    culture = holo.get("cultural_note")
+    sauce = holo.get("native_sauce")
+
+    if reg:
+        lines.append(f"\n🧭 <b>Register</b>: <i>{h(reg)}</i>")
+
+    # show risk only if not safe
+    if risk and risk != "safe":
+        lines.append(f"⚠️ <b>Risk</b>: {h(risk)}")
+
+    if trap:
+        lines.append(f"🪤 <b>Trap</b>: {h(trap)}")
+
+    if culture:
+        lines.append(f"🍝 <b>Culture</b>: {h(culture)}")
+
+    if sauce:
+        lines.append(f"🧃 <b>Native sauce</b>: {h(sauce)}")
+
+    # Scenario prompt (optional)
+    if scenario:
+        lines.append(f"\n🎬 <b>Scenario</b>: {h(scenario)}")
+
+    # Production task (always)
+    lines.append(
         f"\n✍️ Now you:\n"
-        f"Write <b>one Italian sentence</b> using the word <b>{h(meta.get('term') or '')}</b>.\n"
-        f"(Any sentence you want — your choice.)"
+        f"Write <b>one Italian sentence</b> using the word <b>{h(term)}</b>.\n"
+        f"<i>(Any tense/form is OK. Don’t copy the chunk — just use the word naturally.)</i>"
     )
 
-    await query.edit_message_text(msg, parse_mode=ParseMode.HTML)
+    await query.edit_message_text("\n".join(lines), parse_mode=ParseMode.HTML)
+
 
 
 async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
