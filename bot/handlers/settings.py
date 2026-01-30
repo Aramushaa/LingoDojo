@@ -3,6 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from bot.utils.telegram import get_chat_sender
 
+
 from bot.db import (
     get_user_profile,
     set_user_target_language,
@@ -10,7 +11,7 @@ from bot.db import (
     set_user_helper_language,
     list_packs,
     get_user_active_packs,
-    toggle_pack,
+    toggle_pack,get_user_level
 )
 
 TARGET_LANG_OPTIONS = [("it", "🇮🇹 Italian"), ("en", "🇬🇧 English")]
@@ -28,14 +29,16 @@ def _label(code: str | None) -> str:
     return code
 
 
-def build_settings_text(target: str, ui: str, helper: str | None):
+def build_settings_text(target: str, ui: str, helper: str | None, level: str):
     return (
         "⚙️ <b>Settings</b>\n\n"
-        f"🌍 <b>Target</b>: {_label(target)}\n"
-        f"🗣 <b>UI</b>: {_label(ui)}\n"
-        f"🧩 <b>Helper</b>: {_label(helper)}\n\n"
+        f"🌍 <b>Target</b>: {target}\n"
+        f"🗣 <b>UI</b>: {ui}\n"
+        f"🧩 <b>Helper</b>: {helper or 'None'}\n"
+        f"🎯 <b>Level</b>: {level}\n\n"
         "Choose what you want to change:"
     )
+
 
 
 def build_settings_keyboard(target: str, ui: str, helper: str | None):
@@ -65,6 +68,9 @@ def build_settings_keyboard(target: str, ui: str, helper: str | None):
 
     # Packs button
     rows.append([InlineKeyboardButton("📦 Packs (activate/deactivate)", callback_data="SETTINGS|PACKS")])
+    rows.append([InlineKeyboardButton("🎯 Set Level", callback_data="SETTINGS|LEVEL")])
+
+
 
     return InlineKeyboardMarkup(rows)
 
@@ -103,8 +109,9 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     target, ui, helper = profile
 
     msg = get_chat_sender(update)
+    level = get_user_level(user.id)
     await msg.reply_text(
-        build_settings_text(target, ui, helper),
+        build_settings_text(target, ui, helper, level),
         reply_markup=build_settings_keyboard(target, ui, helper),
         parse_mode="HTML",
     )
@@ -135,12 +142,24 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data == "SETTINGS|BACK":
         # reload profile in case changed
         target, ui, helper = get_user_profile(user.id)
+        level = get_user_level(user.id)
         await query.edit_message_text(
-            build_settings_text(target, ui, helper),
+            build_settings_text(target, ui, helper, level),
             reply_markup=build_settings_keyboard(target, ui, helper),
             parse_mode="HTML",
         )
         return
+
+    
+    if data == "SETTINGS|LEVEL":
+        current = get_user_level(user.id)
+        await query.edit_message_text(
+            f"🎚 <b>Choose your level</b>\nCurrent: <b>{current}</b>",
+            reply_markup=build_level_keyboard(current),
+            parse_mode="HTML",
+        )
+        return
+
 
     # ACTIONS
     action, code = data.split("|", 1)
@@ -169,3 +188,19 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup=build_settings_keyboard(target, ui, helper),
         parse_mode="HTML",
     )
+
+LEVELS = ["A1", "A2", "B1", "B2", "C1"]
+
+def build_level_keyboard(current: str):
+    rows = []
+    row = []
+    for lv in LEVELS:
+        prefix = "✅ " if lv == current else ""
+        row.append(InlineKeyboardButton(f"{prefix}{lv}", callback_data=f"SETLEVEL|{lv}"))
+        if len(row) == 3:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    rows.append([InlineKeyboardButton("⬅️ Back", callback_data="SETTINGS|BACK")])
+    return InlineKeyboardMarkup(rows)

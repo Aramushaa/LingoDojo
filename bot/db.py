@@ -113,18 +113,6 @@ def init_db():
     """)
 
 
-    def _ensure_column(conn, table: str, col: str, coltype: str):
-        cur = conn.cursor()
-        cur.execute(f"PRAGMA table_info({table})")
-        cols = [row[1] for row in cur.fetchall()]
-        if col not in cols:
-            cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {coltype}")
-            conn.commit()
-
-    _ensure_column(conn, "user_session", "meta_json", "TEXT")
-    _ensure_column(conn, "users", "user_level", "TEXT")
-
-
 
 
 
@@ -145,6 +133,13 @@ def init_db():
     _add_column_if_missing(cursor, "reviews", "prev_lapses", "INTEGER")
     _add_column_if_missing(cursor, "reviews", "undo_available", "INTEGER NOT NULL DEFAULT 0")
     _add_column_if_missing(cursor, "users", "helper_language", "TEXT DEFAULT NULL")
+    _add_column_if_missing(cursor, "pack_items", "level", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "category", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "tags_json", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "cultural_note", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "pronunciation_text", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "translation_helper", "TEXT")
+
 
 
 

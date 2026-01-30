@@ -1,7 +1,8 @@
 from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes
-from bot.db import get_connection,get_due_count, get_status_counts
+from bot.db import get_connection,get_due_count, get_status_counts, get_user_level
+
 
 
 
@@ -31,7 +32,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     first_name, created_at_iso = row
     pretty = format_pretty_date(created_at_iso)
 
-    
+    level = get_user_level(user.id)
 
     await update.effective_message.reply_text(
     f"📊 Your Stats\n"
@@ -43,6 +44,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     f"🟡 Learning: {learning_count}\n"
     f"🟢 Mature: {mature_count}\n"
     f"⚪ New: {new_count}\n\n"
+    f"🎯 Level: {level}\n\n"
     f"Next: /review"
     )
 
