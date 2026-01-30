@@ -13,7 +13,7 @@ from bot.db import (
     get_user_languages, get_lexicon_cache_it,pick_one_item_for_user,
     pick_next_new_item_for_user,
     get_active_items_total,
-    get_active_items_introduced,
+    get_active_items_introduced,get_user_profile,
 )
 
 from bot.services.dictionary_it import validate_it_term
@@ -30,6 +30,15 @@ def h(text: str) -> str:
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    msg = get_chat_sender(update)
+
+    profile = get_user_profile(user.id)
+    if not profile:
+        await msg.reply_text("Use /start first.")
+        return
+    
+    target, ui, helper = profile
+
     langs = get_user_languages(user.id)
     if not langs:
         msg = get_chat_sender(update)
@@ -40,19 +49,23 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     active_packs = get_user_active_packs(user.id)
     if not active_packs:
-        msg = get_chat_sender(update)
-        await msg.reply_text("No active packs. Go to ⚙️ /settings → 📦 Packs and turn one ON.")
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("⚙️ Open Settings → Packs", callback_data="HOME|SETTINGS")]
+        ])
+        await msg.reply_text(
+            "You don’t have any active packs yet.\n\nGo to ⚙️ Settings → 📦 Packs and turn at least one ON.",
+            reply_markup=kb
+        )
         return
 
-    item = pick_next_new_item_for_user(user.id, target_language)
+    item = pick_next_new_item_for_user(user.id, target_language=target)
     if not item:
         total = get_active_items_total(user.id, target_language)
         introduced = get_active_items_introduced(user.id, target_language)
-        msg = get_chat_sender(update)
         await msg.reply_text(
-            f"✅ You introduced all items in your active packs.\n"
+            f"✅ You finished all NEW items in your active packs.\n"
             f"Progress: {introduced}/{total}\n\n"
-            f"Now do /review 👇",
+            f"Now go /review 🔁"
         )
         return
 
@@ -82,6 +95,12 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+    
+
+    # Progress header
+    total = get_active_items_total(user.id, target)
+    introduced = get_active_items_introduced(user.id)
+    progress_line = f"📦 Progress: {introduced}/{total}"
 
     opts = quiz.get("options_en", ["A", "B", "C"])
     keyboard = [
@@ -91,15 +110,15 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
     ]
 
-    msg = (
+    text = (
+        f"{progress_line}\n\n"
         f"🕵️ <b>Guess the meaning</b>\n\n"
         f"Word: <b>{h(term)}</b>\n\n"
         f"Context:\n<i>{h(quiz.get('context_it',''))}</i>\n\n"
         f"Pick the best meaning:"
     )
 
-    msg_sender = get_chat_sender(update)
-    await msg_sender.reply_text(msg, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
+    await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 

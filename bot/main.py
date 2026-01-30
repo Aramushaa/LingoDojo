@@ -66,11 +66,10 @@ def main():
 
 
     app.add_handler(CallbackQueryHandler(on_grade_button, pattern=r"^GRADE\|"))
-    app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^SET_(TARGET|UI)\|"))
     app.add_handler(CallbackQueryHandler(on_home_button, pattern=r"^home:"))
     app.add_handler(CallbackQueryHandler(on_undo_button, pattern=r"^UNDO\|"))
     # Settings callbacks
-    app.add_handler(CallbackQueryHandler(on_settings_button, pattern=r"^(SET_TARGET|SET_UI|SET_HELPER|SETTINGS|PKTOG)\|"))
+    app.add_handler(CallbackQueryHandler(on_settings_button,pattern=r"^(SET_(TARGET|UI|HELPER)\||SETTINGS\||PKTOG\||SETLEVEL\|)"))
     # Learn callbacks
     app.add_handler(CallbackQueryHandler(on_guess_button, pattern=r"^GUESS\|"))
     app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))

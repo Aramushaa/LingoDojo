@@ -139,6 +139,45 @@ def init_db():
     _add_column_if_missing(cursor, "pack_items", "cultural_note", "TEXT")
     _add_column_if_missing(cursor, "pack_items", "pronunciation_text", "TEXT")
     _add_column_if_missing(cursor, "pack_items", "translation_helper", "TEXT")
+    # --- pack_items: holographic card fields (backward-compatible) ---
+    _add_column_if_missing(cursor, "pack_items", "focus", "TEXT")              # word | phrase
+    _add_column_if_missing(cursor, "pack_items", "lemma", "TEXT")              # if focus=word
+    _add_column_if_missing(cursor, "pack_items", "phrase", "TEXT")             # if focus=phrase
+    _add_column_if_missing(cursor, "pack_items", "phrase_hint", "TEXT")        # optional suggested chunk
+    _add_column_if_missing(cursor, "pack_items", "register", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "risk", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "trap", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "native_sauce", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "components_json", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "media_json", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "drills_json", "TEXT")
+
+
+    # --- NEW: contexts table (multiple contexts per card) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS card_contexts (
+        context_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL,
+        lang TEXT NOT NULL DEFAULT 'it',
+        sentence TEXT NOT NULL,
+        source TEXT,
+        FOREIGN KEY (item_id) REFERENCES pack_items(item_id) ON DELETE CASCADE
+    )
+    """)
+
+
+    # --- NEW: scenes table (roleplay scenes per pack) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS pack_scenes (
+        scene_row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pack_id TEXT NOT NULL,
+        scene_id TEXT NOT NULL,
+        unlock_rule_json TEXT,
+        roleplay_json TEXT,
+        FOREIGN KEY (pack_id) REFERENCES packs(pack_id) ON DELETE CASCADE,
+        UNIQUE(pack_id, scene_id)
+    )
+    """)
 
 
 
@@ -163,65 +202,175 @@ def get_user_languages(user_id: int):
 def import_packs_from_folder():
     """
     Loads all JSON packs from data/packs into SQLite.
-    Safe to run multiple times (won't duplicate packs).
+    Supports:
+      - legacy schema: { items: [...] }
+      - v2 mission schema: { cards: [...], scenes: [...] }
     """
     conn = get_connection()
     cursor = conn.cursor()
 
     PACKS_DIR.mkdir(parents=True, exist_ok=True)
 
-    for pack_file in PACKS_DIR.glob("*.json"):
-        with open(pack_file, "r", encoding="utf-8") as f:
+    for path in PACKS_DIR.glob("*.json"):
+        with open(path, "r", encoding="utf-8") as f:
             pack = json.load(f)
 
         pack_id = pack["pack_id"]
-        target_language = pack["target_language"]
+        target_language = pack.get("target_language", "it")
         level = pack.get("level")
-        title = pack["title"]
-        description = pack.get("description")
+        title = pack.get("title", pack_id)
+        description = pack.get("description", "")
 
-        # Insert pack metadata (ignore if exists)
+        # Upsert pack metadata
         cursor.execute("""
-            INSERT OR IGNORE INTO packs (pack_id, target_language, level, title, description)
+            INSERT INTO packs (pack_id, target_language, level, title, description)
             VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(pack_id) DO UPDATE SET
+                target_language=excluded.target_language,
+                level=excluded.level,
+                title=excluded.title,
+                description=excluded.description
         """, (pack_id, target_language, level, title, description))
 
-        # If items already exist for this pack, skip inserting items again
-        cursor.execute("SELECT COUNT(*) FROM pack_items WHERE pack_id = ?", (pack_id,))
-        (count_existing,) = cursor.fetchone()
-        if count_existing > 0:
-            continue
+        # Clean old rows for idempotent re-import
+        cursor.execute("DELETE FROM pack_items WHERE pack_id = ?", (pack_id,))
+        cursor.execute("DELETE FROM pack_scenes WHERE pack_id = ?", (pack_id,))
 
-        # Insert items
-        for item in pack["items"]:
-            tags = item.get("tags") or []
-            tags_json = json.dumps(tags, ensure_ascii=False)
+        # --------- Import legacy items OR v2 cards ---------
+        cards = pack.get("cards")
+        items = pack.get("items")
 
+        def _safe_json(x):
+            return json.dumps(x, ensure_ascii=False) if x is not None else None
+
+        if cards:
+            for c in cards:
+                focus = c.get("focus", "word")  # word | phrase
+
+                lemma = c.get("lemma")
+                phrase = c.get("phrase")
+                phrase_hint = c.get("phrase_hint")
+
+                # Backward-compatible "term" and "chunk" (what Learn expects)
+                if focus == "phrase":
+                    term = phrase or (phrase_hint or "")
+                    chunk = phrase or (phrase_hint or term)
+                else:
+                    term = lemma or ""
+                    chunk = phrase_hint or term
+
+                meaning_en = c.get("meaning_en") or c.get("translation_en")
+                meaning_helper = c.get("meaning_helper") or c.get("translation_helper")
+
+                meta = c.get("meta") or {}
+                tags = meta.get("tags") or []
+                components = c.get("components") or []
+
+                cursor.execute("""
+                    INSERT INTO pack_items (
+                        pack_id, term, chunk, translation_en, note,
+                        focus, lemma, phrase, phrase_hint,
+                        level, category, register, risk,
+                        trap, native_sauce, cultural_note,
+                        tags_json, components_json, media_json, drills_json,
+                        translation_helper, pronunciation_text
+                    )
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?)
+                """, (
+                    pack_id,
+                    term,
+                    chunk,
+                    meaning_en,
+                    "",
+
+                    focus,
+                    lemma,
+                    phrase,
+                    phrase_hint,
+
+                    c.get("level", level),
+                    meta.get("category"),
+                    meta.get("register"),
+                    meta.get("risk"),
+
+                    meta.get("trap"),
+                    meta.get("native_sauce"),
+                    meta.get("cultural_note"),
+
+                    _safe_json(tags),
+                    _safe_json(components),
+                    _safe_json(c.get("media") or {}),
+                    _safe_json(c.get("drills") or {}),
+
+                    meaning_helper,
+                    c.get("pronunciation_text") or chunk or term
+                ))
+
+                item_id = cursor.lastrowid
+
+                # Context sentences
+                for sent in (c.get("contexts_it") or []):
+                    cursor.execute("""
+                        INSERT INTO card_contexts (item_id, lang, sentence, source)
+                        VALUES (?, 'it', ?, ?)
+                    """, (item_id, sent, (c.get("context_source") or None)))
+
+        elif items:
+            # legacy packs: keep your current schema but store extra fields if present
+            for item in items:
+                tags = item.get("tags") or []
+                cursor.execute("""
+                    INSERT INTO pack_items (
+                        pack_id, term, chunk, translation_en, note,
+                        level, category, tags_json, cultural_note,
+                        pronunciation_text, translation_helper,
+                        focus, lemma, phrase
+                    )
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?,
+                            'word', ?, NULL)
+                """, (
+                    pack_id,
+                    item["term"],
+                    item.get("chunk") or item["term"],
+                    item.get("translation_en"),
+                    item.get("note", ""),
+
+                    item.get("level", level),
+                    item.get("category"),
+                    json.dumps(tags, ensure_ascii=False),
+                    item.get("cultural_note"),
+
+                    item.get("pronunciation_text", item.get("chunk") or item["term"]),
+                    item.get("translation_helper"),
+
+                    item.get("term")
+                ))
+
+        # --------- Import scenes (optional) ---------
+        for s in (pack.get("scenes") or []):
             cursor.execute("""
-                INSERT INTO pack_items (
-                    pack_id, term, chunk,
-                    translation_en, note,
-                    level, category,
-                    tags_json, cultural_note,
-                    pronunciation_text, translation_helper
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO pack_scenes (pack_id, scene_id, unlock_rule_json, roleplay_json)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(pack_id, scene_id) DO UPDATE SET
+                    unlock_rule_json=excluded.unlock_rule_json,
+                    roleplay_json=excluded.roleplay_json
             """, (
                 pack_id,
-                item["term"],
-                item.get("chunk") or item["term"],  # allow word-only packs
-                item.get("translation_en"),
-                item.get("note", ""),
-                item.get("level", pack.get("level", None)),
-                item.get("category", None),
-                tags_json,
-                item.get("cultural_note", None),
-                item.get("pronunciation_text", item.get("term")),
-                item.get("translation_helper", None),
+                s.get("scene_id"),
+                _safe_json(s.get("unlock_rule") or {}),
+                _safe_json(s.get("roleplay") or {})
             ))
 
     conn.commit()
     conn.close()
+
 
 def list_packs(target_language: str):
     conn = get_connection()

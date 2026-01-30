@@ -1,0 +1,63 @@
+{
+  "pack_id": "it_a1_mission_bar_v2",
+  "target_language": "it",
+  "level": "A1",
+  "type": "mission",
+  "title": "☕ Mission: Survive an Italian Bar (v2)",
+  "description": "Order, pay, and understand banco vs tavolo.",
+  "cards": [
+    {
+      "card_id": "bar_01",
+      "focus": "word",
+      "lemma": "prendere",
+      "phrase_hint": "Prendiamo un caffè?",
+      "meaning_en": "to have (a coffee) / to take",
+      "contexts_it": [
+        "Prendiamo un caffè dopo?",
+        "Prendo un caffè al volo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": ["bar", "daily"],
+        "trap": "‘Prendere un caffè’ means ‘have a coffee’ in Italian.",
+        "native_sauce": "Often used as a casual invitation.",
+        "cultural_note": "‘Un caffè’ usually means espresso."
+      },
+      "drills": {
+        "scenario_prompt": "You see a friend outside. Invite them for coffee."
+      }
+    },
+    {
+      "card_id": "bar_02",
+      "focus": "phrase",
+      "phrase": "Un caffè, per favore",
+      "meaning_en": "A coffee, please",
+      "contexts_it": [
+        "Buongiorno! Un caffè, per favore."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["bar", "politeness"],
+        "native_sauce": "Often said quickly at the counter."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "scene_id": "bar_scene_01",
+      "unlock_rule": { "after_cards_learned": 2 },
+      "roleplay": {
+        "setting": "Busy bar in Rome",
+        "bot_role": "barista",
+        "turns": [
+          { "bot": "Buongiorno! Dimmi." },
+          { "user_task": "Order an espresso politely." },
+          { "bot": "Altro?" },
+          { "user_task": "Say no and thank them." }
+        ]
+      }
+    }
+  ]
+}
