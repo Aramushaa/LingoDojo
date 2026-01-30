@@ -1,4 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 from html import escape
@@ -33,6 +34,24 @@ SCENE_EVERY_N_NEW_ITEMS = 3
 
 def h(text: str) -> str:
     return escape(text or "")
+
+def _build_quiz_message(term: str, quiz: dict, progress_line: str | None = None):
+    opts = quiz.get("options_en", ["A", "B", "C"])
+    keyboard = [
+        [InlineKeyboardButton(f"A) {opts[0]}", callback_data="GUESS|0")],
+        [InlineKeyboardButton(f"B) {opts[1]}", callback_data="GUESS|1")],
+        [InlineKeyboardButton(f"C) {opts[2]}", callback_data="GUESS|2")],
+        [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
+    ]
+
+    text = (
+        f"{progress_line + '\n\n' if progress_line else ''}"
+        f"🕵️ <b>Guess the meaning</b>\n\n"
+        f"Word: <b>{h(term)}</b>\n\n"
+        f"Context:\n<i>{h(quiz.get('context_it',''))}</i>\n\n"
+        f"Pick the best meaning:"
+    )
+    return text, InlineKeyboardMarkup(keyboard)
 
 async def offer_scene(msg, user_id: int, item_id: int, meta: dict):
     """
@@ -181,31 +200,42 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "holo": holo,
     }
 
-    set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
-
-
     # Progress header
     total = get_active_items_total(user.id, target)
     introduced = get_active_items_introduced(user.id, target)
     progress_line = f"📦 Progress: {introduced}/{total}"
 
-    opts = quiz.get("options_en", ["A", "B", "C"])
-    keyboard = [
-        [InlineKeyboardButton(f"A) {opts[0]}", callback_data="GUESS|0")],
-        [InlineKeyboardButton(f"B) {opts[1]}", callback_data="GUESS|1")],
-        [InlineKeyboardButton(f"C) {opts[2]}", callback_data="GUESS|2")],
-        [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
-    ]
+    if not quiz.get("ok"):
+        meta = meta or {}
+        meta["pending_ai"] = {
+            "kind": "quiz",
+            "term": term,
+            "chunk": chunk,
+            "translation_en": translation_en,
+            "context_it": ctx_it,
+        }
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
 
-    text = (
-        f"{progress_line}\n\n"
-        f"🕵️ <b>Guess the meaning</b>\n\n"
-        f"Word: <b>{h(term)}</b>\n\n"
-        f"Context:\n<i>{h(quiz.get('context_it',''))}</i>\n\n"
-        f"Pick the best meaning:"
-    )
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_QUIZ")],
+            [InlineKeyboardButton("⏭ Skip quiz", callback_data="AI|SKIP_QUIZ")]
+        ])
 
-    await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
+        try:
+            await msg.reply_text(
+                "⚠️ <b>AI quiz not available</b>\n"
+                "Do you want to try again, or skip the quiz?",
+                parse_mode=ParseMode.HTML,
+                reply_markup=kb
+            )
+        except BadRequest as e:
+            if "Message is not modified" not in str(e):
+                raise
+        return
+
+    set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+    text, keyboard = _build_quiz_message(term, quiz, progress_line)
+    await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
 
 
 
@@ -214,6 +244,7 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = (update.message.text or "").strip()
+    msg = get_chat_sender(update)
 
     session = get_session(user.id)
     if not session:
@@ -423,6 +454,77 @@ async def on_ai_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, action = data.split("|", 1)
 
     pending = (meta or {}).get("pending_ai") or {}
+    if pending.get("kind") == "quiz":
+        if action == "SKIP_QUIZ":
+            quiz = (meta or {}).get("quiz") or {
+                "context_it": f"Uso comune: {pending.get('term') or ''}.",
+                "meaning_en": pending.get("translation_en") or "(meaning not available)",
+                "options_en": [pending.get("translation_en") or "Meaning", "Other", "Other"],
+                "correct_index": 0,
+                "clue": "Fallback (AI off).",
+            }
+
+            meta = meta or {}
+            meta["quiz"] = quiz
+            set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+
+            profile = get_user_profile(user.id)
+            if profile:
+                target_lang = profile[0]
+                total = get_active_items_total(user.id, target_lang)
+                introduced = get_active_items_introduced(user.id, target_lang)
+                progress_line = f"📦 Progress: {introduced}/{total}"
+            else:
+                progress_line = None
+
+            text, keyboard = _build_quiz_message(pending.get("term") or "", quiz, progress_line)
+        try:
+            await query.edit_message_text("⏭ Skipping AI quiz. Here’s the fallback quiz.", parse_mode=ParseMode.HTML)
+        except BadRequest as e:
+            if "Message is not modified" not in str(e):
+                raise
+        msg = get_chat_sender(update)
+        await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
+        return
+
+        # RETRY_QUIZ
+        term = pending.get("term") or ""
+        chunk = pending.get("chunk")
+        translation_en = pending.get("translation_en")
+        context_it = pending.get("context_it")
+
+        lexicon = get_lexicon_cache_it(term)
+        quiz = await generate_reverse_context_quiz(
+            term=term,
+            chunk=chunk,
+            translation_en=translation_en,
+            lexicon=lexicon,
+            context_it=context_it,
+        )
+
+        meta = meta or {}
+        meta["quiz"] = quiz
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+
+        profile = get_user_profile(user.id)
+        if profile:
+            target_lang = profile[0]
+            total = get_active_items_total(user.id, target_lang)
+            introduced = get_active_items_introduced(user.id, target_lang)
+            progress_line = f"📦 Progress: {introduced}/{total}"
+        else:
+            progress_line = None
+
+        text, keyboard = _build_quiz_message(term, quiz, progress_line)
+        try:
+            await query.edit_message_text("✅ Quiz ready. Here you go:", parse_mode=ParseMode.HTML)
+        except BadRequest as e:
+            if "Message is not modified" not in str(e):
+                raise
+        msg = get_chat_sender(update)
+        await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
+        return
+
     if pending.get("kind") != "learn_feedback":
         clear_session(user.id)
         await query.edit_message_text("Nothing to retry. Type /learn again.")
@@ -460,6 +562,34 @@ async def on_ai_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         clear_session(user.id)
         return
 
+    if not ai.get("ok"):
+        meta = meta or {}
+        meta["pending_ai"] = {
+            "kind": "learn_feedback",
+            "term": term,
+            "chunk": chunk,
+            "translation_en": translation_en,
+            "user_sentence": user_sentence,
+        }
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
+
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_LEARN")],
+            [InlineKeyboardButton("⏭ Skip feedback", callback_data="AI|SKIP_LEARN")]
+        ])
+
+        reason = ai.get("notes") or "AI not available."
+        try:
+            await query.edit_message_text(
+                f"⚠️ <b>AI not available</b>\n{h(reason)}\n\nWhat do you want to do?",
+                parse_mode=ParseMode.HTML,
+                reply_markup=kb
+            )
+        except BadRequest as e:
+            if "Message is not modified" not in str(e):
+                raise
+        return
+
     examples = ai.get("examples") or []
     examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
 
@@ -477,7 +607,11 @@ async def on_ai_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply += f"\n📌 <b>Examples</b>:\n{h(examples_block)}\n\nType /review or /learn."
 
-    await query.edit_message_text("✅ AI is back. Sending feedback…", parse_mode=ParseMode.HTML)
+    try:
+        await query.edit_message_text("✅ AI is back. Sending feedback…", parse_mode=ParseMode.HTML)
+    except BadRequest as e:
+        if "Message is not modified" not in str(e):
+            raise
     msg = get_chat_sender(update)
     await msg.reply_text(reply, parse_mode=ParseMode.HTML)
 
