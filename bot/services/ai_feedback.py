@@ -326,22 +326,64 @@ async def generate_roleplay_feedback(
     Lightweight correction for roleplay.
     No forced vocabulary. Just correctness + naturalness.
     """
-    prompt = f"""
-You are a friendly native teacher.
-Target language: {target_language}
+    try:
+        if AI_PROVIDER != "gemini":
+            return _fallback_feedback(user_sentence, reason=f"AI_PROVIDER={AI_PROVIDER!r}")
 
-Context:
+        if not GEMINI_API_KEY:
+            return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY missing/empty")
+
+        client = genai.Client(api_key=GEMINI_API_KEY)
+
+        prompt = f"""
+You are a friendly native Italian tutor.
+The user is a beginner.
+
+ROLEPLAY CONTEXT:
 - setting: {setting}
 - bot role: {bot_role}
 
-Student message:
-{user_sentence}
+User message:
+"{user_sentence}"
 
-Return JSON with:
-- correction (string or "")
-- rewrite (string or "")
-- notes (string or "")
-Keep it short. No essays.
-"""
-    # Use the same Gemini call style you already use inside generate_learn_feedback
-    return _fallback_feedback(prompt)
+RULES:
+- Keep correction minimal.
+- If acceptable, do not correct.
+- rewrite is optional (more natural, same meaning).
+- notes max 2 short lines.
+- examples MUST be exactly 3 short sentences.
+
+Return JSON ONLY:
+{{
+  "correction": string | null,
+  "rewrite": string | null,
+  "notes": string,
+  "examples": [string, string, string]
+}}
+""".strip()
+
+        resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+        text = (resp.text or "").strip()
+
+        data = _extract_json(text)
+        if not data:
+            return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
+
+        examples = data.get("examples") or []
+        if not isinstance(examples, list):
+            examples = []
+        examples = [str(x) for x in examples][:3]
+        while len(examples) < 3:
+            examples.append("")
+
+        return {
+            "ok": True,
+            "correction": data.get("correction"),
+            "rewrite": data.get("rewrite"),
+            "notes": data.get("notes") or "",
+            "examples": examples,
+            "provider": "gemini",
+        }
+
+    except Exception as e:
+        return _fallback_feedback(user_sentence, reason=f"exception: {type(e).__name__}: {e}")

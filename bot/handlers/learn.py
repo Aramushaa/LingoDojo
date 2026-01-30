@@ -297,6 +297,31 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
+    # ✅ If AI returned fallback, offer Retry/Skip
+    if not ai.get("ok"):
+        meta = meta or {}
+        meta["pending_ai"] = {
+            "kind": "learn_feedback",
+            "term": term,
+            "chunk": chunk,
+            "translation_en": translation_en,
+            "user_sentence": text,
+        }
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
+
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_LEARN")],
+            [InlineKeyboardButton("⏭ Skip feedback", callback_data="AI|SKIP_LEARN")]
+        ])
+
+        reason = ai.get("notes") or "AI not available."
+        await msg.reply_text(
+            f"⚠️ <b>AI not available</b>\n{h(reason)}\n\nWhat do you want to do?",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb
+        )
+        return
+
     examples = ai.get("examples") or []
     examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
 
@@ -558,13 +583,8 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not term:
         return
 
-    holo = (meta or {}).get("holo") or {}
-    # prefer explicit pronunciation text if present, else chunk, else term
-    say_text = (
-        holo.get("pronunciation_text")
-        or (meta or {}).get("chunk")
-        or term
-    ).strip()
+    say_text = term.strip()
+
 
     try:
         path = await tts_it(say_text)
@@ -611,6 +631,9 @@ async def handle_scene_reply(update, context, item_id: int, meta: dict):
         )
     except Exception:
         fb = {}
+        await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
+
+    if not fb.get("ok"):
         await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
 
     out = []
