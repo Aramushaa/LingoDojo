@@ -11,7 +11,8 @@ from bot.db import (
     set_user_helper_language,
     list_packs,
     get_user_active_packs,
-    toggle_pack,get_user_level
+    toggle_pack,get_user_level,
+    set_user_level,
 )
 
 TARGET_LANG_OPTIONS = [("it", "🇮🇹 Italian"), ("en", "🇬🇧 English")]
@@ -23,10 +24,7 @@ HELPER_LANG_OPTIONS = [
 ]
 
 
-def _label(code: str | None) -> str:
-    if code is None:
-        return "None"
-    return code
+
 
 
 def build_settings_text(target: str, ui: str, helper: str | None, level: str):
@@ -154,11 +152,27 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data == "SETTINGS|LEVEL":
         current = get_user_level(user.id)
         await query.edit_message_text(
-            f"🎚 <b>Choose your level</b>\nCurrent: <b>{current}</b>",
+            f"🎯 <b>Choose your level</b>\nCurrent: <b>{current}</b>",
             reply_markup=build_level_keyboard(current),
             parse_mode="HTML",
         )
         return
+    
+    if data.startswith("SETLEVEL|"):
+        _, level_code = data.split("|", 1)
+        set_user_level(user.id, level_code)
+
+        # go back to settings screen
+        target, ui, helper = get_user_profile(user.id)
+        level = get_user_level(user.id)
+
+        await query.edit_message_text(
+            build_settings_text(target, ui, helper, level),
+            reply_markup=build_settings_keyboard(target, ui, helper),
+            parse_mode="HTML",
+        )
+        return
+
 
 
     # ACTIONS
@@ -183,11 +197,14 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # refresh settings view
     target, ui, helper = get_user_profile(user.id)
+    level = get_user_level(user.id)
+
     await query.edit_message_text(
-        build_settings_text(target, ui, helper),
+        build_settings_text(target, ui, helper, level),
         reply_markup=build_settings_keyboard(target, ui, helper),
         parse_mode="HTML",
     )
+
 
 LEVELS = ["A1", "A2", "B1", "B2", "C1"]
 
