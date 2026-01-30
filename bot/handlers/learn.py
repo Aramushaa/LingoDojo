@@ -15,18 +15,96 @@ from bot.db import (
     pick_next_new_item_for_user,
     get_active_items_total,
     get_active_items_introduced,get_user_profile,
-    get_random_context_for_item,get_item_holographic_meta
+    get_random_context_for_item, get_item_holographic_meta,
+    get_learn_since_scene,
+    set_learn_since_scene,
+    pick_one_scene_for_user_active_packs,
+
 )
 
 from bot.services.dictionary_it import validate_it_term
-from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz
+from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz,generate_roleplay_feedback
 from bot.services.lexicon_it import get_or_fetch_lexicon_it
 from bot.services.tts_edge import tts_it
+
+
+SCENE_EVERY_N_NEW_ITEMS = 3
 
 
 def h(text: str) -> str:
     return escape(text or "")
 
+async def offer_scene(msg, user_id: int, item_id: int, meta: dict):
+    """
+    Save a pending scene in session and ask user to Start/Skip.
+    """
+    scene = pick_one_scene_for_user_active_packs(user_id)
+    if not scene:
+        await msg.reply_text("🎭 No scenes found in your active packs yet.")
+        return
+
+    roleplay = scene.get("roleplay") or {}
+    turns = roleplay.get("turns") or []
+    if not turns:
+        await msg.reply_text("🎭 Scene found but it's empty (no turns).")
+        return
+
+    meta = meta or {}
+    meta["pending_scene"] = {
+        "pack_id": scene.get("pack_id"),
+        "scene_id": scene.get("scene_id"),
+        "roleplay": roleplay,
+        "turns": turns,
+        "idx": 0
+    }
+
+    # Set session to await scene decision
+    set_session(user_id, mode="learn", item_id=item_id, stage="await_scene_choice", meta=meta)
+
+    kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎭 Start Scene", callback_data="SCENE|START")],
+        [InlineKeyboardButton("⏭ Skip for now", callback_data="SCENE|SKIP")]
+    ])
+
+    await msg.reply_text(
+        f"🎭 <b>Mission Time</b>\n"
+        f"You learned <b>{SCENE_EVERY_N_NEW_ITEMS}</b> new cards.\n"
+        f"Want to practice a short real-life scene now?",
+        parse_mode=ParseMode.HTML,
+        reply_markup=kb
+    )
+
+
+async def send_scene_prompt(msg, meta: dict):
+    scene = (meta or {}).get("scene") or {}
+    roleplay = scene.get("roleplay") or {}
+    turns = scene.get("turns") or []
+    idx = int(scene.get("idx", 0))
+
+    setting = roleplay.get("setting", "Scene")
+    bot_role = roleplay.get("bot_role", "Bot")
+
+    # Walk forward until we find the next bot line or user_task
+    out = [f"🎭 <b>Mission Scene</b>\n<i>{h(setting)}</i>\n<b>Role:</b> {h(bot_role)}\n"]
+
+    # Append any bot messages until first user_task
+    while idx < len(turns):
+        t = turns[idx]
+        if "bot" in t:
+            out.append(f"🗣 <b>{h(bot_role)}</b>: {h(t['bot'])}")
+            idx += 1
+            continue
+        if "user_task" in t:
+            out.append(f"\n✅ <b>Your turn</b>: {h(t['user_task'])}")
+            break
+        idx += 1
+
+    scene = (meta or {}).get("scene") or {}
+    scene["idx"] = idx
+    meta["scene"] = scene
+
+    msg_text = "\n".join(out) + "\n\n✍️ Reply with your message (type it)."
+    await msg.reply_text(msg_text, parse_mode=ParseMode.HTML)
 
 
 
@@ -140,8 +218,15 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = get_session(user.id)
     if not session:
         return
-
+    
     mode, item_id, stage, meta = session
+
+    # --- Scene handler ---
+    if mode == "learn" and stage == "scene_turn":
+        await handle_scene_reply(update, context, item_id, meta)
+        return
+
+
     if not (mode == "learn" and stage == "await_sentence" and item_id is not None):
         return
 
@@ -178,14 +263,39 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     # 4) AI feedback
-    ai = await generate_learn_feedback(
-        target_language="it",
-        term=term,
-        chunk=chunk,
-        translation_en=translation_en,
-        user_sentence=text,
-        lexicon=lexicon,
-    )
+    try:
+        ai = await generate_learn_feedback(
+            target_language="it",
+            term=term,
+            chunk=chunk,
+            translation_en=translation_en,
+            user_sentence=text,
+            lexicon=lexicon,
+        )
+    except Exception:
+        # Save what we need to retry
+        meta = meta or {}
+        meta["pending_ai"] = {
+            "kind": "learn_feedback",
+            "term": term,
+            "chunk": chunk,
+            "translation_en": translation_en,
+            "user_sentence": text
+        }
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
+
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_LEARN")],
+            [InlineKeyboardButton("⏭ Skip AI feedback", callback_data="AI|SKIP_LEARN")]
+        ])
+
+        await msg.reply_text(
+            "⚠️ <b>AI is not available right now.</b>\n"
+            "Do you want to try again, or skip feedback and continue?",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb
+        )
+        return
 
     examples = ai.get("examples") or []
     examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
@@ -211,8 +321,144 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = get_chat_sender(update)
     await msg.reply_text(reply, parse_mode=ParseMode.HTML)
+    
+    # ✅ persistent counter (survives clear_session)
+    count = get_learn_since_scene(user.id) + 1
+    set_learn_since_scene(user.id, count)
+
+    # If it's time, offer scene (do NOT auto-start)
+    if count >= SCENE_EVERY_N_NEW_ITEMS:
+        set_learn_since_scene(user.id, 0)
+        await offer_scene(msg, user.id, item_id, meta)
+        return
 
     clear_session(user.id)
+
+
+async def on_scene_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("Session expired. Type /learn again.")
+        return
+
+    mode, item_id, stage, meta = session
+    if mode != "learn" or stage != "await_scene_choice":
+        return
+
+    data = query.data  # SCENE|START or SCENE|SKIP
+    _, action = data.split("|", 1)
+
+    if action == "SKIP":
+        clear_session(user.id)
+        await query.edit_message_text(
+            "⏭ Skipped. No worries.\nType /learn to continue or /review to practice.",
+            parse_mode=ParseMode.HTML
+        )
+        return
+
+    # START
+    pending = (meta or {}).get("pending_scene")
+    if not pending:
+        clear_session(user.id)
+        await query.edit_message_text("No pending scene found. Type /learn again.")
+        return
+
+    meta["scene"] = pending
+    meta.pop("pending_scene", None)
+
+    set_session(user.id, mode="learn", item_id=item_id, stage="scene_turn", meta=meta)
+
+    # Replace the offer message with “starting…”
+    await query.edit_message_text("🎭 Starting scene…", parse_mode=ParseMode.HTML)
+
+    # Send the actual first prompt
+    msg = get_chat_sender(update)
+    await send_scene_prompt(msg, meta)
+
+
+async def on_ai_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("Session expired. Type /learn again.")
+        return
+
+    mode, item_id, stage, meta = session
+    if mode != "learn" or stage != "await_ai_choice":
+        return
+
+    data = query.data  # AI|RETRY_LEARN or AI|SKIP_LEARN
+    _, action = data.split("|", 1)
+
+    pending = (meta or {}).get("pending_ai") or {}
+    if pending.get("kind") != "learn_feedback":
+        clear_session(user.id)
+        await query.edit_message_text("Nothing to retry. Type /learn again.")
+        return
+
+    if action == "SKIP_LEARN":
+        await query.edit_message_text(
+            "⏭ Skipped AI feedback.\nType /learn to continue or /review to practice.",
+            parse_mode=ParseMode.HTML
+        )
+        clear_session(user.id)
+        return
+
+    term = pending.get("term")
+    chunk = pending.get("chunk")
+    translation_en = pending.get("translation_en")
+    user_sentence = pending.get("user_sentence")
+
+    lexicon = get_lexicon_cache_it(term)
+
+    try:
+        ai = await generate_learn_feedback(
+            target_language="it",
+            term=term,
+            chunk=chunk,
+            translation_en=translation_en,
+            user_sentence=user_sentence,
+            lexicon=lexicon,
+        )
+    except Exception:
+        await query.edit_message_text(
+            "⚠️ AI still not available.\nYou can /learn without feedback or try later.",
+            parse_mode=ParseMode.HTML
+        )
+        clear_session(user.id)
+        return
+
+    examples = ai.get("examples") or []
+    examples_block = "\n".join([f"• {ex}" for ex in examples if ex]) or "• (no examples)"
+
+    reply = (
+        f"✅ <b>Learn — Feedback</b>\n\n"
+        f"Word: <b>{h(term)}</b>\n"
+        f"Your sentence:\n“{h(user_sentence)}”\n"
+    )
+    if ai.get("correction"):
+        reply += f"\n🛠 <b>Correction</b>: {h(ai['correction'])}\n"
+    if ai.get("rewrite"):
+        reply += f"\n✨ <b>Rewrite</b>: {h(ai['rewrite'])}\n"
+    if ai.get("notes"):
+        reply += f"\n💡 {h(ai['notes'])}\n"
+
+    reply += f"\n📌 <b>Examples</b>:\n{h(examples_block)}\n\nType /review or /learn."
+
+    await query.edit_message_text("✅ AI is back. Sending feedback…", parse_mode=ParseMode.HTML)
+    msg = get_chat_sender(update)
+    await msg.reply_text(reply, parse_mode=ParseMode.HTML)
+
+    clear_session(user.id)
+    
+
 
 
 async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -268,7 +514,7 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lines.append(f"\n🧭 <b>Register</b>: <i>{h(reg)}</i>")
 
     # show risk only if not safe
-    if risk and risk != "safe":
+    if risk and str(risk).strip().lower() != "safe":
         lines.append(f"⚠️ <b>Risk</b>: {h(risk)}")
 
     if trap:
@@ -295,6 +541,7 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+
 async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -311,8 +558,16 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not term:
         return
 
+    holo = (meta or {}).get("holo") or {}
+    # prefer explicit pronunciation text if present, else chunk, else term
+    say_text = (
+        holo.get("pronunciation_text")
+        or (meta or {}).get("chunk")
+        or term
+    ).strip()
+
     try:
-        path = await tts_it(term)
+        path = await tts_it(say_text)
 
         # Decide how to send based on extension
         suffix = path.suffix.lower()
@@ -320,15 +575,80 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
         with open(path, "rb") as f:
             if suffix == ".ogg":
                 await query.message.reply_voice(
-                    voice=InputFile(f, filename=f"{term}.ogg"),
-                    caption=f"🔊 {term}",
+                    voice=InputFile(f, filename=f"{say_text}.ogg"),
+                    caption=f"🔊 {say_text}",
                 )
             else:
                 # mp3/wav -> send as audio
                 await query.message.reply_audio(
-                    audio=InputFile(f, filename=f"{term}{suffix}"),
-                    title=term,
+                    audio=InputFile(f, filename=f"{say_text}{suffix}"),
+                    title=say_text,
                 )
 
     except Exception as e:
         await query.message.reply_text(f"TTS failed: {type(e).__name__}: {e}")
+
+async def handle_scene_reply(update, context, item_id: int, meta: dict):
+    user = update.effective_user
+    msg = get_chat_sender(update)
+    user_text = (update.message.text or "").strip()
+
+    scene = (meta or {}).get("scene") or {}
+    roleplay = scene.get("roleplay") or {}
+    turns = scene.get("turns") or []
+    idx = int(scene.get("idx", 0))
+
+    setting = roleplay.get("setting", "")
+    bot_role = roleplay.get("bot_role", "Bot")
+
+    # tiny correction (optional but good)
+    try:
+        fb = await generate_roleplay_feedback(
+            target_language="it",
+            user_sentence=user_text,
+            setting=setting,
+            bot_role=bot_role
+        )
+    except Exception:
+        fb = {}
+        await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
+
+    out = []
+    if fb.get("correction"):
+        out.append(f"🛠 <b>Correction</b>: {h(fb['correction'])}")
+    if fb.get("rewrite"):
+        out.append(f"✨ <b>Native</b>: {h(fb['rewrite'])}")
+    if fb.get("notes"):
+        out.append(f"💡 {h(fb['notes'])}")
+
+    # Advance idx past the user_task we just answered
+    while idx < len(turns) and "user_task" not in turns[idx]:
+        idx += 1
+    if idx < len(turns) and "user_task" in turns[idx]:
+        idx += 1
+
+    # Add next bot lines and next user task
+    while idx < len(turns):
+        t = turns[idx]
+        if "bot" in t:
+            out.append(f"\n🗣 <b>{h(bot_role)}</b>: {h(t['bot'])}")
+            idx += 1
+            continue
+        if "user_task" in t:
+            out.append(f"\n✅ <b>Your turn</b>: {h(t['user_task'])}")
+            break
+        idx += 1
+
+    # Scene finished
+    if idx >= len(turns):
+        out.append("\n🏁 <b>Scene complete.</b> Type /learn to continue or /review to practice.")
+        clear_session(user.id)
+        await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML)
+        return
+
+    # Save updated index
+    scene["idx"] = idx
+    meta["scene"] = scene
+    set_session(user.id, mode="learn", item_id=item_id, stage="scene_turn", meta=meta)
+
+    await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML)

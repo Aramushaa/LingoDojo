@@ -153,7 +153,9 @@ async def generate_learn_feedback(
 
 
         text = (resp.text or "").strip()
-        data = json.loads(text)
+        data = _extract_json(text)
+        if not data:
+            return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
 
         # Normalize
         correction = data.get("correction")
@@ -312,3 +314,34 @@ async def generate_reverse_context_quiz(
             "correct_index": 0,
             "clue": "AI error; fallback quiz.",
         }
+
+async def generate_roleplay_feedback(
+    *,
+    target_language: str,
+    user_sentence: str,
+    setting: str = "",
+    bot_role: str = ""
+) -> dict:
+    """
+    Lightweight correction for roleplay.
+    No forced vocabulary. Just correctness + naturalness.
+    """
+    prompt = f"""
+You are a friendly native teacher.
+Target language: {target_language}
+
+Context:
+- setting: {setting}
+- bot role: {bot_role}
+
+Student message:
+{user_sentence}
+
+Return JSON with:
+- correction (string or "")
+- rewrite (string or "")
+- notes (string or "")
+Keep it short. No essays.
+"""
+    # Use the same Gemini call style you already use inside generate_learn_feedback
+    return _fallback_feedback(prompt)

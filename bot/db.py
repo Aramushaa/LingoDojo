@@ -124,6 +124,7 @@ def init_db():
     
     _add_column_if_missing(cursor, "users", "target_language", "TEXT NOT NULL DEFAULT 'it'")
     _add_column_if_missing(cursor, "users", "ui_language", "TEXT NOT NULL DEFAULT 'en'")
+    _add_column_if_missing(cursor, "users", "learn_since_scene", "INTEGER NOT NULL DEFAULT 0")
         # --- reviews undo support ---
     _add_column_if_missing(cursor, "reviews", "prev_status", "TEXT")
     _add_column_if_missing(cursor, "reviews", "prev_interval_days", "INTEGER")
@@ -199,6 +200,23 @@ def get_user_languages(user_id: int):
     return row  # (target_language, ui_language) or None
 
 
+def get_learn_since_scene(user_id: int) -> int:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT learn_since_scene FROM users WHERE user_id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    return int(row[0]) if row and row[0] is not None else 0
+
+
+def set_learn_since_scene(user_id: int, value: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET learn_since_scene = ? WHERE user_id = ?", (int(value), user_id))
+    conn.commit()
+    conn.close()
+
+
 def import_packs_from_folder():
     """
     Loads all JSON packs from data/packs into SQLite.
@@ -232,9 +250,28 @@ def import_packs_from_folder():
                 description=excluded.description
         """, (pack_id, target_language, level, title, description))
 
-        # Clean old rows for idempotent re-import
-        cursor.execute("DELETE FROM pack_items WHERE pack_id = ?", (pack_id,))
-        cursor.execute("DELETE FROM pack_scenes WHERE pack_id = ?", (pack_id,))
+        # If items already exist for this pack, do NOT re-import items.
+        # Re-importing would create new item_id values and break progress.
+        cursor.execute("SELECT COUNT(*) FROM pack_items WHERE pack_id = ?", (pack_id,))
+        (count_existing,) = cursor.fetchone()
+
+        if count_existing > 0:
+            # But we CAN still upsert scenes safely (does not affect item_id)
+            for s in (pack.get("scenes") or []):
+                cursor.execute("""
+                    INSERT INTO pack_scenes (pack_id, scene_id, unlock_rule_json, roleplay_json)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(pack_id, scene_id) DO UPDATE SET
+                        unlock_rule_json=excluded.unlock_rule_json,
+                        roleplay_json=excluded.roleplay_json
+                """, (
+                    pack_id,
+                    s.get("scene_id"),
+                    json.dumps(s.get("unlock_rule") or {}, ensure_ascii=False),
+                    json.dumps(s.get("roleplay") or {}, ensure_ascii=False),
+                ))
+            continue
+
 
         # --------- Import legacy items OR v2 cards ---------
         cards = pack.get("cards")
@@ -936,16 +973,16 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
     conn.close()
     return row
 
-def get_random_context_for_item(item_id: int) -> str | None:
+def get_random_context_for_item(item_id: int, lang: str = "it") -> str | None:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT sentence_it
+        SELECT sentence
         FROM card_contexts
-        WHERE item_id = ?
+        WHERE item_id = ? AND lang = ?
         ORDER BY RANDOM()
         LIMIT 1
-    """, (item_id,))
+    """, (item_id, lang))
     row = cur.fetchone()
     conn.close()
     return row[0] if row else None
@@ -968,7 +1005,7 @@ def get_item_holographic_meta(item_id: int) -> dict:
             tags_json,
             drills_json,
             media_json
-        FROM item_holographic_meta
+        FROM pack_items
         WHERE item_id = ?
     """, (item_id,))
     row = cur.fetchone()
@@ -1013,3 +1050,96 @@ def get_item_holographic_meta(item_id: int) -> dict:
         "drills": drills,
         "media": media,
     }
+
+def reset_user_learning_progress(user_id: int, target_language: str = "it"):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        DELETE FROM reviews
+        WHERE user_id = ?
+          AND item_id IN (
+            SELECT pi.item_id
+            FROM pack_items pi
+            JOIN packs p ON p.pack_id = pi.pack_id
+            WHERE p.target_language = ?
+          )
+    """, (user_id, target_language))
+    conn.commit()
+    conn.close()
+
+def get_pack_id_for_item(item_id: int) -> str | None:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT pack_id FROM pack_items WHERE item_id = ?", (item_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+
+def pick_one_scene_for_pack(pack_id: str) -> dict | None:
+    """
+    Returns one random scene for a pack as dict:
+    { scene_id, unlock_rule, roleplay }
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT scene_id, unlock_rule_json, roleplay_json
+        FROM pack_scenes
+        WHERE pack_id = ?
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (pack_id,))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    scene_id, unlock_json, roleplay_json = row
+
+    try:
+        unlock = json.loads(unlock_json) if unlock_json else {}
+    except Exception:
+        unlock = {}
+
+    try:
+        roleplay = json.loads(roleplay_json) if roleplay_json else {}
+    except Exception:
+        roleplay = {}
+
+    return {"scene_id": scene_id, "unlock_rule": unlock, "roleplay": roleplay}
+
+def pick_one_scene_for_user_active_packs(user_id: int) -> dict | None:
+    """
+    Pick one random scene among all scenes belonging to packs the user activated.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT ps.pack_id, ps.scene_id, ps.unlock_rule_json, ps.roleplay_json
+        FROM pack_scenes ps
+        JOIN user_packs up ON up.pack_id = ps.pack_id
+        WHERE up.user_id = ?
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (user_id,))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    pack_id, scene_id, unlock_json, roleplay_json = row
+
+    try:
+        unlock = json.loads(unlock_json) if unlock_json else {}
+    except Exception:
+        unlock = {}
+
+    try:
+        roleplay = json.loads(roleplay_json) if roleplay_json else {}
+    except Exception:
+        roleplay = {}
+
+    return {"pack_id": pack_id, "scene_id": scene_id, "unlock_rule": unlock, "roleplay": roleplay}

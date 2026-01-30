@@ -1,3 +1,4 @@
+from telegram import BotCommand
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 import logging
 
@@ -5,11 +6,12 @@ from bot.config import BOT_TOKEN
 from bot.db import init_db, import_packs_from_folder,get_session
 from bot.handlers.start import start
 from bot.handlers.stats import stats
-from bot.handlers.learn import learn, on_guess_button, on_pronounce_button
+from bot.handlers.learn import learn, on_guess_button, on_pronounce_button, on_scene_choice, on_ai_choice
 from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
+from bot.handlers.help import help_command
 from dotenv import load_dotenv
 from bot.handlers.setlevel import setlevel, on_setlevel_button
 
@@ -42,6 +44,17 @@ async def on_text_router(update, context):
     elif mode == "review":
         await on_review_text(update, context)
 
+async def post_init(application):
+    commands = [
+        BotCommand("start", "Setup your profile (languages + level)"),
+        BotCommand("learn", "Learn a new item from active packs"),
+        BotCommand("review", "Review due items (SRS)"),
+        BotCommand("stats", "Your progress + streak"),
+        BotCommand("settings", "Packs + languages + preferences"),
+        BotCommand("setlevel", "Set your level (A1/A2/B1/...)"),
+        BotCommand("help", "Show command menu"),
+    ]
+    await application.bot.set_my_commands(commands)
 
 
 
@@ -54,7 +67,7 @@ def main():
     init_db()
     import_packs_from_folder()
 
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stats", stats))
@@ -62,6 +75,7 @@ def main():
     app.add_handler(CommandHandler("settings", settings))
     app.add_handler(CommandHandler("review", review))
     app.add_handler(CommandHandler("setlevel", setlevel))
+    app.add_handler(CommandHandler("help", help_command))
 
 
 
@@ -73,6 +87,8 @@ def main():
     # Learn callbacks
     app.add_handler(CallbackQueryHandler(on_guess_button, pattern=r"^GUESS\|"))
     app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))
+    app.add_handler(CallbackQueryHandler(on_scene_choice, pattern=r"^SCENE\|"))
+    app.add_handler(CallbackQueryHandler(on_ai_choice, pattern=r"^AI\|"))
     app.add_handler(CallbackQueryHandler(on_setlevel_button, pattern=r"^SETLEVEL\|"))
 
 
