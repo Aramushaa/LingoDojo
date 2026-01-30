@@ -8,7 +8,55 @@ from typing import Dict, Any, Optional
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "none").lower().strip()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_API_KEYS = [k.strip() for k in os.getenv("GEMINI_API_KEYS", "").split(",") if k.strip()]
 MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-flash-latest").strip()
+DEFAULT_GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-3-flash",
+    "gemini-2.5-flash-lite",
+]
+
+_gemini_key_idx = 0
+
+
+def _next_gemini_key() -> str:
+    """
+    Round-robin across GEMINI_API_KEYS if provided, else fall back to GEMINI_API_KEY.
+    """
+    global _gemini_key_idx
+    if GEMINI_API_KEYS:
+        key = GEMINI_API_KEYS[_gemini_key_idx % len(GEMINI_API_KEYS)]
+        _gemini_key_idx += 1
+        return key
+    return GEMINI_API_KEY
+
+
+def _gemini_models() -> list[str]:
+    """
+    Model priority list. Use GEMINI_MODELS if set, else GEMINI_MODEL (if explicitly set),
+    else default list.
+    """
+    env_list = [m.strip() for m in os.getenv("GEMINI_MODELS", "").split(",") if m.strip()]
+    if env_list:
+        return env_list
+    if "GEMINI_MODEL" in os.environ and MODEL_NAME:
+        return [MODEL_NAME]
+    return DEFAULT_GEMINI_MODELS
+
+
+def _is_quota_or_rate_error(err: Exception) -> bool:
+    msg = str(err).lower()
+    return any(
+        token in msg
+        for token in [
+            "quota",
+            "rate",
+            "limit",
+            "exceeded",
+            "resource_exhausted",
+            "429",
+        ]
+    )
 
 
 
@@ -131,12 +179,10 @@ async def generate_learn_feedback(
         if AI_PROVIDER != "gemini":
             return _fallback_feedback(user_sentence, reason=f"AI_PROVIDER={AI_PROVIDER!r}")
 
-        if not GEMINI_API_KEY:
-            return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY missing/empty")
+        if not (GEMINI_API_KEYS or GEMINI_API_KEY):
+            return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY(S) missing/empty")
 
 
-
-        client = genai.Client(api_key=GEMINI_API_KEY)
 
         prompt = _build_prompt(
             term=term,
@@ -145,40 +191,52 @@ async def generate_learn_feedback(
             user_sentence=user_sentence,
             lexicon=lexicon or dict_validation,
         )
+        last_err: Exception | None = None
+        for model in _gemini_models():
+            try:
+                client = genai.Client(api_key=_next_gemini_key())
+                resp = client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                )
 
-        resp = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
+                text = (resp.text or "").strip()
+                data = _extract_json(text)
+                if not data:
+                    return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
+
+                # Normalize
+                correction = data.get("correction")
+                rewrite = data.get("rewrite")
+                notes = data.get("notes") or ""
+                examples = data.get("examples") or []
+
+                if not isinstance(examples, list):
+                    examples = []
+
+                # Ensure 3 examples
+                examples = [str(x) for x in examples][:3]
+                while len(examples) < 3:
+                    examples.append("")
+
+                return {
+                    "ok": True,
+                    "correction": correction,
+                    "rewrite": rewrite,
+                    "notes": notes,
+                    "examples": examples,
+                    "provider": "gemini",
+                }
+            except Exception as e:
+                last_err = e
+                if _is_quota_or_rate_error(e):
+                    continue
+                raise
+
+        return _fallback_feedback(
+            user_sentence,
+            reason=f"quota/rate limit across models: {type(last_err).__name__ if last_err else 'unknown'}",
         )
-
-
-        text = (resp.text or "").strip()
-        data = _extract_json(text)
-        if not data:
-            return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
-
-        # Normalize
-        correction = data.get("correction")
-        rewrite = data.get("rewrite")
-        notes = data.get("notes") or ""
-        examples = data.get("examples") or []
-
-        if not isinstance(examples, list):
-            examples = []
-
-        # Ensure 3 examples
-        examples = [str(x) for x in examples][:3]
-        while len(examples) < 3:
-            examples.append("")
-
-        return {
-            "ok": True,
-            "correction": correction,
-            "rewrite": rewrite,
-            "notes": notes,
-            "examples": examples,
-            "provider": "gemini",
-        }
 
     except Exception as e:
         return _fallback_feedback(user_sentence, reason=f"exception: {type(e).__name__}: {e}")
@@ -186,7 +244,7 @@ async def generate_learn_feedback(
 def debug_list_models() -> str:
     try:
         import google.genai as genai  # type: ignore
-        client = genai.Client(api_key=GEMINI_API_KEY)
+        client = genai.Client(api_key=_next_gemini_key())
         models = client.models.list()
         names = []
         for m in models:
@@ -216,7 +274,7 @@ async def generate_reverse_context_quiz(
     }
     """
     # If AI not enabled, return a simple fallback quiz
-    if AI_PROVIDER != "gemini" or not GEMINI_API_KEY:
+    if AI_PROVIDER != "gemini" or not (GEMINI_API_KEYS or GEMINI_API_KEY):
         meaning = translation_en or "(meaning not available)"
         return {
             "ok": False,
@@ -229,9 +287,6 @@ async def generate_reverse_context_quiz(
 
     try:
         import google.genai as genai  # type: ignore
-
-        client = genai.Client(api_key=GEMINI_API_KEY)
-        model = os.getenv("GEMINI_MODEL", "gemini-flash-latest").strip()
 
         lex_str = json.dumps(lexicon or {}, ensure_ascii=False)
 
@@ -265,41 +320,57 @@ async def generate_reverse_context_quiz(
         "clue": "short explanation of the clue"
         }}
         """.strip()
+        last_err: Exception | None = None
+        for model in _gemini_models():
+            try:
+                client = genai.Client(api_key=_next_gemini_key())
+                resp = client.models.generate_content(model=model, contents=prompt)
+                data = _extract_json((resp.text or "").strip())
+                if not data:
+                    return {
+                        "ok": False,
+                        "context_it": f"Uso comune: {term}.",
+                        "meaning_en": translation_en or "(meaning not available)",
+                        "options_en": [translation_en or "Meaning", "Other", "Other"],
+                        "correct_index": 0,
+                        "clue": "AI returned invalid JSON.",
+                    }
+                meaning_en = str(data.get("meaning_en") or (translation_en or "")).strip()
 
+                # Guardrail: prevent chunk meaning leaking into term meaning
+                if term.lower() == "andare" and "home" in meaning_en.lower():
+                    meaning_en = "to go"
 
-        resp = client.models.generate_content(model=model, contents=prompt)
-        data = _extract_json((resp.text or "").strip())
-        if not data:
-            return {
-                "ok": False,
-                "context_it": f"Uso comune: {term}.",
-                "meaning_en": translation_en or "(meaning not available)",
-                "options_en": [translation_en or "Meaning", "Other", "Other"],
-                "correct_index": 0,
-                "clue": "AI returned invalid JSON.",
-            }
-        meaning_en = str(data.get("meaning_en") or (translation_en or "")).strip()
+                options = data.get("options_en") or []
+                if not isinstance(options, list) or len(options) != 3:
+                    options = [translation_en or "Meaning", "Other", "Other"]
 
-        # Guardrail: prevent chunk meaning leaking into term meaning
-        if term.lower() == "andare" and "home" in meaning_en.lower():
-            meaning_en = "to go"
+                idx = data.get("correct_index")
+                if idx not in [0, 1, 2]:
+                    idx = 0
 
+                return {
+                    "ok": True,
+                    "context_it": str(data.get("context_it") or "").strip(),
+                    "meaning_en": meaning_en,  # ✅ use the guarded one
+                    "options_en": [str(x).strip() for x in options],
+                    "correct_index": idx,
+                    "clue": str(data.get("clue") or "").strip(),
+                }
+            except Exception as e:
+                last_err = e
+                if _is_quota_or_rate_error(e):
+                    continue
+                raise
 
-        options = data.get("options_en") or []
-        if not isinstance(options, list) or len(options) != 3:
-            options = [translation_en or "Meaning", "Other", "Other"]
-
-        idx = data.get("correct_index")
-        if idx not in [0, 1, 2]:
-            idx = 0
-
+        meaning = translation_en or "(meaning not available)"
         return {
-            "ok": True,
-            "context_it": str(data.get("context_it") or "").strip(),
-            "meaning_en": meaning_en,  # ✅ use the guarded one
-            "options_en": [str(x).strip() for x in options],
-            "correct_index": idx,
-            "clue": str(data.get("clue") or "").strip(),
+            "ok": False,
+            "context_it": f"Uso comune: {term}.",
+            "meaning_en": meaning,
+            "options_en": [meaning, "Something else", "Unrelated meaning"],
+            "correct_index": 0,
+            "clue": "Quota/rate limit across models.",
         }
 
 
@@ -330,10 +401,8 @@ async def generate_roleplay_feedback(
         if AI_PROVIDER != "gemini":
             return _fallback_feedback(user_sentence, reason=f"AI_PROVIDER={AI_PROVIDER!r}")
 
-        if not GEMINI_API_KEY:
-            return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY missing/empty")
-
-        client = genai.Client(api_key=GEMINI_API_KEY)
+        if not (GEMINI_API_KEYS or GEMINI_API_KEY):
+            return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY(S) missing/empty")
 
         prompt = f"""
 You are a friendly native Italian tutor.
@@ -361,29 +430,42 @@ Return JSON ONLY:
   "examples": [string, string, string]
 }}
 """.strip()
+        last_err: Exception | None = None
+        for model in _gemini_models():
+            try:
+                client = genai.Client(api_key=_next_gemini_key())
+                resp = client.models.generate_content(model=model, contents=prompt)
+                text = (resp.text or "").strip()
 
-        resp = client.models.generate_content(model=MODEL_NAME, contents=prompt)
-        text = (resp.text or "").strip()
+                data = _extract_json(text)
+                if not data:
+                    return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
 
-        data = _extract_json(text)
-        if not data:
-            return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
+                examples = data.get("examples") or []
+                if not isinstance(examples, list):
+                    examples = []
+                examples = [str(x) for x in examples][:3]
+                while len(examples) < 3:
+                    examples.append("")
 
-        examples = data.get("examples") or []
-        if not isinstance(examples, list):
-            examples = []
-        examples = [str(x) for x in examples][:3]
-        while len(examples) < 3:
-            examples.append("")
+                return {
+                    "ok": True,
+                    "correction": data.get("correction"),
+                    "rewrite": data.get("rewrite"),
+                    "notes": data.get("notes") or "",
+                    "examples": examples,
+                    "provider": "gemini",
+                }
+            except Exception as e:
+                last_err = e
+                if _is_quota_or_rate_error(e):
+                    continue
+                raise
 
-        return {
-            "ok": True,
-            "correction": data.get("correction"),
-            "rewrite": data.get("rewrite"),
-            "notes": data.get("notes") or "",
-            "examples": examples,
-            "provider": "gemini",
-        }
+        return _fallback_feedback(
+            user_sentence,
+            reason=f"quota/rate limit across models: {type(last_err).__name__ if last_err else 'unknown'}",
+        )
 
     except Exception as e:
         return _fallback_feedback(user_sentence, reason=f"exception: {type(e).__name__}: {e}")
