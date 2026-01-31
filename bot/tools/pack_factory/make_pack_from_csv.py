@@ -149,11 +149,11 @@ def make_pack_from_csv(
 if __name__ == "__main__":
     # Example usage (edit these values)
     make_pack_from_csv(
-        csv_path="data/pack_sources/it_a1_mission_bar_cards.csv",
-        out_path="data/packs/it_a1_mission_bar_v2.json",
-        pack_id="it_a1_mission_bar_v2",
+        csv_path="data/pack_sources/draft_it_a1_airport.csv",
+        out_path="data/packs/it_a1_mission_airport_v2.json",
+        pack_id="it_a1_mission_airport_v2",
         target_language="it",
         level="A1",
-        title="☕ Mission: Survive an Italian Bar (A1)",
-        description="Order espresso like a local, handle banco vs tavolo, pay at the cassa, and exit politely.",
+        title="✈️ Mission: Navigate an Italian Airport (A1)",
+        description="Survive check-in, security, boarding, arrivals, and baggage with simple Italian.",
     )

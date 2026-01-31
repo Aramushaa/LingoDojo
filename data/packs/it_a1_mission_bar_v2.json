@@ -7,6 +7,7 @@
   "description": "Order espresso like a local, handle banco vs tavolo, pay at the cassa, and exit politely.",
   "cards": [
     {
+      "source_uid": "un_caff_b8c431af5d",
       "card_id": "un_caff_b8c431af5d",
       "focus": "phrase",
       "meaning_en": "per favore",
@@ -32,6 +33,7 @@
       ]
     },
     {
+      "source_uid": "pagare_bfbf920049",
       "card_id": "pagare_bfbf920049",
       "focus": "word",
       "meaning_en": "to pay",
@@ -62,6 +64,7 @@
       ]
     },
     {
+      "source_uid": "dove_si_paga_e1e5f94fbc",
       "card_id": "dove_si_paga_e1e5f94fbc",
       "focus": "phrase",
       "meaning_en": "Where do you pay?",
@@ -89,6 +92,7 @@
       ]
     },
     {
+      "source_uid": "volere_e836cd6939",
       "card_id": "volere_e836cd6939",
       "focus": "word",
       "meaning_en": "to want (polite form: vorrei = I would like)",
@@ -119,6 +123,7 @@
       ]
     },
     {
+      "source_uid": "vorrei_un_caff_c330cbff54",
       "card_id": "vorrei_un_caff_c330cbff54",
       "focus": "phrase",
       "meaning_en": "grazie",
@@ -143,6 +148,7 @@
       ]
     },
     {
+      "source_uid": "un_cappuccino_f09e0a44cc",
       "card_id": "un_cappuccino_f09e0a44cc",
       "focus": "phrase",
       "meaning_en": "per favore",
@@ -168,6 +174,7 @@
       ]
     },
     {
+      "source_uid": "prendere_6f8a5c198a",
       "card_id": "prendere_6f8a5c198a",
       "focus": "word",
       "meaning_en": "to have / to take",
@@ -199,6 +206,7 @@
       ]
     },
     {
+      "source_uid": "prendiamo_un_caff_0e3cbde552",
       "card_id": "prendiamo_un_caff_0e3cbde552",
       "focus": "phrase",
       "meaning_en": "Shall we have a coffee?",
@@ -225,6 +233,7 @@
       ]
     },
     {
+      "source_uid": "qui_1a85c41dad",
       "card_id": "qui_1a85c41dad",
       "focus": "word",
       "meaning_en": "here",
@@ -253,6 +262,7 @@
       ]
     },
     {
+      "source_uid": "qui_d9e9cb287c",
       "card_id": "qui_d9e9cb287c",
       "focus": "phrase",
       "meaning_en": "grazie",
@@ -277,6 +287,7 @@
       ]
     },
     {
+      "source_uid": "da_portar_via_54e7964e9d",
       "card_id": "da_portar_via_54e7964e9d",
       "focus": "phrase",
       "meaning_en": "grazie",
@@ -301,6 +312,7 @@
       ]
     },
     {
+      "source_uid": "zucchero_683959d649",
       "card_id": "zucchero_683959d649",
       "focus": "word",
       "meaning_en": "sugar",
@@ -329,6 +341,7 @@
       ]
     },
     {
+      "source_uid": "senza_zucchero_441e669a5c",
       "card_id": "senza_zucchero_441e669a5c",
       "focus": "phrase",
       "meaning_en": "grazie",
@@ -350,6 +363,7 @@
       "phrase": "Senza zucchero"
     },
     {
+      "source_uid": "subito_a223c29b9d",
       "card_id": "subito_a223c29b9d",
       "focus": "word",
       "meaning_en": "right away",
@@ -379,6 +393,7 @@
       ]
     },
     {
+      "source_uid": "attimo_4137664cd7",
       "card_id": "attimo_4137664cd7",
       "focus": "word",
       "meaning_en": "a moment",
@@ -407,6 +422,7 @@
       ]
     },
     {
+      "source_uid": "un_attimo_bfa31990ac",
       "card_id": "un_attimo_bfa31990ac",
       "focus": "phrase",
       "meaning_en": "per favore",
@@ -428,6 +444,7 @@
       "phrase": "Un attimo"
     },
     {
+      "source_uid": "scontrino_5b45f2148e",
       "card_id": "scontrino_5b45f2148e",
       "focus": "word",
       "meaning_en": "receipt",
@@ -457,6 +474,7 @@
       ]
     },
     {
+      "source_uid": "contanti_2c0e254f7d",
       "card_id": "contanti_2c0e254f7d",
       "focus": "word",
       "meaning_en": "cash",
@@ -484,6 +502,7 @@
       ]
     },
     {
+      "source_uid": "carta_cb9f978f6b",
       "card_id": "carta_cb9f978f6b",
       "focus": "word",
       "meaning_en": "card",
@@ -512,6 +531,7 @@
       ]
     },
     {
+      "source_uid": "pago_con_carta_d7f46b2bea",
       "card_id": "pago_con_carta_d7f46b2bea",
       "focus": "phrase",
       "meaning_en": "I’ll pay by card",
@@ -536,6 +556,7 @@
       ]
     },
     {
+      "source_uid": "prego_583f51d56f",
       "card_id": "prego_583f51d56f",
       "focus": "word",
       "meaning_en": "you’re welcome / please / go ahead",
@@ -566,6 +587,7 @@
       ]
     },
     {
+      "source_uid": "grazie_708f0ac97d",
       "card_id": "grazie_708f0ac97d",
       "focus": "phrase",
       "meaning_en": "buona giornata",
@@ -590,6 +612,7 @@
       ]
     },
     {
+      "source_uid": "scusi_de2824578d",
       "card_id": "scusi_de2824578d",
       "focus": "phrase",
       "meaning_en": "one moment",
@@ -611,6 +634,7 @@
       "phrase": "Scusi"
     },
     {
+      "source_uid": "cassa_164caf4dad",
       "card_id": "cassa_164caf4dad",
       "focus": "word",
       "meaning_en": "cashier",
@@ -640,6 +664,7 @@
       ]
     },
     {
+      "source_uid": "asporto_3a25685716",
       "card_id": "asporto_3a25685716",
       "focus": "word",
       "meaning_en": "takeaway",
@@ -667,6 +692,7 @@
       ]
     },
     {
+      "source_uid": "ordine_1429041028",
       "card_id": "ordine_1429041028",
       "focus": "word",
       "meaning_en": "order",
@@ -690,6 +716,7 @@
       ]
     },
     {
+      "source_uid": "mi_porta_un_caff_a113aa1a10",
       "card_id": "mi_porta_un_caff_a113aa1a10",
       "focus": "phrase",
       "meaning_en": "Can you bring me a coffee?",
