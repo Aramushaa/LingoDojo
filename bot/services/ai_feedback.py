@@ -4,7 +4,11 @@ import google.genai as genai  # type: ignore
 
 import os
 import json
+import random
+import hashlib
 from typing import Dict, Any, Optional
+
+from bot.db import ai_cache_get, ai_cache_set
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "none").lower().strip()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
@@ -143,9 +147,19 @@ OUTPUT FORMAT:
 {{
   "correction": string | null,
   "rewrite": string | null,
+  "why": [string, string],
+  "grammar_notes": [
+    {{"issue": string, "explain": string, "example": string}},
+    {{"issue": string, "explain": string, "example": string}}
+  ],
   "notes": string,
   "examples": [string, string, string]
 }}
+
+RULES FOR WHY + GRAMMAR:
+- If correction is null, why MUST be [] and grammar_notes MUST be [].
+- why: max 2 items, each ONE short sentence, beginner-friendly.
+- grammar_notes: max 2 items, short, practical.
 
 FIELD GUIDELINES:
 - correction:
@@ -178,6 +192,15 @@ async def generate_learn_feedback(
     dict_validation: Optional[dict] = None,
     lexicon: Optional[dict] = None,
 ) -> Dict[str, Any]:
+    # Cache key: same term + same sentence = reuse
+    raw_key = f"learn_feedback|{target_language}|{term}|{user_sentence.strip()}"
+    cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+
+    cached = ai_cache_get(cache_key)
+    if cached:
+        cached["cached"] = True
+        return cached
+
     # Always safe: never raise to caller
     try:
         if AI_PROVIDER != "gemini":
@@ -186,8 +209,6 @@ async def generate_learn_feedback(
         if not (GEMINI_API_KEYS or GEMINI_API_KEY):
             return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY(S) missing/empty")
 
-
-
         prompt = _build_prompt(
             term=term,
             chunk=chunk,
@@ -195,6 +216,7 @@ async def generate_learn_feedback(
             user_sentence=user_sentence,
             lexicon=lexicon or dict_validation,
         )
+
         last_err: Exception | None = None
         for model in _gemini_models():
             for _ in range(_num_keys()):
@@ -213,9 +235,18 @@ async def generate_learn_feedback(
                     # Normalize
                     correction = data.get("correction")
                     rewrite = data.get("rewrite")
+                    why = data.get("why") or []
+                    if not isinstance(why, list):
+                        why = []
+                    why = [str(x).strip() for x in why if x][:2]
+
+                    grammar_notes = data.get("grammar_notes") or []
+                    if not isinstance(grammar_notes, list):
+                        grammar_notes = []
+                    grammar_notes = grammar_notes[:2]
+
                     notes = data.get("notes") or ""
                     examples = data.get("examples") or []
-
                     if not isinstance(examples, list):
                         examples = []
 
@@ -224,14 +255,19 @@ async def generate_learn_feedback(
                     while len(examples) < 3:
                         examples.append("")
 
-                    return {
+                    result = {
                         "ok": True,
                         "correction": correction,
                         "rewrite": rewrite,
+                        "why": why,
+                        "grammar_notes": grammar_notes,
                         "notes": notes,
                         "examples": examples,
                         "provider": "gemini",
                     }
+                    ai_cache_set(cache_key, result)
+                    return result
+
                 except Exception as e:
                     last_err = e
                     if _is_quota_or_rate_error(e):
@@ -259,7 +295,7 @@ def debug_list_models() -> str:
     except Exception as e:
         return f"(could not list models: {type(e).__name__}: {e})"
 
-async def generate_reverse_context_quiz(
+async def _generate_reverse_context_quiz_ai(
     *,
     term: str,
     chunk: Optional[str],
@@ -391,6 +427,53 @@ async def generate_reverse_context_quiz(
             "correct_index": 0,
             "clue": "AI error; fallback quiz.",
         }
+
+async def generate_reverse_context_quiz(
+    *,
+    term: str,
+    chunk: Optional[str],
+    translation_en: Optional[str],
+    lexicon: Optional[dict] = None,
+    context_it: Optional[str] = None,
+    distractors_en: Optional[list[str]] = None
+) -> Dict[str, Any]:
+    """
+    Offline reverse-context quiz (no AI calls).
+    """
+    meaning = (translation_en or "(meaning not available)").strip()
+
+    # Build options: 1 correct + 2 distractors
+    pool = [x.strip() for x in (distractors_en or []) if x and x.strip() and x.strip().lower() != meaning.lower()]
+
+    # fallback distractors if pool too small
+    fallback_pool = [
+        "to eat", "to sleep", "to go", "to do", "to make",
+        "a place", "a person", "a thing", "a problem", "an idea"
+    ]
+    for x in fallback_pool:
+        if len(pool) >= 2:
+            break
+        if x.lower() != meaning.lower() and x not in pool:
+            pool.append(x)
+
+    pool = pool[:2]
+    options = [meaning] + pool
+
+    # shuffle
+    random.shuffle(options)
+    correct_index = options.index(meaning)
+
+    ctx = (context_it or f"Uso comune: {term}.").strip()
+
+    return {
+        "ok": True,
+        "context_it": ctx,
+        "meaning_en": meaning,
+        "options_en": options,
+        "correct_index": correct_index,
+        "clue": "Use the context to pick the closest meaning."
+    }
+
 
 async def generate_roleplay_feedback(
     *,

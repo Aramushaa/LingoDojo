@@ -11,6 +11,7 @@ from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
+from bot.handlers.reloadpacks import reloadpacks_command
 from bot.handlers.help import help_command
 from dotenv import load_dotenv
 from bot.handlers.setlevel import setlevel, on_setlevel_button
@@ -53,6 +54,7 @@ async def post_init(application):
         BotCommand("settings", "Packs + languages + preferences"),
         BotCommand("setlevel", "Set your level (A1/A2/B1/...)"),
         BotCommand("help", "Show command menu"),
+        BotCommand("reloadpacks", "Reload packs from /data/packs (dev)"),
     ]
     await application.bot.set_my_commands(commands)
 
@@ -76,6 +78,7 @@ def main():
     app.add_handler(CommandHandler("review", review))
     app.add_handler(CommandHandler("setlevel", setlevel))
     app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("reloadpacks", reloadpacks_command))
 
 
 

@@ -7,371 +7,87 @@
   "description": "Order espresso like a local, handle banco vs tavolo, pay at the cassa, and exit politely.",
   "cards": [
     {
-      "card_id": "bar_01",
+      "card_id": "un_caff_b8c431af5d",
       "focus": "phrase",
-      "phrase": "Un caffè, per favore",
-      "meaning_en": "A coffee (espresso), please",
-      "contexts_it": ["Buongiorno! Un caffè, per favore."],
+      "meaning_en": "per favore",
+      "contexts_it": [
+        "A coffee (espresso)"
+      ],
       "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "ordering", "politeness"],
-        "cultural_note": "In Italy, 'un caffè' usually means an espresso.",
-        "trap": "Don't say 'expresso'. It's 'espresso'.",
-        "native_sauce": "Often said quickly at the counter with eye contact."
+        "register": "please",
+        "risk": "Buongiorno! Un caffè, per favore.",
+        "tags": [
+          "polite"
+        ],
+        "cultural_note": "You're at the counter. Order an espresso politely.",
+        "trap": "bar,ordering,politeness",
+        "native_sauce": "Don't say 'expresso'. It's 'espresso'."
       },
-      "drills": { "scenario_prompt": "You're at the counter. Order an espresso politely." }
+      "drills": {
+        "scenario_prompt": "safe"
+      },
+      "phrase": "Un caffè",
+      "examples_it": [
+        "Often said quickly at the counter with eye contact."
+      ]
     },
     {
-      "card_id": "bar_02",
+      "card_id": "pagare_bfbf920049",
       "focus": "word",
-      "lemma": "pagare",
-      "phrase_hint": "Dove si paga?",
       "meaning_en": "to pay",
-      "contexts_it": ["Scusi, dove si paga?", "Posso pagare qui?"],
+      "contexts_it": [
+        "Scusi, dove si paga?",
+        "Posso pagare qui?"
+      ],
       "meta": {
         "register": "polite",
         "risk": "safe",
-        "tags": ["bar", "payment"],
+        "tags": [
+          "bar",
+          "payment"
+        ],
         "cultural_note": "Many bars have you pay at the cashier (la cassa).",
         "trap": "Don't assume table service; ask first.",
         "native_sauce": "A super common polite opener is 'Scusi'."
       },
-      "drills": { "scenario_prompt": "You don’t know where to pay. Ask politely." }
+      "drills": {
+        "scenario_prompt": "You don’t know where to pay. Ask politely."
+      },
+      "lemma": "pagare",
+      "phrase_hint": "Dove si paga?",
+      "examples_it": [
+        "Devo pagare.",
+        "Posso pagare qui?",
+        "Pago in contanti."
+      ]
     },
     {
-      "card_id": "bar_03",
+      "card_id": "dove_si_paga_e1e5f94fbc",
       "focus": "phrase",
-      "phrase": "Dove si paga?",
       "meaning_en": "Where do you pay?",
-      "contexts_it": ["Scusi, dove si paga?"],
+      "contexts_it": [
+        "Scusi, dove si paga?"
+      ],
       "meta": {
         "register": "polite",
         "risk": "safe",
-        "tags": ["bar", "payment"],
+        "tags": [
+          "bar",
+          "payment"
+        ],
         "trap": "If you're at a table, they might bring the bill — but many places still prefer the cassa.",
         "native_sauce": "Short and direct, but still polite."
       },
-      "drills": { "scenario_prompt": "You're confused. Ask where you should pay." }
-    },
-    {
-      "card_id": "bar_04",
-      "focus": "word",
-      "lemma": "volere",
-      "phrase_hint": "Vorrei un caffè",
-      "meaning_en": "to want (polite form: vorrei = I would like)",
-      "contexts_it": ["Vorrei un caffè, grazie.", "Vorrei pagare, per favore."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["politeness", "ordering"],
-        "cultural_note": "'Vorrei' sounds polite. 'Voglio' can sound too strong in service situations.",
-        "trap": "Avoid 'Voglio un caffè' with strangers.",
-        "native_sauce": "Add 'grazie' at the end and you're golden."
+      "drills": {
+        "scenario_prompt": "You're confused. Ask where you should pay."
       },
-      "drills": { "scenario_prompt": "Order politely using 'vorrei'." }
-    },
-    {
-      "card_id": "bar_05",
-      "focus": "phrase",
-      "phrase": "Vorrei un caffè, grazie",
-      "meaning_en": "I’d like a coffee, thanks",
-      "contexts_it": ["Vorrei un caffè, grazie."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "ordering", "politeness"],
-        "native_sauce": "This is a safe default phrase almost everywhere."
-      },
-      "drills": { "scenario_prompt": "Order an espresso politely and add 'grazie'." }
-    },
-    {
-      "card_id": "bar_06",
-      "focus": "phrase",
-      "phrase": "Un cappuccino, per favore",
-      "meaning_en": "A cappuccino, please",
-      "contexts_it": ["Un cappuccino, per favore."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "ordering"],
-        "cultural_note": "Cappuccino is typically a morning drink in Italy.",
-        "trap": "Ordering cappuccino after lunch can get you side-eye (not illegal, just cultural).",
-        "native_sauce": "If you don’t care, order it anyway. Just know the vibe."
-      },
-      "drills": { "scenario_prompt": "It's morning. Order a cappuccino politely." }
-    },
-    {
-      "card_id": "bar_07",
-      "focus": "word",
-      "lemma": "prendere",
-      "phrase_hint": "Prendo un caffè",
-      "meaning_en": "to have / to take",
-      "contexts_it": ["Prendo un caffè.", "Prendiamo un caffè?"],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["bar", "daily", "invite"],
-        "cultural_note": "'Prendere un caffè' often means 'have a coffee' (not literally take it away).",
-        "trap": "If you want take-away, say 'da portar via' / 'da asporto'.",
-        "native_sauce": "Used casually among friends too."
-      },
-      "drills": { "scenario_prompt": "Invite a friend: suggest grabbing coffee." }
-    },
-    {
-      "card_id": "bar_08",
-      "focus": "phrase",
-      "phrase": "Prendiamo un caffè?",
-      "meaning_en": "Shall we have a coffee?",
-      "contexts_it": ["Ehi, prendiamo un caffè?"],
-      "meta": {
-        "register": "friendly",
-        "risk": "safe",
-        "tags": ["invite", "friends"],
-        "native_sauce": "This is a social move: coffee = quick chat."
-      },
-      "drills": { "scenario_prompt": "You see a friend. Invite them for coffee casually." }
-    },
-    {
-      "card_id": "bar_09",
-      "focus": "word",
-      "lemma": "qui",
-      "phrase_hint": "Qui o da portar via?",
-      "meaning_en": "here",
-      "contexts_it": ["Qui o da portar via?"],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["bar", "takeaway"],
-        "cultural_note": "Bar staff may ask if you drink here or take away.",
-        "native_sauce": "A very common question you’ll hear in busy places."
-      },
-      "drills": { "scenario_prompt": "Answer: you want to drink here." }
-    },
-    {
-      "card_id": "bar_10",
-      "focus": "phrase",
-      "phrase": "Qui, grazie",
-      "meaning_en": "Here, thanks",
-      "contexts_it": ["Qui, grazie."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "takeaway"],
-        "native_sauce": "Short, fast, natural."
-      },
-      "drills": { "scenario_prompt": "They ask 'Qui o da portar via?'. Say you’ll drink here." }
-    },
-    {
-      "card_id": "bar_11",
-      "focus": "phrase",
-      "phrase": "Da portar via, grazie",
-      "meaning_en": "To take away, thanks",
-      "contexts_it": ["Da portar via, grazie."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "takeaway"],
-        "native_sauce": "Also said as: 'da asporto'."
-      },
-      "drills": { "scenario_prompt": "They ask 'Qui o da portar via?'. Say take away." }
-    },
-    {
-      "card_id": "bar_12",
-      "focus": "word",
-      "lemma": "zucchero",
-      "phrase_hint": "Con zucchero / senza zucchero",
-      "meaning_en": "sugar",
-      "contexts_it": ["Un caffè con zucchero, per favore.", "Senza zucchero, grazie."],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["bar", "preferences"],
-        "native_sauce": "Often you’ll just say 'con' or 'senza'."
-      },
-      "drills": { "scenario_prompt": "Order coffee and specify sugar preference." }
-    },
-    {
-      "card_id": "bar_13",
-      "focus": "phrase",
-      "phrase": "Senza zucchero, grazie",
-      "meaning_en": "Without sugar, thanks",
-      "contexts_it": ["Senza zucchero, grazie."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["bar", "preferences"]
-      },
-      "drills": { "scenario_prompt": "Tell them you want no sugar." }
-    },
-    {
-      "card_id": "bar_14",
-      "focus": "word",
-      "lemma": "subito",
-      "phrase_hint": "Subito",
-      "meaning_en": "right away",
-      "contexts_it": ["Arrivo subito.", "Subito!"],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["bar", "interaction"],
-        "cultural_note": "You’ll hear 'Subito!' a lot in service contexts.",
-        "native_sauce": "It can mean 'right away' but also 'I’m on it'."
-      },
-      "drills": { "scenario_prompt": "The barista says they’ll bring it soon. Reply politely." }
-    },
-    {
-      "card_id": "bar_15",
-      "focus": "word",
-      "lemma": "attimo",
-      "phrase_hint": "Un attimo",
-      "meaning_en": "a moment",
-      "contexts_it": ["Un attimo, per favore.", "Solo un attimo."],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["bar", "interaction"],
-        "native_sauce": "Very common filler while someone is busy."
-      },
-      "drills": { "scenario_prompt": "You need a moment to decide. Say it politely." }
-    },
-    {
-      "card_id": "bar_16",
-      "focus": "phrase",
-      "phrase": "Un attimo, per favore",
-      "meaning_en": "One moment, please",
-      "contexts_it": ["Un attimo, per favore."],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["politeness", "interaction"]
-      },
-      "drills": { "scenario_prompt": "They ask what you want. You need a second—reply politely." }
-    },
-    {
-      "card_id": "bar_17",
-      "focus": "word",
-      "lemma": "scontrino",
-      "phrase_hint": "Lo scontrino",
-      "meaning_en": "receipt",
-      "contexts_it": ["Vuole lo scontrino?", "Lo scontrino, per favore."],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["payment", "receipt"],
-        "cultural_note": "In Italy, receipts matter (especially in public places).",
-        "native_sauce": "You might hear it at the cassa."
-      },
-      "drills": { "scenario_prompt": "You want the receipt. Ask politely." }
-    },
-    {
-      "card_id": "bar_18",
-      "focus": "word",
-      "lemma": "contanti",
-      "phrase_hint": "In contanti",
-      "meaning_en": "cash",
-      "contexts_it": ["Pago in contanti.", "In contanti o con carta?"],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["payment"],
-        "native_sauce": "Often asked: 'contanti o carta?'."
-      },
-      "drills": { "scenario_prompt": "They ask how you’ll pay. Say cash." }
-    },
-    {
-      "card_id": "bar_19",
-      "focus": "word",
-      "lemma": "carta",
-      "phrase_hint": "Con carta",
-      "meaning_en": "card",
-      "contexts_it": ["Pago con carta.", "Va bene la carta?"],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["payment"],
-        "trap": "Some places have minimum spend for card; rare, but it happens.",
-        "native_sauce": "Say 'Pago con carta' — simple."
-      },
-      "drills": { "scenario_prompt": "They ask how you’ll pay. Say card." }
-    },
-    {
-      "card_id": "bar_20",
-      "focus": "phrase",
-      "phrase": "Pago con carta",
-      "meaning_en": "I’ll pay by card",
-      "contexts_it": ["Pago con carta."],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["payment"]
-      },
-      "drills": { "scenario_prompt": "At the cassa, say you’ll pay by card." }
-    },
-    {
-      "card_id": "bar_21",
-      "focus": "word",
-      "lemma": "prego",
-      "phrase_hint": "Prego",
-      "meaning_en": "you’re welcome / please / go ahead",
-      "contexts_it": ["Prego!", "Prego, si accomodi."],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": ["interaction", "politeness"],
-        "cultural_note": "'Prego' has multiple uses (you're welcome, please, go ahead).",
-        "trap": "Don’t overthink—copy locals: use it when someone says 'grazie'.",
-        "native_sauce": "It’s a Swiss-army word."
-      },
-      "drills": { "scenario_prompt": "They say 'Grazie'. Reply naturally." }
-    },
-    {
-      "card_id": "bar_22",
-      "focus": "phrase",
-      "phrase": "Grazie, buona giornata",
-      "meaning_en": "Thanks, have a nice day",
-      "contexts_it": ["Grazie, buona giornata!"],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": ["politeness", "closing"],
-        "native_sauce": "This tiny line makes you sound instantly nice."
-      },
-      "drills": { "scenario_prompt": "You’re leaving. Say thanks and wish them a good day." }
+      "phrase": "Dove si paga?",
+      "examples_it": [
+        "Dove si paga?",
+        "Mi scusi, dove si paga?",
+        "Posso pagare qui?"
+      ]
     }
   ],
-  "scenes": [
-    {
-      "scene_id": "bar_scene_01",
-      "unlock_rule": { "after_cards_learned": 3 },
-      "roleplay": {
-        "setting": "A busy bar in Rome, morning rush",
-        "bot_role": "barista",
-        "turns": [
-          { "bot": "Buongiorno! Dimmi." },
-          { "user_task": "Order an espresso politely." },
-          { "bot": "Qui o da portar via?" },
-          { "user_task": "Say you’ll drink here (or take away). Add 'grazie'." },
-          { "bot": "Perfetto. Sono 1 euro e 20." },
-          { "user_task": "Ask where to pay OR say you’ll pay by card/cash." }
-        ]
-      }
-    },
-    {
-      "scene_id": "bar_scene_02",
-      "unlock_rule": { "after_cards_learned": 6 },
-      "roleplay": {
-        "setting": "At the cassa (cashier) after coffee",
-        "bot_role": "cassiere",
-        "turns": [
-          { "bot": "Ciao! Hai già consumato?" },
-          { "user_task": "Say yes and that you want to pay." },
-          { "bot": "Contanti o carta?" },
-          { "user_task": "Answer cash or card." },
-          { "bot": "Vuoi lo scontrino?" },
-          { "user_task": "Say yes or no politely, then say goodbye." }
-        ]
-      }
-    }
-  ]
+  "scenes": []
 }

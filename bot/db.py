@@ -180,6 +180,15 @@ def init_db():
     )
     """)
 
+    # --- NEW: AI cache (reduce quota) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ai_cache (
+        cache_key TEXT PRIMARY KEY,
+        value_json TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    )
+    """)
+
 
 
 
@@ -198,6 +207,34 @@ def get_user_languages(user_id: int):
     row = cursor.fetchone()
     conn.close()
     return row  # (target_language, ui_language) or None
+
+
+def ai_cache_get(cache_key: str) -> dict | None:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT value_json FROM ai_cache WHERE cache_key = ?", (cache_key,))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return None
+    try:
+        return json.loads(row[0])
+    except Exception:
+        return None
+
+
+def ai_cache_set(cache_key: str, value: dict):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO ai_cache (cache_key, value_json, created_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(cache_key) DO UPDATE SET
+            value_json=excluded.value_json,
+            created_at=excluded.created_at
+    """, (cache_key, json.dumps(value, ensure_ascii=False), utc_now_iso()))
+    conn.commit()
+    conn.close()
 
 
 def get_learn_since_scene(user_id: int) -> int:
@@ -801,6 +838,27 @@ def get_status_counts(user_id: int) -> dict:
         if status in out:
             out[status] = int(cnt)
     return out
+
+
+def get_random_meanings_from_active_packs(user_id: int, target_language: str, exclude_item_id: int, limit: int = 2) -> list[str]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT pi.translation_en
+        FROM pack_items pi
+        JOIN user_packs up ON up.pack_id = pi.pack_id
+        JOIN packs p ON p.pack_id = pi.pack_id
+        WHERE up.user_id = ?
+          AND p.target_language = ?
+          AND pi.item_id != ?
+          AND pi.translation_en IS NOT NULL
+          AND TRIM(pi.translation_en) != ''
+        ORDER BY RANDOM()
+        LIMIT ?
+    """, (user_id, target_language, exclude_item_id, limit))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]]
 
 def get_lexicon_cache_it(term: str):
     conn = get_connection()

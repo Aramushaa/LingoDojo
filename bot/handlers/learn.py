@@ -20,6 +20,7 @@ from bot.db import (
     get_learn_since_scene,
     set_learn_since_scene,
     pick_one_scene_for_user_active_packs,
+    get_random_meanings_from_active_packs,
 
 )
 
@@ -183,12 +184,14 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ensure_review_row(user.id, item_id)
 
     lexicon = get_lexicon_cache_it(term)
+    distractors = get_random_meanings_from_active_packs(user.id, target, item_id, limit=2)
     quiz = await generate_reverse_context_quiz(
     term=term,
     chunk=chunk,
     translation_en=translation_en,
     lexicon=lexicon,
     context_it=ctx_it,   # ✅ use fixed context if available
+    distractors_en=distractors,
     )
 
 
@@ -293,6 +296,28 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
+    lower = text.casefold()
+    term_low = (term or "").casefold()
+
+    # 1) Too short
+    if len(text) < 3:
+        await msg.reply_text("⚠️ Write a full sentence (not just one word). Try again 🙂")
+        return
+
+    # 2) Must contain at least one letter
+    if not any(ch.isalpha() for ch in text):
+        await msg.reply_text("⚠️ Please write a sentence with letters 🙂")
+        return
+
+    # 3) Must use the target word (simple MVP check)
+    if term_low and term_low not in lower:
+        await msg.reply_text(
+            f"⚠️ Your sentence must include the word <b>{h(term)}</b>.\n"
+            f"Try again (any tense/person is ok).",
+            parse_mode=ParseMode.HTML
+        )
+        return
+
     # 4) AI feedback
     try:
         ai = await generate_learn_feedback(
@@ -367,6 +392,21 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply += f"\n🛠 <b>Correction</b>: {h(ai['correction'])}\n"
     if ai.get("rewrite"):
         reply += f"\n✨ <b>Rewrite</b>: {h(ai['rewrite'])}\n"
+    why = ai.get("why") or []
+    if why:
+        reply += "\n🧠 <b>Why</b>:\n" + "\n".join([f"• {h(x)}" for x in why]) + "\n"
+
+    gnotes = ai.get("grammar_notes") or []
+    if gnotes:
+        lines = []
+        for gn in gnotes[:2]:
+            issue = h(str(gn.get("issue", "")))
+            explain = h(str(gn.get("explain", "")))
+            ex = h(str(gn.get("example", "")))
+            if issue or explain or ex:
+                lines.append(f"• <b>{issue}</b>: {explain}" + (f" <i>({ex})</i>" if ex else ""))
+        if lines:
+            reply += "\n📚 <b>Grammar</b>:\n" + "\n".join(lines) + "\n"
     if ai.get("notes"):
         reply += f"\n💡 {h(ai['notes'])}\n"
 
