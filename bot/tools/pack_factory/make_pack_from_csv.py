@@ -64,6 +64,7 @@ def row_to_card(pack_id: str, row: Dict[str, str]) -> Dict[str, Any]:
     card_id = stable_card_id(pack_id, focus, primary)
 
     card: Dict[str, Any] = {
+        "source_uid": card_id,
         "card_id": card_id,
         "focus": focus,
         "meaning_en": meaning_en,

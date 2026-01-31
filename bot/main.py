@@ -6,7 +6,7 @@ from bot.config import BOT_TOKEN
 from bot.db import init_db, import_packs_from_folder,get_session
 from bot.handlers.start import start
 from bot.handlers.stats import stats
-from bot.handlers.learn import learn, on_guess_button, on_pronounce_button, on_scene_choice, on_ai_choice
+from bot.handlers.learn import learn, on_guess_button, on_pronounce_button, on_scene_choice, on_ai_choice, on_learn_skip
 from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.settings import settings, on_settings_button
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
@@ -92,6 +92,7 @@ def main():
     app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))
     app.add_handler(CallbackQueryHandler(on_scene_choice, pattern=r"^SCENE\|"))
     app.add_handler(CallbackQueryHandler(on_ai_choice, pattern=r"^AI\|"))
+    app.add_handler(CallbackQueryHandler(on_learn_skip, pattern=r"^LEARN\|SKIP$"))
     app.add_handler(CallbackQueryHandler(on_setlevel_button, pattern=r"^SETLEVEL\|"))
 
 

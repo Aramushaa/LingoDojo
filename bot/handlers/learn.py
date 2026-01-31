@@ -21,6 +21,7 @@ from bot.db import (
     set_learn_since_scene,
     pick_one_scene_for_user_active_packs,
     get_random_meanings_from_active_packs,
+    mark_item_mature,
 
 )
 
@@ -43,6 +44,7 @@ def _build_quiz_message(term: str, quiz: dict, progress_line: str | None = None)
         [InlineKeyboardButton(f"B) {opts[1]}", callback_data="GUESS|1")],
         [InlineKeyboardButton(f"C) {opts[2]}", callback_data="GUESS|2")],
         [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
+        [InlineKeyboardButton("✅ I know it (skip)", callback_data="LEARN|SKIP")],
     ]
 
     text = (
@@ -146,6 +148,44 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     target_language, ui_language = langs
+
+    session = get_session(user.id)
+    if session:
+        mode, item_id, stage, meta = session
+        if mode == "learn" and item_id is not None and stage in ("await_guess", "await_sentence"):
+            if stage == "await_guess":
+                quiz = (meta or {}).get("quiz") or {}
+                term = (meta or {}).get("term") or ""
+                opts = quiz.get("options_en", ["A", "B", "C"])
+
+                keyboard = [
+                    [InlineKeyboardButton(f"A) {opts[0]}", callback_data="GUESS|0")],
+                    [InlineKeyboardButton(f"B) {opts[1]}", callback_data="GUESS|1")],
+                    [InlineKeyboardButton(f"C) {opts[2]}", callback_data="GUESS|2")],
+                    [InlineKeyboardButton("🔊 Pronounce", callback_data="PRON|word")],
+                    [InlineKeyboardButton("✅ I know it (skip)", callback_data="LEARN|SKIP")],
+                ]
+
+                text = (
+                    "🧠 You have an active Learn card.\n\n"
+                    f"Word: <b>{h(term)}</b>\n\n"
+                    f"Context:\n<i>{h(quiz.get('context_it',''))}</i>\n\n"
+                    "Pick the best meaning:"
+                )
+                await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
+                return
+
+            if stage == "await_sentence":
+                term = (meta or {}).get("term") or ""
+                keyboard = InlineKeyboardMarkup([
+                    [InlineKeyboardButton("✅ I know it (skip)", callback_data="LEARN|SKIP")]
+                ])
+                await msg.reply_text(
+                    f"✍️ Finish your current card first.\n\nWrite one Italian sentence using <b>{h(term)}</b>.",
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=keyboard
+                )
+                return
 
     active_packs = get_user_active_packs(user.id)
     if not active_packs:
@@ -781,6 +821,27 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     except Exception as e:
         await query.message.reply_text(f"TTS failed: {type(e).__name__}: {e}")
+
+
+async def on_learn_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("No active learn card. Type /learn.")
+        return
+
+    mode, item_id, stage, meta = session
+    if mode != "learn" or item_id is None:
+        await query.edit_message_text("No active learn card. Type /learn.")
+        return
+
+    mark_item_mature(user.id, item_id)
+    clear_session(user.id)
+
+    await query.edit_message_text("✅ Skipped. Type /learn for the next item.")
 
 async def handle_scene_reply(update, context, item_id: int, meta: dict):
     user = update.effective_user

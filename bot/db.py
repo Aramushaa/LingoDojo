@@ -152,6 +152,8 @@ def init_db():
     _add_column_if_missing(cursor, "pack_items", "components_json", "TEXT")
     _add_column_if_missing(cursor, "pack_items", "media_json", "TEXT")
     _add_column_if_missing(cursor, "pack_items", "drills_json", "TEXT")
+    _add_column_if_missing(cursor, "pack_items", "source_uid", "TEXT")
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_pack_items_source_uid ON pack_items(pack_id, source_uid)")
 
 
     # --- NEW: contexts table (multiple contexts per card) ---
@@ -287,29 +289,6 @@ def import_packs_from_folder():
                 description=excluded.description
         """, (pack_id, target_language, level, title, description))
 
-        # If items already exist for this pack, do NOT re-import items.
-        # Re-importing would create new item_id values and break progress.
-        cursor.execute("SELECT COUNT(*) FROM pack_items WHERE pack_id = ?", (pack_id,))
-        (count_existing,) = cursor.fetchone()
-
-        if count_existing > 0:
-            # But we CAN still upsert scenes safely (does not affect item_id)
-            for s in (pack.get("scenes") or []):
-                cursor.execute("""
-                    INSERT INTO pack_scenes (pack_id, scene_id, unlock_rule_json, roleplay_json)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(pack_id, scene_id) DO UPDATE SET
-                        unlock_rule_json=excluded.unlock_rule_json,
-                        roleplay_json=excluded.roleplay_json
-                """, (
-                    pack_id,
-                    s.get("scene_id"),
-                    json.dumps(s.get("unlock_rule") or {}, ensure_ascii=False),
-                    json.dumps(s.get("roleplay") or {}, ensure_ascii=False),
-                ))
-            continue
-
-
         # --------- Import legacy items OR v2 cards ---------
         cards = pack.get("cards")
         items = pack.get("items")
@@ -340,16 +319,20 @@ def import_packs_from_folder():
                 tags = meta.get("tags") or []
                 components = c.get("components") or []
 
+                source_uid = c.get("source_uid") or c.get("id") or c.get("card_id") or ""
+                if not source_uid:
+                    source_uid = f"{term}\n{chunk}".strip()
+
                 cursor.execute("""
-                    INSERT INTO pack_items (
-                        pack_id, term, chunk, translation_en, note,
+                    INSERT OR IGNORE INTO pack_items (
+                        pack_id, source_uid, term, chunk, translation_en, note,
                         focus, lemma, phrase, phrase_hint,
                         level, category, register, risk,
                         trap, native_sauce, cultural_note,
                         tags_json, components_json, media_json, drills_json,
                         translation_helper, pronunciation_text
                     )
-                    VALUES (?, ?, ?, ?, ?,
+                    VALUES (?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?,
                             ?, ?, ?, ?,
                             ?, ?, ?,
@@ -357,6 +340,7 @@ def import_packs_from_folder():
                             ?, ?)
                 """, (
                     pack_id,
+                    source_uid,
                     term,
                     chunk,
                     meaning_en,
@@ -385,6 +369,9 @@ def import_packs_from_folder():
                     c.get("pronunciation_text") or chunk or term
                 ))
 
+                if cursor.rowcount == 0:
+                    continue
+
                 item_id = cursor.lastrowid
 
                 # Context sentences
@@ -398,19 +385,24 @@ def import_packs_from_folder():
             # legacy packs: keep your current schema but store extra fields if present
             for item in items:
                 tags = item.get("tags") or []
+                source_uid = item.get("source_uid") or item.get("id") or item.get("card_id")
+                if not source_uid:
+                    source_uid = f"{item.get('term','')}\n{(item.get('chunk') or item.get('term',''))}".strip()
+
                 cursor.execute("""
-                    INSERT INTO pack_items (
-                        pack_id, term, chunk, translation_en, note,
+                    INSERT OR IGNORE INTO pack_items (
+                        pack_id, source_uid, term, chunk, translation_en, note,
                         level, category, tags_json, cultural_note,
                         pronunciation_text, translation_helper,
                         focus, lemma, phrase
                     )
-                    VALUES (?, ?, ?, ?, ?,
+                    VALUES (?, ?, ?, ?, ?, ?,
                             ?, ?, ?, ?,
                             ?, ?,
                             'word', ?, NULL)
                 """, (
                     pack_id,
+                    source_uid,
                     item["term"],
                     item.get("chunk") or item["term"],
                     item.get("translation_en"),
@@ -711,6 +703,28 @@ def apply_grade(user_id: int, item_id: int, grade: str):
     conn.close()
 
     return new_status, new_interval, new_due
+
+
+def mark_item_mature(user_id: int, item_id: int):
+    """
+    Mark item as mature with a long interval so it won't appear again soon.
+    """
+    # Ensure row exists first
+    ensure_review_row(user_id, item_id)
+
+    new_status = "mature"
+    new_interval = 3650  # ~10 years
+    new_due = (date.today() + timedelta(days=new_interval)).isoformat()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE reviews
+        SET status = ?, interval_days = ?, due_date = ?, last_reviewed_at = ?, reps = reps + 1
+        WHERE user_id = ? AND item_id = ?
+    """, (new_status, new_interval, new_due, utc_now_iso(), user_id, item_id))
+    conn.commit()
+    conn.close()
 
 def undo_last_grade(user_id: int, item_id: int):
     """
