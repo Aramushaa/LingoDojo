@@ -1,0 +1,305 @@
+{
+  "pack_id": "it_b1_mission_airport_pressure_v1",
+  "target_language": "it",
+  "level": "B1",
+  "type": "mission",
+  "title": "✈️ Mission: Airport Pressure (B1)",
+  "description": "Authority questions, control checks, and stress language at the airport.",
+  "cards": [
+    {
+      "source_uid": "perch_qui_986584e639",
+      "card_id": "perch_qui_986584e639",
+      "focus": "phrase",
+      "meaning_en": "Why are you here?",
+      "contexts_it": [
+        "Perché è qui?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Perché è qui?"
+    },
+    {
+      "source_uid": "qual_lo_scopo_del_vi_f1ccdc1fe7",
+      "card_id": "qual_lo_scopo_del_vi_f1ccdc1fe7",
+      "focus": "phrase",
+      "meaning_en": "What is the purpose of your trip?",
+      "contexts_it": [
+        "Qual è lo scopo del viaggio?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Qual è lo scopo del viaggio?"
+    },
+    {
+      "source_uid": "quanto_tempo_rester_e047d7fc70",
+      "card_id": "quanto_tempo_rester_e047d7fc70",
+      "focus": "phrase",
+      "meaning_en": "How long will you stay?",
+      "contexts_it": [
+        "Quanto tempo resterà?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Quanto tempo resterà?"
+    },
+    {
+      "source_uid": "dove_allogger_fb02c714d2",
+      "card_id": "dove_allogger_fb02c714d2",
+      "focus": "phrase",
+      "meaning_en": "Where will you stay?",
+      "contexts_it": [
+        "Dove alloggerà?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Dove alloggerà?"
+    },
+    {
+      "source_uid": "viaggia_da_solo_91e5b8dfac",
+      "card_id": "viaggia_da_solo_91e5b8dfac",
+      "focus": "phrase",
+      "meaning_en": "Are you traveling alone?",
+      "contexts_it": [
+        "Viaggia da solo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Viaggia da solo?"
+    },
+    {
+      "source_uid": "chi_ha_fatto_la_vali_51f3a830d2",
+      "card_id": "chi_ha_fatto_la_vali_51f3a830d2",
+      "focus": "phrase",
+      "meaning_en": "Who packed the suitcase?",
+      "contexts_it": [
+        "Chi ha fatto la valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Chi ha fatto la valigia?"
+    },
+    {
+      "source_uid": "ha_preparato_lei_la__6508511512",
+      "card_id": "ha_preparato_lei_la__6508511512",
+      "focus": "phrase",
+      "meaning_en": "Did you pack your suitcase yourself?",
+      "contexts_it": [
+        "Ha preparato lei la valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha preparato lei la valigia?"
+    },
+    {
+      "source_uid": "responsabile_del_con_5565006dd7",
+      "card_id": "responsabile_del_con_5565006dd7",
+      "focus": "phrase",
+      "meaning_en": "Are you responsible for the contents?",
+      "contexts_it": [
+        "È responsabile del contenuto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "È responsabile del contenuto?"
+    },
+    {
+      "source_uid": "ha_documenti_di_rito_7f31866535",
+      "card_id": "ha_documenti_di_rito_7f31866535",
+      "focus": "phrase",
+      "meaning_en": "Do you have return documents/ticket?",
+      "contexts_it": [
+        "Ha documenti di ritorno?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha documenti di ritorno?"
+    },
+    {
+      "source_uid": "ha_una_prenotazione_2b1053bcd8",
+      "card_id": "ha_una_prenotazione_2b1053bcd8",
+      "focus": "phrase",
+      "meaning_en": "Do you have a reservation?",
+      "contexts_it": [
+        "Ha una prenotazione?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha una prenotazione?"
+    },
+    {
+      "source_uid": "sicuro_e3b5b77928",
+      "card_id": "sicuro_e3b5b77928",
+      "focus": "phrase",
+      "meaning_en": "Are you sure?",
+      "contexts_it": [
+        "È sicuro?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "È sicuro?"
+    },
+    {
+      "source_uid": "ne_certo_9ec00a0d3e",
+      "card_id": "ne_certo_9ec00a0d3e",
+      "focus": "phrase",
+      "meaning_en": "Are you certain?",
+      "contexts_it": [
+        "Ne è certo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ne è certo?"
+    },
+    {
+      "source_uid": "pu_dimostrarlo_d43634fb96",
+      "card_id": "pu_dimostrarlo_d43634fb96",
+      "focus": "phrase",
+      "meaning_en": "Can you prove it?",
+      "contexts_it": [
+        "Può dimostrarlo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Può dimostrarlo?"
+    },
+    {
+      "source_uid": "sta_dicendo_la_verit_3f2dc1186b",
+      "card_id": "sta_dicendo_la_verit_3f2dc1186b",
+      "focus": "phrase",
+      "meaning_en": "Are you telling the truth?",
+      "contexts_it": [
+        "Sta dicendo la verità?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Sta dicendo la verità?"
+    }
+  ],
+  "scenes": []
+}

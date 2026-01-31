@@ -1,0 +1,9 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,È uno scherzo.,It's a joke.,È uno scherzo.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: escalation
+phrase,,Non è un mio problema.,It's not my problem.,Non è un mio problema.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: aggressive
+phrase,,Non capisco perché mi fermate.,I don't understand why you're stopping me.,Non capisco perché mi fermate.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: confrontational
+phrase,,È ridicolo.,It's ridiculous.,È ridicolo.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: provocative
+phrase,,State esagerando.,You're exaggerating.,State esagerando.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: escalation
+phrase,,Non mi interessa.,I don't care.,Non mi interessa.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: rude
+phrase,,Lei non può farlo.,You can't do that.,Lei non può farlo.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: challenge
+phrase,,Non devo rispondere.,I don't have to answer.,Non devo rispondere.,neutral,avoid,"airport,dark",⚠️ Dark Mode: Learn for understanding only. Do NOT use casually.,,,,,,manual,,B1+,risk: defensive

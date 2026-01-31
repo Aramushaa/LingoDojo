@@ -8,7 +8,7 @@ from bot.handlers.start import start
 from bot.handlers.stats import stats
 from bot.handlers.learn import learn, on_guess_button, on_pronounce_button, on_scene_choice, on_ai_choice, on_learn_skip
 from bot.handlers.learn import on_text as on_learn_text
-from bot.handlers.settings import settings, on_settings_button
+from bot.handlers.settings import settings, on_settings_button, open_packs
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button
 from bot.handlers.home import on_home_button
 from bot.handlers.reloadpacks import reloadpacks_command
@@ -49,9 +49,11 @@ async def post_init(application):
     commands = [
         BotCommand("start", "Setup your profile (languages + level)"),
         BotCommand("learn", "Learn a new item from active packs"),
+        BotCommand("missions", "Mission flow (inside Learn)"),
+        BotCommand("packs", "Browse & activate packs"),
+        BotCommand("progress", "Stats + streak"),
         BotCommand("review", "Review due items (SRS)"),
-        BotCommand("stats", "Your progress + streak"),
-        BotCommand("settings", "Packs + languages + preferences"),
+        BotCommand("settings", "Languages + level"),
         BotCommand("setlevel", "Set your level (A1/A2/B1/...)"),
         BotCommand("help", "Show command menu"),
         BotCommand("reloadpacks", "Reload packs from /data/packs (dev)"),
@@ -73,8 +75,11 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("stats", stats))
+    app.add_handler(CommandHandler("progress", stats))
     app.add_handler(CommandHandler("learn", learn))
+    app.add_handler(CommandHandler("missions", learn))
     app.add_handler(CommandHandler("settings", settings))
+    app.add_handler(CommandHandler("packs", open_packs))
     app.add_handler(CommandHandler("review", review))
     app.add_handler(CommandHandler("setlevel", setlevel))
     app.add_handler(CommandHandler("help", help_command))
@@ -86,7 +91,7 @@ def main():
     app.add_handler(CallbackQueryHandler(on_home_button, pattern=r"^home:"))
     app.add_handler(CallbackQueryHandler(on_undo_button, pattern=r"^UNDO\|"))
     # Settings callbacks
-    app.add_handler(CallbackQueryHandler(on_settings_button,pattern=r"^(SET_(TARGET|UI|HELPER)\||SETTINGS\||PKTOG\||SETLEVEL\|)"))
+    app.add_handler(CallbackQueryHandler(on_settings_button,pattern=r"^(SET_(TARGET|UI|HELPER)\||SETTINGS\||PKTOG\||SETLEVEL\||PACKCAT\||PACKMOD\||PACKLOCK\||PACKDARK\|)"))
     # Learn callbacks
     app.add_handler(CallbackQueryHandler(on_guess_button, pattern=r"^GUESS\|"))
     app.add_handler(CallbackQueryHandler(on_pronounce_button, pattern=r"^PRON\|"))

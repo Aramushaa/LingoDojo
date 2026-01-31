@@ -1,0 +1,1145 @@
+{
+  "pack_id": "it_a1_mission_airport_v2",
+  "target_language": "it",
+  "level": "A1",
+  "type": "mission",
+  "title": "✈️ Mission: Airport Survival (A1)",
+  "description": "Passport, check-in, gate, luggage, and delays — the stuff you actually need.",
+  "cards": [
+    {
+      "source_uid": "dov_il_gate_d_imbarc_1ecb0a893a",
+      "card_id": "dov_il_gate_d_imbarc_1ecb0a893a",
+      "focus": "phrase",
+      "meaning_en": "Where is the boarding gate for UA 111?",
+      "contexts_it": [
+        "Dov'è il gate d'imbarco per il volo UA 111?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Dov'è il gate d'imbarco per il volo UA 111?"
+    },
+    {
+      "source_uid": "posso_vedere_la_sua__f19aeb70fa",
+      "card_id": "posso_vedere_la_sua__f19aeb70fa",
+      "focus": "phrase",
+      "meaning_en": "May I see your boarding pass, please?",
+      "contexts_it": [
+        "Posso vedere la sua carta d'imbarco, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: At check-in. Ask about your boarding pass or reservation."
+      },
+      "phrase": "Posso vedere la sua carta d'imbarco, per favore?"
+    },
+    {
+      "source_uid": "il_volo_123_sar_in_r_796f6992ed",
+      "card_id": "il_volo_123_sar_in_r_796f6992ed",
+      "focus": "phrase",
+      "meaning_en": "Is Flight 123 going to be delayed?",
+      "contexts_it": [
+        "Il volo 123 sarà in ritardo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Il volo 123 sarà in ritardo?"
+    },
+    {
+      "source_uid": "come_arrivo_al_gate__2beb718780",
+      "card_id": "come_arrivo_al_gate__2beb718780",
+      "focus": "phrase",
+      "meaning_en": "How do I get to Gate 5?",
+      "contexts_it": [
+        "Come arrivo al Gate 5?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Come arrivo al Gate 5?"
+    },
+    {
+      "source_uid": "il_nostro_volo_in_ri_a13b73153c",
+      "card_id": "il_nostro_volo_in_ri_a13b73153c",
+      "focus": "phrase",
+      "meaning_en": "Our flight is delayed.",
+      "contexts_it": [
+        "Il nostro volo è in ritardo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Il nostro volo è in ritardo."
+    },
+    {
+      "source_uid": "il_nostro_volo_stato_68c1d04dda",
+      "card_id": "il_nostro_volo_stato_68c1d04dda",
+      "focus": "phrase",
+      "meaning_en": "Our flight was canceled.",
+      "contexts_it": [
+        "Il nostro volo è stato cancellato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Il nostro volo è stato cancellato."
+    },
+    {
+      "source_uid": "la_compagnia_aerea_h_b5a6917003",
+      "card_id": "la_compagnia_aerea_h_b5a6917003",
+      "focus": "phrase",
+      "meaning_en": "The airline lost my suitcase.",
+      "contexts_it": [
+        "La compagnia aerea ha perso la mia valigia."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "La compagnia aerea ha perso la mia valigia."
+    },
+    {
+      "source_uid": "la_mia_valigia_stata_1bd7df9cbb",
+      "card_id": "la_mia_valigia_stata_1bd7df9cbb",
+      "focus": "phrase",
+      "meaning_en": "My suitcase was stolen at the airport.",
+      "contexts_it": [
+        "La mia valigia è stata rubata all'aeroporto."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "La mia valigia è stata rubata all'aeroporto."
+    },
+    {
+      "source_uid": "posso_vedere_il_suo__2d3147dba4",
+      "card_id": "posso_vedere_il_suo__2d3147dba4",
+      "focus": "phrase",
+      "meaning_en": "May I see your passport, please?",
+      "contexts_it": [
+        "Posso vedere il suo passaporto, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control. Speak to the officer politely."
+      },
+      "phrase": "Posso vedere il suo passaporto, per favore?"
+    },
+    {
+      "source_uid": "mi_pu_mostrare_il_su_627ce64018",
+      "card_id": "mi_pu_mostrare_il_su_627ce64018",
+      "focus": "phrase",
+      "meaning_en": "Can you show me your passport, please?",
+      "contexts_it": [
+        "Mi può mostrare il suo passaporto, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control. Speak to the officer politely."
+      },
+      "phrase": "Mi può mostrare il suo passaporto, per favore?"
+    },
+    {
+      "source_uid": "dov_il_gate_20aa409717",
+      "card_id": "dov_il_gate_20aa409717",
+      "focus": "phrase",
+      "meaning_en": "Where is the gate?",
+      "contexts_it": [
+        "Dov'è il gate?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Dov'è il gate?"
+    },
+    {
+      "source_uid": "dov_la_dogana_1069ae93d9",
+      "card_id": "dov_la_dogana_1069ae93d9",
+      "focus": "phrase",
+      "meaning_en": "Where is Customs?",
+      "contexts_it": [
+        "Dov'è la dogana?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "mission"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Airport survival. Use this naturally."
+      },
+      "phrase": "Dov'è la dogana?"
+    },
+    {
+      "source_uid": "dov_la_mia_valigia_561bc3f40c",
+      "card_id": "dov_la_mia_valigia_561bc3f40c",
+      "focus": "phrase",
+      "meaning_en": "Where's my suitcase?",
+      "contexts_it": [
+        "Dov'è la mia valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "Dov'è la mia valigia?"
+    },
+    {
+      "source_uid": "dov_la_sua_valigia_03e2282b38",
+      "card_id": "dov_la_sua_valigia_03e2282b38",
+      "focus": "phrase",
+      "meaning_en": "Where's your suitcase?",
+      "contexts_it": [
+        "Dov'è la sua valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "Dov'è la sua valigia?"
+    },
+    {
+      "source_uid": "qual_la_sua_valigia_02fb6c5d15",
+      "card_id": "qual_la_sua_valigia_02fb6c5d15",
+      "focus": "phrase",
+      "meaning_en": "Which is your suitcase?",
+      "contexts_it": [
+        "Qual è la sua valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "Qual è la sua valigia?"
+    },
+    {
+      "source_uid": "il_volo_23_in_orario_0651b1aa2d",
+      "card_id": "il_volo_23_in_orario_0651b1aa2d",
+      "focus": "phrase",
+      "meaning_en": "Is flight 23 on time?",
+      "contexts_it": [
+        "Il volo 23 è in orario?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "mission"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Airport survival. Use this naturally."
+      },
+      "phrase": "Il volo 23 è in orario?"
+    },
+    {
+      "source_uid": "passaporto_per_favor_759f7f84c1",
+      "card_id": "passaporto_per_favor_759f7f84c1",
+      "focus": "phrase",
+      "meaning_en": "Passport, please.",
+      "contexts_it": [
+        "Passaporto, per favore."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control. Speak to the officer politely."
+      },
+      "phrase": "Passaporto, per favore."
+    },
+    {
+      "source_uid": "il_volo_123_arrivato_c0521f8dee",
+      "card_id": "il_volo_123_arrivato_c0521f8dee",
+      "focus": "phrase",
+      "meaning_en": "Has Flight 123 arrived?",
+      "contexts_it": [
+        "Il volo 123 è arrivato?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "mission"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Airport survival. Use this naturally."
+      },
+      "phrase": "Il volo 123 è arrivato?"
+    },
+    {
+      "source_uid": "qual_l_ora_di_imbarc_903e15f4c2",
+      "card_id": "qual_l_ora_di_imbarc_903e15f4c2",
+      "focus": "phrase",
+      "meaning_en": "What's the boarding time?",
+      "contexts_it": [
+        "Qual è l'ora di imbarco?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Qual è l'ora di imbarco?"
+    },
+    {
+      "source_uid": "dov_il_banco_check_i_43b9fc80de",
+      "card_id": "dov_il_banco_check_i_43b9fc80de",
+      "focus": "phrase",
+      "meaning_en": "Where is the check-in counter?",
+      "contexts_it": [
+        "Dov'è il banco check-in?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: At check-in. Ask about your boarding pass or reservation."
+      },
+      "phrase": "Dov'è il banco check-in?"
+    },
+    {
+      "source_uid": "ha_visto_la_mia_vali_4007763410",
+      "card_id": "ha_visto_la_mia_vali_4007763410",
+      "focus": "phrase",
+      "meaning_en": "Have you seen my suitcase?",
+      "contexts_it": [
+        "Ha visto la mia valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "Ha visto la mia valigia?"
+    },
+    {
+      "source_uid": "dov_il_suo_passaport_7f6366f6b1",
+      "card_id": "dov_il_suo_passaport_7f6366f6b1",
+      "focus": "phrase",
+      "meaning_en": "Where's your passport?",
+      "contexts_it": [
+        "Dov'è il suo passaporto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control. Speak to the officer politely."
+      },
+      "phrase": "Dov'è il suo passaporto?"
+    },
+    {
+      "source_uid": "quanto_dista_l_aerop_618a9a5677",
+      "card_id": "quanto_dista_l_aerop_618a9a5677",
+      "focus": "phrase",
+      "meaning_en": "How far is it to the airport?",
+      "contexts_it": [
+        "Quanto dista l'aeroporto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "mission"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Airport survival. Use this naturally."
+      },
+      "phrase": "Quanto dista l'aeroporto?"
+    },
+    {
+      "source_uid": "quanto_pesa_la_sua_v_b1c5bcd430",
+      "card_id": "quanto_pesa_la_sua_v_b1c5bcd430",
+      "focus": "phrase",
+      "meaning_en": "What's the weight of your suitcase?",
+      "contexts_it": [
+        "Quanto pesa la sua valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage drop / baggage problems."
+      },
+      "phrase": "Quanto pesa la sua valigia?"
+    },
+    {
+      "source_uid": "dov_il_controllo_di__ad40756d91",
+      "card_id": "dov_il_controllo_di__ad40756d91",
+      "focus": "phrase",
+      "meaning_en": "Where is the security check?",
+      "contexts_it": [
+        "Dov'è il controllo di sicurezza?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "security"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Security check. Ask where to go."
+      },
+      "phrase": "Dov'è il controllo di sicurezza?"
+    },
+    {
+      "source_uid": "dov_il_ritiro_bagagl_41634482cf",
+      "card_id": "dov_il_ritiro_bagagl_41634482cf",
+      "focus": "phrase",
+      "meaning_en": "Where is baggage claim?",
+      "contexts_it": [
+        "Dov'è il ritiro bagagli?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Dov'è il ritiro bagagli?"
+    },
+    {
+      "source_uid": "dov_il_nastro_bagagl_c0fd8aaa05",
+      "card_id": "dov_il_nastro_bagagl_c0fd8aaa05",
+      "focus": "phrase",
+      "meaning_en": "Where is the baggage belt?",
+      "contexts_it": [
+        "Dov'è il nastro bagagli?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Dov'è il nastro bagagli?"
+    },
+    {
+      "source_uid": "dov_l_uscita_eaf0cca5d8",
+      "card_id": "dov_l_uscita_eaf0cca5d8",
+      "focus": "phrase",
+      "meaning_en": "Where is the exit?",
+      "contexts_it": [
+        "Dov'è l'uscita?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "nav"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your way in the airport."
+      },
+      "phrase": "Dov'è l'uscita?"
+    },
+    {
+      "source_uid": "dov_il_bagno_4207e3bbcd",
+      "card_id": "dov_il_bagno_4207e3bbcd",
+      "focus": "phrase",
+      "meaning_en": "Where is the bathroom?",
+      "contexts_it": [
+        "Dov'è il bagno?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "nav"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your way in the airport."
+      },
+      "phrase": "Dov'è il bagno?"
+    },
+    {
+      "source_uid": "ho_perso_la_carta_d__c11c72f42a",
+      "card_id": "ho_perso_la_carta_d__c11c72f42a",
+      "focus": "phrase",
+      "meaning_en": "I lost my boarding pass.",
+      "contexts_it": [
+        "Ho perso la carta d'imbarco."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Ho perso la carta d'imbarco."
+    },
+    {
+      "source_uid": "pu_ripetere_per_favo_b6636167c0",
+      "card_id": "pu_ripetere_per_favo_b6636167c0",
+      "focus": "phrase",
+      "meaning_en": "Can you repeat, please?",
+      "contexts_it": [
+        "Può ripetere, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Può ripetere, per favore?"
+    },
+    {
+      "source_uid": "non_capisco_a644614ded",
+      "card_id": "non_capisco_a644614ded",
+      "focus": "phrase",
+      "meaning_en": "I don't understand.",
+      "contexts_it": [
+        "Non capisco."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Non capisco."
+    },
+    {
+      "source_uid": "ecco_la_mia_carta_d__53229e0ef1",
+      "card_id": "ecco_la_mia_carta_d__53229e0ef1",
+      "focus": "phrase",
+      "meaning_en": "Here is my boarding pass.",
+      "contexts_it": [
+        "Ecco la mia carta d'imbarco."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: At check-in. Show your documents."
+      },
+      "phrase": "Ecco la mia carta d'imbarco."
+    },
+    {
+      "source_uid": "ecco_il_mio_passapor_7f1c088556",
+      "card_id": "ecco_il_mio_passapor_7f1c088556",
+      "focus": "phrase",
+      "meaning_en": "Here is my passport.",
+      "contexts_it": [
+        "Ecco il mio passaporto."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control. Show your documents."
+      },
+      "phrase": "Ecco il mio passaporto."
+    },
+    {
+      "source_uid": "un_attimo_per_favore_59d43bc26f",
+      "card_id": "un_attimo_per_favore_59d43bc26f",
+      "focus": "phrase",
+      "meaning_en": "One moment, please.",
+      "contexts_it": [
+        "Un attimo, per favore."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Un attimo, per favore."
+    },
+    {
+      "source_uid": "dov_la_porta_d_imbar_e6603c07a9",
+      "card_id": "dov_la_porta_d_imbar_e6603c07a9",
+      "focus": "phrase",
+      "meaning_en": "Where is the boarding gate?",
+      "contexts_it": [
+        "Dov'è la porta d'imbarco?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Dov'è la porta d'imbarco?"
+    },
+    {
+      "source_uid": "a_che_ora_parte_il_v_af1df693ff",
+      "card_id": "a_che_ora_parte_il_v_af1df693ff",
+      "focus": "phrase",
+      "meaning_en": "What time does the flight depart?",
+      "contexts_it": [
+        "A che ora parte il volo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "A che ora parte il volo?"
+    },
+    {
+      "source_uid": "il_volo_in_orario_16b79d9a15",
+      "card_id": "il_volo_in_orario_16b79d9a15",
+      "focus": "phrase",
+      "meaning_en": "Is the flight on time?",
+      "contexts_it": [
+        "Il volo è in orario?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Il volo è in orario?"
+    },
+    {
+      "source_uid": "il_volo_in_ritardo_ab76fd25f2",
+      "card_id": "il_volo_in_ritardo_ab76fd25f2",
+      "focus": "phrase",
+      "meaning_en": "Is the flight delayed?",
+      "contexts_it": [
+        "Il volo è in ritardo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Il volo è in ritardo?"
+    },
+    {
+      "source_uid": "il_volo_stato_cancel_42e92352c8",
+      "card_id": "il_volo_stato_cancel_42e92352c8",
+      "focus": "phrase",
+      "meaning_en": "The flight was canceled.",
+      "contexts_it": [
+        "Il volo è stato cancellato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Il volo è stato cancellato."
+    },
+    {
+      "source_uid": "posso_fare_il_check__757c269112",
+      "card_id": "posso_fare_il_check__757c269112",
+      "focus": "phrase",
+      "meaning_en": "Can I check in here?",
+      "contexts_it": [
+        "Posso fare il check-in qui?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Check-in and boarding pass."
+      },
+      "phrase": "Posso fare il check-in qui?"
+    },
+    {
+      "source_uid": "posso_vedere_la_cart_f9df915e92",
+      "card_id": "posso_vedere_la_cart_f9df915e92",
+      "focus": "phrase",
+      "meaning_en": "May I see the boarding pass, please?",
+      "contexts_it": [
+        "Posso vedere la carta d'imbarco, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Check-in and boarding pass."
+      },
+      "phrase": "Posso vedere la carta d'imbarco, per favore?"
+    },
+    {
+      "source_uid": "qual_il_mio_posto_745e570952",
+      "card_id": "qual_il_mio_posto_745e570952",
+      "focus": "phrase",
+      "meaning_en": "What is my seat?",
+      "contexts_it": [
+        "Qual è il mio posto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Check-in and boarding pass."
+      },
+      "phrase": "Qual è il mio posto?"
+    },
+    {
+      "source_uid": "questo_il_mio_gate_02803c3a40",
+      "card_id": "questo_il_mio_gate_02803c3a40",
+      "focus": "phrase",
+      "meaning_en": "Is this my gate?",
+      "contexts_it": [
+        "È questo il mio gate?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "È questo il mio gate?"
+    },
+    {
+      "source_uid": "posso_vedere_il_suo__0a532176fd",
+      "card_id": "posso_vedere_il_suo__0a532176fd",
+      "focus": "phrase",
+      "meaning_en": "May I see your passport?",
+      "contexts_it": [
+        "Posso vedere il suo passaporto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Posso vedere il suo passaporto?"
+    },
+    {
+      "source_uid": "mi_pu_mostrare_il_su_d3c6682c21",
+      "card_id": "mi_pu_mostrare_il_su_d3c6682c21",
+      "focus": "phrase",
+      "meaning_en": "Can you show me your passport?",
+      "contexts_it": [
+        "Mi può mostrare il suo passaporto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Mi può mostrare il suo passaporto?"
+    },
+    {
+      "source_uid": "dov_il_mio_passaport_bb818778ad",
+      "card_id": "dov_il_mio_passaport_bb818778ad",
+      "focus": "phrase",
+      "meaning_en": "Where is my passport?",
+      "contexts_it": [
+        "Dov'è il mio passaporto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Dov'è il mio passaporto?"
+    },
+    {
+      "source_uid": "ho_perso_il_passapor_ead103f206",
+      "card_id": "ho_perso_il_passapor_ead103f206",
+      "focus": "phrase",
+      "meaning_en": "I lost my passport.",
+      "contexts_it": [
+        "Ho perso il passaporto."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Ho perso il passaporto."
+    },
+    {
+      "source_uid": "questa_la_mia_valigi_d6621d9b92",
+      "card_id": "questa_la_mia_valigi_d6621d9b92",
+      "focus": "phrase",
+      "meaning_en": "This is my suitcase.",
+      "contexts_it": [
+        "Questa è la mia valigia."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Questa è la mia valigia."
+    },
+    {
+      "source_uid": "la_mia_valigia_stata_48765a888a",
+      "card_id": "la_mia_valigia_stata_48765a888a",
+      "focus": "phrase",
+      "meaning_en": "My suitcase was stolen.",
+      "contexts_it": [
+        "La mia valigia è stata rubata."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "La mia valigia è stata rubata."
+    },
+    {
+      "source_uid": "quanto_pesa_la_valig_db3acea3a3",
+      "card_id": "quanto_pesa_la_valig_db3acea3a3",
+      "focus": "phrase",
+      "meaning_en": "How much does the suitcase weigh?",
+      "contexts_it": [
+        "Quanto pesa la valigia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Quanto pesa la valigia?"
+    },
+    {
+      "source_uid": "dove_ritiro_i_bagagl_c727aa2723",
+      "card_id": "dove_ritiro_i_bagagl_c727aa2723",
+      "focus": "phrase",
+      "meaning_en": "Where do I collect my baggage?",
+      "contexts_it": [
+        "Dove ritiro i bagagli?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Dove ritiro i bagagli?"
+    },
+    {
+      "source_uid": "ho_qualcosa_da_dichi_2543922fd8",
+      "card_id": "ho_qualcosa_da_dichi_2543922fd8",
+      "focus": "phrase",
+      "meaning_en": "I have something to declare",
+      "contexts_it": [
+        "Ho qualcosa da dichiarare?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Ho qualcosa da dichiarare?"
+    },
+    {
+      "source_uid": "non_ho_nulla_da_dich_d560e272b0",
+      "card_id": "non_ho_nulla_da_dich_d560e272b0",
+      "focus": "phrase",
+      "meaning_en": "I have nothing to declare.",
+      "contexts_it": [
+        "Non ho nulla da dichiarare."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "documents"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Passport control and documents."
+      },
+      "phrase": "Non ho nulla da dichiarare."
+    }
+  ],
+  "scenes": []
+}

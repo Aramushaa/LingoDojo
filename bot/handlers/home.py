@@ -2,9 +2,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.learn import learn
-from bot.handlers.review import review
 from bot.handlers.stats import stats
-from bot.handlers.settings import settings
+from bot.handlers.settings import settings, open_packs
 
 
 async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -18,10 +17,14 @@ async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "home:learn":
         await learn(update, context)
 
-    elif data == "home:review":
-        await review(update, context)
+    elif data == "home:missions":
+        # Missions are integrated into Learn for now
+        await learn(update, context)
 
-    elif data == "home:stats":
+    elif data == "home:packs":
+        await open_packs(update, context)
+
+    elif data == "home:progress":
         await stats(update, context)
 
     elif data == "home:settings":

@@ -149,11 +149,38 @@ def make_pack_from_csv(
 if __name__ == "__main__":
     # Example usage (edit these values)
     make_pack_from_csv(
-        csv_path="data/pack_sources/draft_it_a1_airport.csv",
+        csv_path="data/pack_sources/airport_a1_core_v2.csv",
         out_path="data/packs/it_a1_mission_airport_v2.json",
         pack_id="it_a1_mission_airport_v2",
         target_language="it",
         level="A1",
-        title="✈️ Mission: Navigate an Italian Airport (A1)",
-        description="Survive check-in, security, boarding, arrivals, and baggage with simple Italian.",
+        title="✈️ Mission: Airport Survival (A1)",
+        description="Passport, check-in, gate, luggage, and delays — the stuff you actually need.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/airport_a2_glue.csv",
+        out_path="data/packs/it_a2_mission_airport_glue_v1.json",
+        pack_id="it_a2_mission_airport_glue_v1",
+        target_language="it",
+        level="A2",
+        title="✈️ Mission: Airport Glue (A2)",
+        description="Longer, more natural airport sentences for real-world situations.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/airport_b1_pressure.csv",
+        out_path="data/packs/it_b1_mission_airport_pressure_v1.json",
+        pack_id="it_b1_mission_airport_pressure_v1",
+        target_language="it",
+        level="B1",
+        title="✈️ Mission: Airport Pressure (B1)",
+        description="Authority questions, control checks, and stress language at the airport.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/airport_b1_dark_mode.csv",
+        out_path="data/packs/it_b1_mission_airport_dark_v1.json",
+        pack_id="it_b1_mission_airport_dark_v1",
+        target_language="it",
+        level="B1+",
+        title="✈️ Mission: Airport Dark Mode (B1+)",
+        description="Risky phrases. Learn for understanding only; do not use casually.",
     )

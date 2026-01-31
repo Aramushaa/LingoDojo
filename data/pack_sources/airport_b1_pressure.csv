@@ -1,0 +1,15 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,Perché è qui?,Why are you here?,Perché è qui?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Qual è lo scopo del viaggio?,What is the purpose of your trip?,Qual è lo scopo del viaggio?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Quanto tempo resterà?,How long will you stay?,Quanto tempo resterà?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Dove alloggerà?,Where will you stay?,Dove alloggerà?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Viaggia da solo?,Are you traveling alone?,Viaggia da solo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Chi ha fatto la valigia?,Who packed the suitcase?,Chi ha fatto la valigia?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Ha preparato lei la valigia?,Did you pack your suitcase yourself?,Ha preparato lei la valigia?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,È responsabile del contenuto?,Are you responsible for the contents?,È responsabile del contenuto?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Ha documenti di ritorno?,Do you have return documents/ticket?,Ha documenti di ritorno?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Ha una prenotazione?,Do you have a reservation?,Ha una prenotazione?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,È sicuro?,Are you sure?,È sicuro?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Ne è certo?,Are you certain?,Ne è certo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Può dimostrarlo?,Can you prove it?,Può dimostrarlo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Sta dicendo la verità?,Are you telling the truth?,Sta dicendo la verità?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials

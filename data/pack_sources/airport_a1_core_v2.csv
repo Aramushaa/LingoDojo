@@ -1,0 +1,55 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,Dov'è il gate d'imbarco per il volo UA 111?,Where is the boarding gate for UA 111?,Dov'è il gate d'imbarco per il volo UA 111?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,tatoeba,13331107,A1,core survival
+phrase,,"Posso vedere la sua carta d'imbarco, per favore?","May I see your boarding pass, please?","Posso vedere la sua carta d'imbarco, per favore?",polite,safe,"airport,checkin",Mission: At check-in. Ask about your boarding pass or reservation.,,,,,,tatoeba,6299193,A1,core survival
+phrase,,Il volo 123 sarà in ritardo?,Is Flight 123 going to be delayed?,Il volo 123 sarà in ritardo?,neutral,safe,"airport,problems",Mission: Delays/cancellations. Ask what’s happening.,,,,,,tatoeba,5085843,A1,core survival
+phrase,,Come arrivo al Gate 5?,How do I get to Gate 5?,Come arrivo al Gate 5?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,tatoeba,2993074,A1,core survival
+phrase,,Il nostro volo è in ritardo.,Our flight is delayed.,Il nostro volo è in ritardo.,neutral,safe,"airport,problems",Mission: Delays/cancellations. Ask what’s happening.,,,,,,tatoeba,13071816,A1,core survival
+phrase,,Il nostro volo è stato cancellato.,Our flight was canceled.,Il nostro volo è stato cancellato.,neutral,safe,"airport,problems",Mission: Delays/cancellations. Ask what’s happening.,,,,,,tatoeba,1361178,A1,core survival
+phrase,,La compagnia aerea ha perso la mia valigia.,The airline lost my suitcase.,La compagnia aerea ha perso la mia valigia.,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,6668945,A1,core survival
+phrase,,La mia valigia è stata rubata all'aeroporto.,My suitcase was stolen at the airport.,La mia valigia è stata rubata all'aeroporto.,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,12596655,A1,core survival
+phrase,,"Posso vedere il suo passaporto, per favore?","May I see your passport, please?","Posso vedere il suo passaporto, per favore?",polite,safe,"airport,documents",Mission: Passport control. Speak to the officer politely.,,,,,,tatoeba,750456,A1,core survival
+phrase,,"Mi può mostrare il suo passaporto, per favore?","Show me your passport, please.","Mi può mostrare il suo passaporto, per favore?",polite,safe,"airport,documents",Mission: Passport control. Speak to the officer politely.,,,,,,tatoeba,621198,A1,core survival
+phrase,,Dov'è il gate?,Where is the gate?,Dov'è il gate?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,tatoeba,1397544,A1,core survival
+phrase,,Dov'è la dogana?,Where is Customs?,Dov'è la dogana?,neutral,safe,"airport,mission",Mission: Airport survival. Use this naturally.,,,,,,tatoeba,4782308,A1,core survival
+phrase,,Dov'è la mia valigia?,Where's my suitcase?,Dov'è la mia valigia?,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,2286944,A1,core survival
+phrase,,Dov'è la sua valigia?,Where's your suitcase?,Dov'è la sua valigia?,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,5973930,A1,core survival
+phrase,,Qual è la sua valigia?,Which is your luggage?,Qual è la sua valigia?,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,3294287,A1,core survival
+phrase,,Il volo 23 è in orario?,Is flight 23 on time?,Il volo 23 è in orario?,neutral,safe,"airport,mission",Mission: Airport survival. Use this naturally.,,,,,,tatoeba,936017,A1,core survival
+phrase,,"Passaporto, per favore.","Passport, please.","Passaporto, per favore.",polite,safe,"airport,documents",Mission: Passport control. Speak to the officer politely.,,,,,,tatoeba,1563303,A1,core survival
+phrase,,Il volo 123 è arrivato?,Has Flight 123 arrived?,Il volo 123 è arrivato?,neutral,safe,"airport,mission",Mission: Airport survival. Use this naturally.,,,,,,tatoeba,5333334,A1,core survival
+phrase,,Qual è l'ora di imbarco?,What's the boarding time?,Qual è l'ora di imbarco?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,tatoeba,4137784,A1,core survival
+phrase,,Dov'è il banco check-in?,Where is the check-in counter?,Dov'è il banco check-in?,neutral,safe,"airport,checkin",Mission: At check-in. Ask about your boarding pass or reservation.,,,,,,tatoeba,5688257,A1,core survival
+phrase,,Ha visto la mia valigia?,Have you seen my suitcase?,Ha visto la mia valigia?,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,13352564,A1,core survival
+phrase,,Dov'è il suo passaporto?,Where's your passport?,Dov'è il suo passaporto?,neutral,safe,"airport,documents",Mission: Passport control. Speak to the officer politely.,,,,,,tatoeba,13714497,A1,core survival
+phrase,,Quanto dista l'aeroporto?,How far is it to the airport?,Quanto dista l'aeroporto?,neutral,safe,"airport,mission",Mission: Airport survival. Use this naturally.,,,,,,tatoeba,702836,A1,core survival
+phrase,,Quanto pesa la sua valigia?,What's the weight of your suitcase?,Quanto pesa la sua valigia?,neutral,safe,"airport,baggage",Mission: Baggage drop / baggage problems.,,,,,,tatoeba,1608647,A1,core survival
+phrase,,Dov'è il controllo di sicurezza?,Where is the security check?,Dov'è il controllo di sicurezza?,neutral,safe,"airport,security",Mission: Security check. Ask where to go.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è il ritiro bagagli?,Where is baggage claim?,Dov'è il ritiro bagagli?,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è il nastro bagagli?,Where is the baggage belt?,Dov'è il nastro bagagli?,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è l'uscita?,Where is the exit?,Dov'è l'uscita?,neutral,safe,"airport,nav",Mission: Find your way in the airport.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è il bagno?,Where is the bathroom?,Dov'è il bagno?,neutral,safe,"airport,nav",Mission: Find your way in the airport.,,,,,,manual,,A1,added essentials
+phrase,,Ho perso la carta d'imbarco.,I lost my boarding pass.,Ho perso la carta d'imbarco.,neutral,safe,"airport,problems",Mission: Delays/cancellations. Ask what’s happening.,,,,,,manual,,A1,added essentials
+phrase,,"Può ripetere, per favore?","Can you repeat, please?","Può ripetere, per favore?",polite,safe,"airport,help",Mission: Ask for help politely.,,,,,,manual,,A1,added essentials
+phrase,,Non capisco.,I don't understand.,Non capisco.,neutral,safe,"airport,help",Mission: Ask for help politely.,,,,,,manual,,A1,added essentials
+phrase,,Ecco la mia carta d'imbarco.,Here is my boarding pass.,Ecco la mia carta d'imbarco.,neutral,safe,"airport,checkin",Mission: At check-in. Show your documents.,,,,,,manual,,A1,added essentials
+phrase,,Ecco il mio passaporto.,Here is my passport.,Ecco il mio passaporto.,neutral,safe,"airport,documents",Mission: Passport control. Show your documents.,,,,,,manual,,A1,added essentials
+phrase,,"Un attimo, per favore.","One moment, please.","Un attimo, per favore.",polite,safe,"airport,help",Mission: Ask for help politely.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è la porta d'imbarco?,Where is the boarding gate?,Dov'è la porta d'imbarco?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,manual,,A1,added essentials
+phrase,,A che ora parte il volo?,What time does the flight depart?,A che ora parte il volo?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,manual,,A1,added essentials
+phrase,,Il volo è in orario?,Is the flight on time?,Il volo è in orario?,neutral,safe,"airport,problems",Mission: Delays/cancellations and rebooking.,,,,,,manual,,A1,added essentials
+phrase,,Il volo è in ritardo?,Is the flight delayed?,Il volo è in ritardo?,neutral,safe,"airport,problems",Mission: Delays/cancellations and rebooking.,,,,,,manual,,A1,added essentials
+phrase,,Il volo è stato cancellato.,The flight was canceled.,Il volo è stato cancellato.,neutral,safe,"airport,problems",Mission: Delays/cancellations and rebooking.,,,,,,manual,,A1,added essentials
+phrase,,Posso fare il check-in qui?,Can I check in here?,Posso fare il check-in qui?,neutral,safe,"airport,checkin",Mission: Check-in and boarding pass.,,,,,,manual,,A1,added essentials
+phrase,,"Posso vedere la carta d'imbarco, per favore?","May I see the boarding pass, please?","Posso vedere la carta d'imbarco, per favore?",polite,safe,"airport,checkin",Mission: Check-in and boarding pass.,,,,,,manual,,A1,added essentials
+phrase,,Qual è il mio posto?,What is my seat?,Qual è il mio posto?,neutral,safe,"airport,checkin",Mission: Check-in and boarding pass.,,,,,,manual,,A1,added essentials
+phrase,,È questo il mio gate?,Is this my gate?,È questo il mio gate?,neutral,safe,"airport,gate",Mission: Find your gate and boarding info.,,,,,,manual,,A1,added essentials
+phrase,,Posso vedere il suo passaporto?,May I see your passport?,Posso vedere il suo passaporto?,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials
+phrase,,Mi può mostrare il suo passaporto?,Can you show me your passport?,Mi può mostrare il suo passaporto?,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials
+phrase,,Dov'è il mio passaporto?,Where is my passport?,Dov'è il mio passaporto?,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials
+phrase,,Ho perso il passaporto.,I lost my passport.,Ho perso il passaporto.,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials
+phrase,,Questa è la mia valigia.,This is my suitcase.,Questa è la mia valigia.,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,La mia valigia è stata rubata.,My suitcase was stolen.,La mia valigia è stata rubata.,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,Quanto pesa la valigia?,How much does the suitcase weigh?,Quanto pesa la valigia?,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,Dove ritiro i bagagli?,Where do I collect my baggage?,Dove ritiro i bagagli?,neutral,safe,"airport,baggage",Mission: Baggage claim / baggage problems.,,,,,,manual,,A1,added essentials
+phrase,,Ho qualcosa da dichiarare?,Do I have something to declare?,Ho qualcosa da dichiarare?,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials
+phrase,,Non ho nulla da dichiarare.,I have nothing to declare.,Non ho nulla da dichiarare.,neutral,safe,"airport,documents",Mission: Passport control and documents.,,,,,,manual,,A1,added essentials

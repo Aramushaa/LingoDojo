@@ -1,0 +1,599 @@
+{
+  "pack_id": "it_a2_mission_airport_glue_v1",
+  "target_language": "it",
+  "level": "A2",
+  "type": "mission",
+  "title": "✈️ Mission: Airport Glue (A2)",
+  "description": "Longer, more natural airport sentences for real-world situations.",
+  "cards": [
+    {
+      "source_uid": "a_causa_del_maltempo_30e4e7adea",
+      "card_id": "a_causa_del_maltempo_30e4e7adea",
+      "focus": "phrase",
+      "meaning_en": "Because of the bad weather, the plane's departure was delayed by two hours.",
+      "contexts_it": [
+        "A causa del maltempo, la partenza dell'aereo era in ritardo di due ore."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "A causa del maltempo, la partenza dell'aereo era in ritardo di due ore."
+    },
+    {
+      "source_uid": "il_mio_volo_stato_ca_d2157829a1",
+      "card_id": "il_mio_volo_stato_ca_d2157829a1",
+      "focus": "phrase",
+      "meaning_en": "My flight was canceled and I can't leave until tomorrow.",
+      "contexts_it": [
+        "Il mio volo è stato cancellato e non posso partire fino a domani."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Il mio volo è stato cancellato e non posso partire fino a domani."
+    },
+    {
+      "source_uid": "questa_la_chiamata_d_74c5da0eae",
+      "card_id": "questa_la_chiamata_d_74c5da0eae",
+      "focus": "phrase",
+      "meaning_en": "This is the final boarding call for Japan Airlines Flight 731.",
+      "contexts_it": [
+        "Questa è la chiamata d'imbarco finale per il volo 731 di Japan Airlines."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Questa è la chiamata d'imbarco finale per il volo 731 di Japan Airlines."
+    },
+    {
+      "source_uid": "sono_in_ritardo_c46115518c",
+      "card_id": "sono_in_ritardo_c46115518c",
+      "focus": "phrase",
+      "meaning_en": "Am I late?",
+      "contexts_it": [
+        "Sono in ritardo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Sono in ritardo?"
+    },
+    {
+      "source_uid": "scusi_il_ritardo_8183fc6e7d",
+      "card_id": "scusi_il_ritardo_8183fc6e7d",
+      "focus": "phrase",
+      "meaning_en": "Sorry for being late.",
+      "contexts_it": [
+        "Scusi il ritardo."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Scusi il ritardo."
+    },
+    {
+      "source_uid": "saremo_in_ritardo_883b97c063",
+      "card_id": "saremo_in_ritardo_883b97c063",
+      "focus": "phrase",
+      "meaning_en": "Are we going to be late?",
+      "contexts_it": [
+        "Saremo in ritardo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Saremo in ritardo?"
+    },
+    {
+      "source_uid": "ci_scusiamo_per_il_r_fd94e6f9b0",
+      "card_id": "ci_scusiamo_per_il_r_fd94e6f9b0",
+      "focus": "phrase",
+      "meaning_en": "We apologize for the delay.",
+      "contexts_it": [
+        "Ci scusiamo per il ritardo."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Ci scusiamo per il ritardo."
+    },
+    {
+      "source_uid": "cosa_sta_causando_il_e6853ac630",
+      "card_id": "cosa_sta_causando_il_e6853ac630",
+      "focus": "phrase",
+      "meaning_en": "What's causing the delay?",
+      "contexts_it": [
+        "Cosa sta causando il ritardo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Cosa sta causando il ritardo?"
+    },
+    {
+      "source_uid": "il_mio_bagaglio_non__ca47727358",
+      "card_id": "il_mio_bagaglio_non__ca47727358",
+      "focus": "phrase",
+      "meaning_en": "My baggage didn't arrive.",
+      "contexts_it": [
+        "Il mio bagaglio non è arrivato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "baggage"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Baggage claim / baggage problems."
+      },
+      "phrase": "Il mio bagaglio non è arrivato."
+    },
+    {
+      "source_uid": "dove_posso_fare_un_r_5e438b1f58",
+      "card_id": "dove_posso_fare_un_r_5e438b1f58",
+      "focus": "phrase",
+      "meaning_en": "Where can I file a complaint?",
+      "contexts_it": [
+        "Dove posso fare un reclamo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Dove posso fare un reclamo?"
+    },
+    {
+      "source_uid": "mi_pu_aiutare_a_camb_47c8925ddb",
+      "card_id": "mi_pu_aiutare_a_camb_47c8925ddb",
+      "focus": "phrase",
+      "meaning_en": "Can you help me change the flight?",
+      "contexts_it": [
+        "Mi può aiutare a cambiare il volo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Mi può aiutare a cambiare il volo?"
+    },
+    {
+      "source_uid": "ho_una_coincidenza_s_b6f2f2de6e",
+      "card_id": "ho_una_coincidenza_s_b6f2f2de6e",
+      "focus": "phrase",
+      "meaning_en": "I have a tight connection.",
+      "contexts_it": [
+        "Ho una coincidenza stretta."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations. Ask what’s happening."
+      },
+      "phrase": "Ho una coincidenza stretta."
+    },
+    {
+      "source_uid": "dove_devo_andare_ade_5bc63ed2df",
+      "card_id": "dove_devo_andare_ade_5bc63ed2df",
+      "focus": "phrase",
+      "meaning_en": "Where do I go now?",
+      "contexts_it": [
+        "Dove devo andare adesso?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "nav"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your way in the airport."
+      },
+      "phrase": "Dove devo andare adesso?"
+    },
+    {
+      "source_uid": "possibile_fare_il_ch_7288857088",
+      "card_id": "possibile_fare_il_ch_7288857088",
+      "focus": "phrase",
+      "meaning_en": "Is it possible to check in here?",
+      "contexts_it": [
+        "È possibile fare il check-in qui?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: At check-in. Show your documents."
+      },
+      "phrase": "È possibile fare il check-in qui?"
+    },
+    {
+      "source_uid": "quando_si_imbarca_0ebee95148",
+      "card_id": "quando_si_imbarca_0ebee95148",
+      "focus": "phrase",
+      "meaning_en": "When is the boarding?",
+      "contexts_it": [
+        "Quando si imbarca?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Quando si imbarca?"
+    },
+    {
+      "source_uid": "da_che_gate_partiamo_b3f716b18e",
+      "card_id": "da_che_gate_partiamo_b3f716b18e",
+      "focus": "phrase",
+      "meaning_en": "Which gate do we leave from?",
+      "contexts_it": [
+        "Da che gate partiamo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Da che gate partiamo?"
+    },
+    {
+      "source_uid": "a_causa_del_maltempo_8ae0e00bba",
+      "card_id": "a_causa_del_maltempo_8ae0e00bba",
+      "focus": "phrase",
+      "meaning_en": "Due to bad weather, the plane's departure is delayed.",
+      "contexts_it": [
+        "A causa del maltempo, la partenza dell'aereo è in ritardo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "A causa del maltempo, la partenza dell'aereo è in ritardo."
+    },
+    {
+      "source_uid": "il_volo_in_ritardo_d_25f47dcbc8",
+      "card_id": "il_volo_in_ritardo_d_25f47dcbc8",
+      "focus": "phrase",
+      "meaning_en": "The flight is delayed by two hours.",
+      "contexts_it": [
+        "Il volo è in ritardo di due ore."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Il volo è in ritardo di due ore."
+    },
+    {
+      "source_uid": "posso_cambiare_il_vo_923d77cb8a",
+      "card_id": "posso_cambiare_il_vo_923d77cb8a",
+      "focus": "phrase",
+      "meaning_en": "Can I change the flight?",
+      "contexts_it": [
+        "Posso cambiare il volo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Posso cambiare il volo?"
+    },
+    {
+      "source_uid": "posso_cambiare_la_da_fa63ba4c28",
+      "card_id": "posso_cambiare_la_da_fa63ba4c28",
+      "focus": "phrase",
+      "meaning_en": "Can I change the date?",
+      "contexts_it": [
+        "Posso cambiare la data?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Posso cambiare la data?"
+    },
+    {
+      "source_uid": "quando_parte_il_pros_df4df40ba7",
+      "card_id": "quando_parte_il_pros_df4df40ba7",
+      "focus": "phrase",
+      "meaning_en": "When does the next flight leave?",
+      "contexts_it": [
+        "Quando parte il prossimo volo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Quando parte il prossimo volo?"
+    },
+    {
+      "source_uid": "c_un_altro_volo_oggi_003cc457e1",
+      "card_id": "c_un_altro_volo_oggi_003cc457e1",
+      "focus": "phrase",
+      "meaning_en": "Is there another flight today?",
+      "contexts_it": [
+        "C'è un altro volo oggi?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "C'è un altro volo oggi?"
+    },
+    {
+      "source_uid": "posso_parlare_con_un_4a9f0fdd76",
+      "card_id": "posso_parlare_con_un_4a9f0fdd76",
+      "focus": "phrase",
+      "meaning_en": "Can I speak to a staff member?",
+      "contexts_it": [
+        "Posso parlare con un addetto?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Posso parlare con un addetto?"
+    },
+    {
+      "source_uid": "questa_la_chiamata_d_8c192d1ac0",
+      "card_id": "questa_la_chiamata_d_8c192d1ac0",
+      "focus": "phrase",
+      "meaning_en": "This is the final boarding call.",
+      "contexts_it": [
+        "Questa è la chiamata d'imbarco finale."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Questa è la chiamata d'imbarco finale."
+    },
+    {
+      "source_uid": "il_gate_stato_cambia_faa45bf9f9",
+      "card_id": "il_gate_stato_cambia_faa45bf9f9",
+      "focus": "phrase",
+      "meaning_en": "The gate has been changed.",
+      "contexts_it": [
+        "Il gate è stato cambiato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "gate"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Find your gate and boarding info."
+      },
+      "phrase": "Il gate è stato cambiato."
+    },
+    {
+      "source_uid": "il_volo_stato_postic_eff7431db3",
+      "card_id": "il_volo_stato_postic_eff7431db3",
+      "focus": "phrase",
+      "meaning_en": "The flight has been postponed.",
+      "contexts_it": [
+        "Il volo è stato posticipato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Delays/cancellations and rebooking."
+      },
+      "phrase": "Il volo è stato posticipato."
+    },
+    {
+      "source_uid": "non_ho_capito_pu_rip_00279e82f8",
+      "card_id": "non_ho_capito_pu_rip_00279e82f8",
+      "focus": "phrase",
+      "meaning_en": "I didn't understand, can you repeat?",
+      "contexts_it": [
+        "Non ho capito, può ripetere?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Non ho capito, può ripetere?"
+    },
+    {
+      "source_uid": "pu_ripetere_per_favo_21a833c64d",
+      "card_id": "pu_ripetere_per_favo_21a833c64d",
+      "focus": "phrase",
+      "meaning_en": "Can you repeat, please?",
+      "contexts_it": [
+        "Può ripetere, per favore?"
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "help"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Ask for help politely."
+      },
+      "phrase": "Può ripetere, per favore?"
+    }
+  ],
+  "scenes": []
+}

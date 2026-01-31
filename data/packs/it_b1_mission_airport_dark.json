@@ -1,0 +1,179 @@
+{
+  "pack_id": "it_b1_mission_airport_dark_v1",
+  "target_language": "it",
+  "level": "B1+",
+  "type": "mission",
+  "title": "✈️ Mission: Airport Dark Mode (B1+)",
+  "description": "Risky phrases. Learn for understanding only; do not use casually.",
+  "cards": [
+    {
+      "source_uid": "uno_scherzo_617a4aa687",
+      "card_id": "uno_scherzo_617a4aa687",
+      "focus": "phrase",
+      "meaning_en": "It's a joke.",
+      "contexts_it": [
+        "È uno scherzo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "È uno scherzo."
+    },
+    {
+      "source_uid": "non_un_mio_problema_6c3c265a5b",
+      "card_id": "non_un_mio_problema_6c3c265a5b",
+      "focus": "phrase",
+      "meaning_en": "It's not my problem.",
+      "contexts_it": [
+        "Non è un mio problema."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non è un mio problema."
+    },
+    {
+      "source_uid": "non_capisco_perch_mi_bfaaa9bac1",
+      "card_id": "non_capisco_perch_mi_bfaaa9bac1",
+      "focus": "phrase",
+      "meaning_en": "I don't understand why you're stopping me.",
+      "contexts_it": [
+        "Non capisco perché mi fermate."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non capisco perché mi fermate."
+    },
+    {
+      "source_uid": "ridicolo_5587b6493a",
+      "card_id": "ridicolo_5587b6493a",
+      "focus": "phrase",
+      "meaning_en": "It's ridiculous.",
+      "contexts_it": [
+        "È ridicolo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "È ridicolo."
+    },
+    {
+      "source_uid": "state_esagerando_48db6e3656",
+      "card_id": "state_esagerando_48db6e3656",
+      "focus": "phrase",
+      "meaning_en": "You're exaggerating.",
+      "contexts_it": [
+        "State esagerando."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "State esagerando."
+    },
+    {
+      "source_uid": "non_mi_interessa_58d3daa2f1",
+      "card_id": "non_mi_interessa_58d3daa2f1",
+      "focus": "phrase",
+      "meaning_en": "I don't care.",
+      "contexts_it": [
+        "Non mi interessa."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non mi interessa."
+    },
+    {
+      "source_uid": "lei_non_pu_farlo_bf9fd16428",
+      "card_id": "lei_non_pu_farlo_bf9fd16428",
+      "focus": "phrase",
+      "meaning_en": "You can't do that.",
+      "contexts_it": [
+        "Lei non può farlo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Lei non può farlo."
+    },
+    {
+      "source_uid": "non_devo_rispondere_499511f0b7",
+      "card_id": "non_devo_rispondere_499511f0b7",
+      "focus": "phrase",
+      "meaning_en": "I don't have to answer.",
+      "contexts_it": [
+        "Non devo rispondere."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "avoid",
+        "tags": [
+          "airport",
+          "dark"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non devo rispondere."
+    }
+  ],
+  "scenes": []
+}

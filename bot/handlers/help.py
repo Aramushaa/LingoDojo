@@ -9,21 +9,23 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = get_chat_sender(update)
 
     text = (
-        "🫧 <b>LingoDojo — Command Menu</b>\n"
-        "<i>(pick one)</i>\n\n"
-        "⚡ <b>/learn</b> — Learn a new item (no repeats)\n"
-        "🔁 <b>/review</b> — Review due items (SRS)\n"
-        "📊 <b>/stats</b> — Progress + counts\n"
-        "⚙️ <b>/settings</b> — Packs + languages + level\n"
-        "🎯 <b>/setlevel</b> — Set A1/A2/B1…\n\n"
-        "Tip: Activate packs in ⚙️ Settings, then /learn becomes a smooth stream."
+        "🫧 <b>LingoDojo — Command Glass</b>\n"
+        "<i>(tap a card)</i>\n\n"
+        "🧠 <b>/learn</b> — New items from active packs\n"
+        "🎯 <b>/missions</b> — Mission flow (inside Learn)\n"
+        "📦 <b>/packs</b> — Browse & activate packs\n"
+        "📊 <b>/progress</b> — Stats + streak\n"
+        "⚙️ <b>/settings</b> — Languages + level\n"
+        "🧰 <b>/help</b> — Show this menu\n\n"
+        "Tip: Activate packs in 📦 Packs, then /learn becomes a smooth stream."
     )
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🧠 Learn", callback_data="HOME|LEARN"),
-         InlineKeyboardButton("🔁 Review", callback_data="HOME|REVIEW")],
-        [InlineKeyboardButton("📊 Stats", callback_data="HOME|STATS"),
-         InlineKeyboardButton("⚙️ Settings", callback_data="HOME|SETTINGS")],
+        [InlineKeyboardButton("🧠 Learn", callback_data="home:learn"),
+         InlineKeyboardButton("🎯 Missions", callback_data="home:missions")],
+        [InlineKeyboardButton("📦 Packs", callback_data="home:packs"),
+         InlineKeyboardButton("📊 Progress", callback_data="home:progress")],
+        [InlineKeyboardButton("⚙️ Settings", callback_data="home:settings")],
     ])
 
     await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
