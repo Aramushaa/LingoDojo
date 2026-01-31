@@ -1,0 +1,9 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,La stanza è troppo rumorosa.,The room is too noisy.,La stanza è troppo rumorosa.,neutral,safe,"hotel,problems",Complain politely.,,,,,,manual,,A2,problem handling
+phrase,,L'aria condizionata non funziona.,The air conditioning doesn't work.,L'aria condizionata non funziona.,neutral,safe,"hotel,problems",Report an issue.,,,,,,manual,,A2,problem handling
+phrase,,C'è un problema con la doccia.,There is a problem with the shower.,C'è un problema con la doccia.,neutral,safe,"hotel,problems",Bathroom issues.,,,,,,manual,,A2,problem handling
+phrase,,Possiamo cambiare stanza?,Can we change rooms?,Possiamo cambiare stanza?,neutral,safe,"hotel,problems",Ask for solution.,,,,,,manual,,A2,problem handling
+phrase,,La colazione è inclusa?,Is breakfast included?,La colazione è inclusa?,neutral,safe,"hotel,services",Clarify services.,,,,,,manual,,A2,problem handling
+phrase,,A che ora apre la reception?,What time does reception open?,A che ora apre la reception?,neutral,safe,"hotel,services",Hotel logistics.,,,,,,manual,,A2,problem handling
+phrase,,Potrebbe aiutarmi?,Could you help me?,Potrebbe aiutarmi?,neutral,safe,"hotel,polite",General politeness.,,,,,,manual,,A2,problem handling
+phrase,,"Mi dispiace, c'è un problema.","Sorry, there's a problem.","Mi dispiace, c'è un problema.",neutral,safe,"hotel,problems",Softening complaints.,,,,,,manual,,A2,problem handling

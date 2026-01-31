@@ -1,0 +1,11 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,Ho una prenotazione.,I have a reservation.,Ho una prenotazione.,neutral,safe,"hotel,checkin",Check in at hotel reception.,,,,,,manual,,A1,core survival
+phrase,,A nome di Rossi.,Under the name Rossi.,A nome di Rossi.,neutral,safe,"hotel,checkin",Confirm reservation name.,,,,,,manual,,A1,core survival (use your surname)
+phrase,,Posso fare il check-in?,Can I check in?,Posso fare il check-in?,neutral,safe,"hotel,checkin",Arriving at hotel.,,,,,,manual,,A1,core survival
+phrase,,A che ora è il check-out?,What time is check-out?,A che ora è il check-out?,neutral,safe,"hotel,checkout",Understand hotel rules.,,,,,,manual,,A1,core survival
+phrase,,La mia stanza è pronta?,Is my room ready?,La mia stanza è pronta?,neutral,safe,"hotel,room",Waiting for room.,,,,,,manual,,A1,core survival
+phrase,,C'è il Wi-Fi?,Is there Wi-Fi?,C'è il Wi-Fi?,neutral,safe,"hotel,amenities",Basic amenities.,,,,,,manual,,A1,core survival
+phrase,,Qual è la password del Wi-Fi?,What's the Wi-Fi password?,Qual è la password del Wi-Fi?,neutral,safe,"hotel,amenities",Internet access.,,,,,,manual,,A1,core survival
+phrase,,"La chiave, per favore.","The key, please.","La chiave, per favore.",polite,safe,"hotel,checkin",Getting room key.,,,,,,manual,,A1,core survival
+phrase,,Dov'è l'ascensore?,Where is the elevator?,Dov'è l'ascensore?,neutral,safe,"hotel,directions",Moving around hotel.,,,,,,manual,,A1,core survival
+phrase,,Dov'è la mia stanza?,Where is my room?,Dov'è la mia stanza?,neutral,safe,"hotel,directions",Finding room.,,,,,,manual,,A1,core survival

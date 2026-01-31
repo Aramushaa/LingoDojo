@@ -1,0 +1,221 @@
+{
+  "pack_id": "it_a1_mission_hotel_v1",
+  "target_language": "it",
+  "level": "A1",
+  "type": "mission",
+  "title": "🏨 Mission: Hotel Survival (A1)",
+  "description": "Check-in, keys, Wi-Fi, directions — the essentials.",
+  "cards": [
+    {
+      "source_uid": "ho_una_prenotazione_4f2b20dc55",
+      "card_id": "ho_una_prenotazione_4f2b20dc55",
+      "focus": "phrase",
+      "meaning_en": "I have a reservation.",
+      "contexts_it": [
+        "Ho una prenotazione."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Check in at hotel reception."
+      },
+      "phrase": "Ho una prenotazione."
+    },
+    {
+      "source_uid": "a_nome_di_rossi_7a860742e2",
+      "card_id": "a_nome_di_rossi_7a860742e2",
+      "focus": "phrase",
+      "meaning_en": "Under the name Rossi.",
+      "contexts_it": [
+        "A nome di Rossi."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Confirm reservation name."
+      },
+      "phrase": "A nome di Rossi."
+    },
+    {
+      "source_uid": "posso_fare_il_check__75d1e33590",
+      "card_id": "posso_fare_il_check__75d1e33590",
+      "focus": "phrase",
+      "meaning_en": "Can I check in?",
+      "contexts_it": [
+        "Posso fare il check-in?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Arriving at hotel."
+      },
+      "phrase": "Posso fare il check-in?"
+    },
+    {
+      "source_uid": "a_che_ora_il_check_o_30b8f3a72d",
+      "card_id": "a_che_ora_il_check_o_30b8f3a72d",
+      "focus": "phrase",
+      "meaning_en": "What time is check-out?",
+      "contexts_it": [
+        "A che ora è il check-out?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkout"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Understand hotel rules."
+      },
+      "phrase": "A che ora è il check-out?"
+    },
+    {
+      "source_uid": "la_mia_stanza_pronta_e864f5a86d",
+      "card_id": "la_mia_stanza_pronta_e864f5a86d",
+      "focus": "phrase",
+      "meaning_en": "Is my room ready?",
+      "contexts_it": [
+        "La mia stanza è pronta?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "room"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Waiting for room."
+      },
+      "phrase": "La mia stanza è pronta?"
+    },
+    {
+      "source_uid": "c_il_wi_fi_9dda3479c6",
+      "card_id": "c_il_wi_fi_9dda3479c6",
+      "focus": "phrase",
+      "meaning_en": "Is there Wi-Fi?",
+      "contexts_it": [
+        "C'è il Wi-Fi?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "amenities"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Basic amenities."
+      },
+      "phrase": "C'è il Wi-Fi?"
+    },
+    {
+      "source_uid": "qual_la_password_del_a6f47f1eb2",
+      "card_id": "qual_la_password_del_a6f47f1eb2",
+      "focus": "phrase",
+      "meaning_en": "What's the Wi-Fi password?",
+      "contexts_it": [
+        "Qual è la password del Wi-Fi?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "amenities"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Internet access."
+      },
+      "phrase": "Qual è la password del Wi-Fi?"
+    },
+    {
+      "source_uid": "la_chiave_per_favore_60fefa6e49",
+      "card_id": "la_chiave_per_favore_60fefa6e49",
+      "focus": "phrase",
+      "meaning_en": "The key, please.",
+      "contexts_it": [
+        "La chiave, per favore."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkin"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Getting room key."
+      },
+      "phrase": "La chiave, per favore."
+    },
+    {
+      "source_uid": "dov_l_ascensore_a9042fab15",
+      "card_id": "dov_l_ascensore_a9042fab15",
+      "focus": "phrase",
+      "meaning_en": "Where is the elevator?",
+      "contexts_it": [
+        "Dov'è l'ascensore?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "directions"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Moving around hotel."
+      },
+      "phrase": "Dov'è l'ascensore?"
+    },
+    {
+      "source_uid": "dov_la_mia_stanza_044dd38ddc",
+      "card_id": "dov_la_mia_stanza_044dd38ddc",
+      "focus": "phrase",
+      "meaning_en": "Where is my room?",
+      "contexts_it": [
+        "Dov'è la mia stanza?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "directions"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Finding room."
+      },
+      "phrase": "Dov'è la mia stanza?"
+    }
+  ],
+  "scenes": []
+}

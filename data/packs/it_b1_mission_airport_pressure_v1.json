@@ -299,6 +299,279 @@
         "scenario_prompt": "Mission: Answer authority questions calmly."
       },
       "phrase": "Sta dicendo la verità?"
+    },
+    {
+      "source_uid": "qual_il_motivo_del_v_499b9cd8db",
+      "card_id": "qual_il_motivo_del_v_499b9cd8db",
+      "focus": "phrase",
+      "meaning_en": "What is the purpose of the trip?",
+      "contexts_it": [
+        "Qual è il motivo del viaggio?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Qual è il motivo del viaggio?"
+    },
+    {
+      "source_uid": "quanto_tempo_rester__c00c735c50",
+      "card_id": "quanto_tempo_rester__c00c735c50",
+      "focus": "phrase",
+      "meaning_en": "How long will you stay in Italy?",
+      "contexts_it": [
+        "Quanto tempo resterà in Italia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Quanto tempo resterà in Italia?"
+    },
+    {
+      "source_uid": "dove_allogger_esatta_d3a264b35d",
+      "card_id": "dove_allogger_esatta_d3a264b35d",
+      "focus": "phrase",
+      "meaning_en": "Where exactly will you stay?",
+      "contexts_it": [
+        "Dove alloggerà esattamente?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Dove alloggerà esattamente?"
+    },
+    {
+      "source_uid": "ha_un_biglietto_di_r_83dc1fa911",
+      "card_id": "ha_un_biglietto_di_r_83dc1fa911",
+      "focus": "phrase",
+      "meaning_en": "Do you have a return ticket?",
+      "contexts_it": [
+        "Ha un biglietto di ritorno?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha un biglietto di ritorno?"
+    },
+    {
+      "source_uid": "viaggia_per_lavoro_o_5793acd271",
+      "card_id": "viaggia_per_lavoro_o_5793acd271",
+      "focus": "phrase",
+      "meaning_en": "Are you traveling for work or tourism?",
+      "contexts_it": [
+        "Viaggia per lavoro o turismo?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Viaggia per lavoro o turismo?"
+    },
+    {
+      "source_uid": "con_chi_viaggia_69a7fc6d7d",
+      "card_id": "con_chi_viaggia_69a7fc6d7d",
+      "focus": "phrase",
+      "meaning_en": "Who are you traveling with?",
+      "contexts_it": [
+        "Con chi viaggia?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Con chi viaggia?"
+    },
+    {
+      "source_uid": "ha_preparato_lei_i_b_6bbe10c934",
+      "card_id": "ha_preparato_lei_i_b_6bbe10c934",
+      "focus": "phrase",
+      "meaning_en": "Did you pack the bags yourself?",
+      "contexts_it": [
+        "Ha preparato lei i bagagli?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha preparato lei i bagagli?"
+    },
+    {
+      "source_uid": "qualcuno_le_ha_chies_f82aa493be",
+      "card_id": "qualcuno_le_ha_chies_f82aa493be",
+      "focus": "phrase",
+      "meaning_en": "Has anyone asked you to carry something?",
+      "contexts_it": [
+        "Qualcuno le ha chiesto di trasportare qualcosa?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Qualcuno le ha chiesto di trasportare qualcosa?"
+    },
+    {
+      "source_uid": "ha_ricevuto_qualcosa_4c687eeee9",
+      "card_id": "ha_ricevuto_qualcosa_4c687eeee9",
+      "focus": "phrase",
+      "meaning_en": "Did you receive something from someone?",
+      "contexts_it": [
+        "Ha ricevuto qualcosa da qualcuno?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha ricevuto qualcosa da qualcuno?"
+    },
+    {
+      "source_uid": "pu_aprire_la_valigia_58fae7ccf2",
+      "card_id": "pu_aprire_la_valigia_58fae7ccf2",
+      "focus": "phrase",
+      "meaning_en": "Can you open the suitcase, please?",
+      "contexts_it": [
+        "Può aprire la valigia, per favore?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Può aprire la valigia, per favore?"
+    },
+    {
+      "source_uid": "ha_farmaci_o_liquidi_27be006af1",
+      "card_id": "ha_farmaci_o_liquidi_27be006af1",
+      "focus": "phrase",
+      "meaning_en": "Do you have medicines or liquids in your baggage?",
+      "contexts_it": [
+        "Ha farmaci o liquidi nel bagaglio?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha farmaci o liquidi nel bagaglio?"
+    },
+    {
+      "source_uid": "ha_visitato_altri_pa_978382b9b2",
+      "card_id": "ha_visitato_altri_pa_978382b9b2",
+      "focus": "phrase",
+      "meaning_en": "Have you visited other countries recently?",
+      "contexts_it": [
+        "Ha visitato altri paesi di recente?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha visitato altri paesi di recente?"
+    },
+    {
+      "source_uid": "ha_un_itinerario_df436b5696",
+      "card_id": "ha_un_itinerario_df436b5696",
+      "focus": "phrase",
+      "meaning_en": "Do you have an itinerary?",
+      "contexts_it": [
+        "Ha un itinerario?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "airport",
+          "authority"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Answer authority questions calmly."
+      },
+      "phrase": "Ha un itinerario?"
     }
   ],
   "scenes": []

@@ -1,0 +1,179 @@
+{
+  "pack_id": "it_b1_mission_hotel_dark_v1",
+  "target_language": "it",
+  "level": "B1+",
+  "type": "mission",
+  "title": "🏨 Mission: Hotel Dark Mode (B1+)",
+  "description": "Risky phrases. Learn for understanding only; do not use casually.",
+  "cards": [
+    {
+      "source_uid": "questa_stanza_inacce_5e964ad080",
+      "card_id": "questa_stanza_inacce_5e964ad080",
+      "focus": "phrase",
+      "meaning_en": "This room is unacceptable.",
+      "contexts_it": [
+        "Questa stanza è inaccettabile."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "In Italy, direct blame can harden the interaction.",
+        "trap": "Escalates tone; sounds confrontational.",
+        "native_sauce": "Safer alternative: Possiamo trovare una soluzione?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Questa stanza è inaccettabile."
+    },
+    {
+      "source_uid": "una_perdita_di_tempo_7fa42093b9",
+      "card_id": "una_perdita_di_tempo_7fa42093b9",
+      "focus": "phrase",
+      "meaning_en": "This is a waste of time.",
+      "contexts_it": [
+        "È una perdita di tempo."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Keep tone calm; staff respond better to polite requests.",
+        "trap": "Dismissive; can trigger defensiveness.",
+        "native_sauce": "Safer alternative: Mi dispiace, ma ho bisogno di aiuto."
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "È una perdita di tempo."
+    },
+    {
+      "source_uid": "voglio_parlare_con_i_139e3391b1",
+      "card_id": "voglio_parlare_con_i_139e3391b1",
+      "focus": "phrase",
+      "meaning_en": "I want to speak to the manager.",
+      "contexts_it": [
+        "Voglio parlare con il responsabile."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Softer wording keeps options open.",
+        "trap": "Escalation; use only if needed.",
+        "native_sauce": "Safer alternative: Potrei parlare con qualcuno che può aiutarmi?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Voglio parlare con il responsabile."
+    },
+    {
+      "source_uid": "questa_una_truffa_0b241a7d02",
+      "card_id": "questa_una_truffa_0b241a7d02",
+      "focus": "phrase",
+      "meaning_en": "This is a scam.",
+      "contexts_it": [
+        "Questa è una truffa."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Focus on solution, not blame.",
+        "trap": "Highly accusatory.",
+        "native_sauce": "Safer alternative: C'è un problema, possiamo risolverlo?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Questa è una truffa."
+    },
+    {
+      "source_uid": "pretendo_un_rimborso_667537c420",
+      "card_id": "pretendo_un_rimborso_667537c420",
+      "focus": "phrase",
+      "meaning_en": "I demand an immediate refund.",
+      "contexts_it": [
+        "Pretendo un rimborso immediato."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Polite request works better.",
+        "trap": "Demanding tone escalates.",
+        "native_sauce": "Safer alternative: Vorrei chiedere un rimborso, per favore."
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Pretendo un rimborso immediato."
+    },
+    {
+      "source_uid": "se_non_risolvete_las_29e3d5b1e1",
+      "card_id": "se_non_risolvete_las_29e3d5b1e1",
+      "focus": "phrase",
+      "meaning_en": "If you don't fix it, I'll leave a negative review.",
+      "contexts_it": [
+        "Se non risolvete, lascio una recensione negativa."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Ask for help instead of threats.",
+        "trap": "Threats damage cooperation.",
+        "native_sauce": "Safer alternative: Posso parlare con chi può aiutarmi?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Se non risolvete, lascio una recensione negativa."
+    },
+    {
+      "source_uid": "non_mi_interessa_ris_728f92b178",
+      "card_id": "non_mi_interessa_ris_728f92b178",
+      "focus": "phrase",
+      "meaning_en": "I don't care, fix it.",
+      "contexts_it": [
+        "Non mi interessa, risolvete."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "hotel",
+          "conflict"
+        ],
+        "cultural_note": "Ask for a solution calmly.",
+        "trap": "Rude and dismissive.",
+        "native_sauce": "Safer alternative: Mi può aiutare a trovare una soluzione?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non mi interessa, risolvete."
+    }
+  ],
+  "scenes": []
+}

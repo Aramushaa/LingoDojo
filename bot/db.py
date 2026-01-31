@@ -268,10 +268,50 @@ def import_packs_from_folder():
 
     PACKS_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Load all pack files first so we can clean up removed packs
+    packs = []
     for path in PACKS_DIR.glob("*.json"):
         with open(path, "r", encoding="utf-8") as f:
             pack = json.load(f)
+            packs.append(pack)
 
+    # Remove packs that no longer exist on disk
+    pack_ids_in_files = {p.get("pack_id") for p in packs if p.get("pack_id")}
+    if pack_ids_in_files:
+        cursor.execute(
+            "SELECT pack_id FROM packs WHERE pack_id NOT IN ({})".format(
+                ",".join("?" for _ in pack_ids_in_files)
+            ),
+            tuple(pack_ids_in_files),
+        )
+        stale = [r[0] for r in cursor.fetchall()]
+        if stale:
+            cursor.execute(
+                "DELETE FROM pack_items WHERE pack_id IN ({})".format(
+                    ",".join("?" for _ in stale)
+                ),
+                tuple(stale),
+            )
+            cursor.execute(
+                "DELETE FROM pack_scenes WHERE pack_id IN ({})".format(
+                    ",".join("?" for _ in stale)
+                ),
+                tuple(stale),
+            )
+            cursor.execute(
+                "DELETE FROM user_packs WHERE pack_id IN ({})".format(
+                    ",".join("?" for _ in stale)
+                ),
+                tuple(stale),
+            )
+            cursor.execute(
+                "DELETE FROM packs WHERE pack_id IN ({})".format(
+                    ",".join("?" for _ in stale)
+                ),
+                tuple(stale),
+            )
+
+    for pack in packs:
         pack_id = pack["pack_id"]
         target_language = pack.get("target_language", "it")
         level = pack.get("level")

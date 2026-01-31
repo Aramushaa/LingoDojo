@@ -13,3 +13,16 @@ phrase,,È sicuro?,Are you sure?,È sicuro?,neutral,safe,"airport,authority",Mis
 phrase,,Ne è certo?,Are you certain?,Ne è certo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
 phrase,,Può dimostrarlo?,Can you prove it?,Può dimostrarlo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
 phrase,,Sta dicendo la verità?,Are you telling the truth?,Sta dicendo la verità?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,added essentials
+phrase,,Qual è il motivo del viaggio?,What is the purpose of the trip?,Qual è il motivo del viaggio?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Quanto tempo resterà in Italia?,How long will you stay in Italy?,Quanto tempo resterà in Italia?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Dove alloggerà esattamente?,Where exactly will you stay?,Dove alloggerà esattamente?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha un biglietto di ritorno?,Do you have a return ticket?,Ha un biglietto di ritorno?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Viaggia per lavoro o turismo?,Are you traveling for work or tourism?,Viaggia per lavoro o turismo?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Con chi viaggia?,Who are you traveling with?,Con chi viaggia?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha preparato lei i bagagli?,Did you pack the bags yourself?,Ha preparato lei i bagagli?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Qualcuno le ha chiesto di trasportare qualcosa?,Has anyone asked you to carry something?,Qualcuno le ha chiesto di trasportare qualcosa?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha ricevuto qualcosa da qualcuno?,Did you receive something from someone?,Ha ricevuto qualcosa da qualcuno?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,"Può aprire la valigia, per favore?","Can you open the suitcase, please?","Può aprire la valigia, per favore?",neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha farmaci o liquidi nel bagaglio?,Do you have medicines or liquids in your baggage?,Ha farmaci o liquidi nel bagaglio?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha visitato altri paesi di recente?,Have you visited other countries recently?,Ha visitato altri paesi di recente?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life
+phrase,,Ha un itinerario?,Do you have an itinerary?,Ha un itinerario?,neutral,safe,"airport,authority",Mission: Answer authority questions calmly.,,,,,,manual,,B1,real life

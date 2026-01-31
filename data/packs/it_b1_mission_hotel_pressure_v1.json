@@ -1,0 +1,284 @@
+{
+  "pack_id": "it_b1_mission_hotel_pressure_v1",
+  "target_language": "it",
+  "level": "B1",
+  "type": "mission",
+  "title": "🏨 Mission: Hotel Pressure (B1)",
+  "description": "Booking disputes and resolution language.",
+  "cards": [
+    {
+      "source_uid": "la_stanza_non_corris_78b40e04c9",
+      "card_id": "la_stanza_non_corris_78b40e04c9",
+      "focus": "phrase",
+      "meaning_en": "The room doesn't match the description.",
+      "contexts_it": [
+        "La stanza non corrisponde alla descrizione."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Dispute politely."
+      },
+      "phrase": "La stanza non corrisponde alla descrizione."
+    },
+    {
+      "source_uid": "abbiamo_prenotato_un_bb2e232d2b",
+      "card_id": "abbiamo_prenotato_un_bb2e232d2b",
+      "focus": "phrase",
+      "meaning_en": "We booked a different room.",
+      "contexts_it": [
+        "Abbiamo prenotato una stanza diversa."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Booking mismatch."
+      },
+      "phrase": "Abbiamo prenotato una stanza diversa."
+    },
+    {
+      "source_uid": "c_stato_un_errore_ne_5a4a196b4d",
+      "card_id": "c_stato_un_errore_ne_5a4a196b4d",
+      "focus": "phrase",
+      "meaning_en": "There was a mistake in the booking.",
+      "contexts_it": [
+        "C'è stato un errore nella prenotazione."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Clarify responsibility."
+      },
+      "phrase": "C'è stato un errore nella prenotazione."
+    },
+    {
+      "source_uid": "non_quello_che_aveva_27e1270f54",
+      "card_id": "non_quello_che_aveva_27e1270f54",
+      "focus": "phrase",
+      "meaning_en": "This is not what we agreed on.",
+      "contexts_it": [
+        "Non è quello che avevamo concordato."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Assert boundaries."
+      },
+      "phrase": "Non è quello che avevamo concordato."
+    },
+    {
+      "source_uid": "possiamo_trovare_una_7e8ccdd84e",
+      "card_id": "possiamo_trovare_una_7e8ccdd84e",
+      "focus": "phrase",
+      "meaning_en": "Can we find a solution?",
+      "contexts_it": [
+        "Possiamo trovare una soluzione?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "De-escalation."
+      },
+      "phrase": "Possiamo trovare una soluzione?"
+    },
+    {
+      "source_uid": "la_camera_non_pulita_14491d86a7",
+      "card_id": "la_camera_non_pulita_14491d86a7",
+      "focus": "phrase",
+      "meaning_en": "The room is not clean.",
+      "contexts_it": [
+        "La camera non è pulita."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "La camera non è pulita."
+    },
+    {
+      "source_uid": "c_muffa_in_bagno_dbba01691e",
+      "card_id": "c_muffa_in_bagno_dbba01691e",
+      "focus": "phrase",
+      "meaning_en": "There is mold in the bathroom.",
+      "contexts_it": [
+        "C'è muffa in bagno."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "C'è muffa in bagno."
+    },
+    {
+      "source_uid": "abbiamo_pagato_per_u_29acb34945",
+      "card_id": "abbiamo_pagato_per_u_29acb34945",
+      "focus": "phrase",
+      "meaning_en": "We paid for a different room.",
+      "contexts_it": [
+        "Abbiamo pagato per una camera diversa."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "Abbiamo pagato per una camera diversa."
+    },
+    {
+      "source_uid": "chiedo_il_rimborso_90920816ae",
+      "card_id": "chiedo_il_rimborso_90920816ae",
+      "focus": "phrase",
+      "meaning_en": "I request a refund.",
+      "contexts_it": [
+        "Chiedo il rimborso."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "Chiedo il rimborso."
+    },
+    {
+      "source_uid": "non_accetto_questa_s_9fee3cd839",
+      "card_id": "non_accetto_questa_s_9fee3cd839",
+      "focus": "phrase",
+      "meaning_en": "I can't accept this room.",
+      "contexts_it": [
+        "Non accetto questa stanza."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "Non accetto questa stanza."
+    },
+    {
+      "source_uid": "serve_una_soluzione__402ae315f3",
+      "card_id": "serve_una_soluzione__402ae315f3",
+      "focus": "phrase",
+      "meaning_en": "We need a solution today.",
+      "contexts_it": [
+        "Serve una soluzione oggi."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "Serve una soluzione oggi."
+    },
+    {
+      "source_uid": "potrei_parlare_con_u_d5b157f8af",
+      "card_id": "potrei_parlare_con_u_d5b157f8af",
+      "focus": "phrase",
+      "meaning_en": "Could I speak with a manager?",
+      "contexts_it": [
+        "Potrei parlare con un responsabile?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "Potrei parlare con un responsabile?"
+    },
+    {
+      "source_uid": "troppo_caro_per_quel_5c44aa8feb",
+      "card_id": "troppo_caro_per_quel_5c44aa8feb",
+      "focus": "phrase",
+      "meaning_en": "It's too expensive for what it offers.",
+      "contexts_it": [
+        "È troppo caro per quello che offre."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "conflict"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Mission: Booking disputes and resolution language."
+      },
+      "phrase": "È troppo caro per quello che offre."
+    }
+  ],
+  "scenes": []
+}

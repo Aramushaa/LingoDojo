@@ -1,0 +1,14 @@
+focus,lemma,phrase,meaning_en,contexts_it,register,risk,tags,scenario_prompt,trap,cultural_note,native_sauce,phrase_hint,examples_it,src,tatoeba_it_id,level,keep_reason
+phrase,,La stanza non corrisponde alla descrizione.,The room doesn't match the description.,La stanza non corrisponde alla descrizione.,neutral,safe,"hotel,conflict",Dispute politely.,,,,,,manual,,B1,real life
+phrase,,Abbiamo prenotato una stanza diversa.,We booked a different room.,Abbiamo prenotato una stanza diversa.,neutral,safe,"hotel,conflict",Booking mismatch.,,,,,,manual,,B1,real life
+phrase,,C'è stato un errore nella prenotazione.,There was a mistake in the booking.,C'è stato un errore nella prenotazione.,neutral,safe,"hotel,conflict",Clarify responsibility.,,,,,,manual,,B1,real life
+phrase,,Non è quello che avevamo concordato.,This is not what we agreed on.,Non è quello che avevamo concordato.,neutral,safe,"hotel,conflict",Assert boundaries.,,,,,,manual,,B1,real life
+phrase,,Possiamo trovare una soluzione?,Can we find a solution?,Possiamo trovare una soluzione?,neutral,safe,"hotel,conflict",De-escalation.,,,,,,manual,,B1,real life
+phrase,,La camera non è pulita.,The room is not clean.,La camera non è pulita.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,C'è muffa in bagno.,There is mold in the bathroom.,C'è muffa in bagno.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,Abbiamo pagato per una camera diversa.,We paid for a different room.,Abbiamo pagato per una camera diversa.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,Chiedo il rimborso.,I request a refund.,Chiedo il rimborso.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,Non accetto questa stanza.,I can't accept this room.,Non accetto questa stanza.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,Serve una soluzione oggi.,We need a solution today.,Serve una soluzione oggi.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,Potrei parlare con un responsabile?,Could I speak with a manager?,Potrei parlare con un responsabile?,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life
+phrase,,È troppo caro per quello che offre.,It's too expensive for what it offers.,È troppo caro per quello che offre.,neutral,safe,"hotel,conflict",Mission: Booking disputes and resolution language.,,,,,,manual,,B1,real life

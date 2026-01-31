@@ -1,0 +1,179 @@
+{
+  "pack_id": "it_a2_mission_hotel_glue_v1",
+  "target_language": "it",
+  "level": "A2",
+  "type": "mission",
+  "title": "🏨 Mission: Hotel Glue (A2)",
+  "description": "Polite problem‑solving and common service requests.",
+  "cards": [
+    {
+      "source_uid": "la_stanza_troppo_rum_52567da977",
+      "card_id": "la_stanza_troppo_rum_52567da977",
+      "focus": "phrase",
+      "meaning_en": "The room is too noisy.",
+      "contexts_it": [
+        "La stanza è troppo rumorosa."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Complain politely."
+      },
+      "phrase": "La stanza è troppo rumorosa."
+    },
+    {
+      "source_uid": "l_aria_condizionata__317f4fee87",
+      "card_id": "l_aria_condizionata__317f4fee87",
+      "focus": "phrase",
+      "meaning_en": "The air conditioning doesn't work.",
+      "contexts_it": [
+        "L'aria condizionata non funziona."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Report an issue."
+      },
+      "phrase": "L'aria condizionata non funziona."
+    },
+    {
+      "source_uid": "c_un_problema_con_la_4939b93835",
+      "card_id": "c_un_problema_con_la_4939b93835",
+      "focus": "phrase",
+      "meaning_en": "There is a problem with the shower.",
+      "contexts_it": [
+        "C'è un problema con la doccia."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Bathroom issues."
+      },
+      "phrase": "C'è un problema con la doccia."
+    },
+    {
+      "source_uid": "possiamo_cambiare_st_979c3e6e25",
+      "card_id": "possiamo_cambiare_st_979c3e6e25",
+      "focus": "phrase",
+      "meaning_en": "Can we change rooms?",
+      "contexts_it": [
+        "Possiamo cambiare stanza?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Ask for solution."
+      },
+      "phrase": "Possiamo cambiare stanza?"
+    },
+    {
+      "source_uid": "la_colazione_inclusa_668b61ce42",
+      "card_id": "la_colazione_inclusa_668b61ce42",
+      "focus": "phrase",
+      "meaning_en": "Is breakfast included?",
+      "contexts_it": [
+        "La colazione è inclusa?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "services"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Clarify services."
+      },
+      "phrase": "La colazione è inclusa?"
+    },
+    {
+      "source_uid": "a_che_ora_apre_la_re_7fa2609ce7",
+      "card_id": "a_che_ora_apre_la_re_7fa2609ce7",
+      "focus": "phrase",
+      "meaning_en": "What time does reception open?",
+      "contexts_it": [
+        "A che ora apre la reception?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "services"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Hotel logistics."
+      },
+      "phrase": "A che ora apre la reception?"
+    },
+    {
+      "source_uid": "potrebbe_aiutarmi_ae49d0c18b",
+      "card_id": "potrebbe_aiutarmi_ae49d0c18b",
+      "focus": "phrase",
+      "meaning_en": "Could you help me?",
+      "contexts_it": [
+        "Potrebbe aiutarmi?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "polite"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "General politeness."
+      },
+      "phrase": "Potrebbe aiutarmi?"
+    },
+    {
+      "source_uid": "mi_dispiace_c_un_pro_c821fb8754",
+      "card_id": "mi_dispiace_c_un_pro_c821fb8754",
+      "focus": "phrase",
+      "meaning_en": "Sorry, there's a problem.",
+      "contexts_it": [
+        "Mi dispiace, c'è un problema."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ]
+      },
+      "drills": {
+        "scenario_prompt": "Softening complaints."
+      },
+      "phrase": "Mi dispiace, c'è un problema."
+    }
+  ],
+  "scenes": []
+}

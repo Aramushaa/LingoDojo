@@ -184,3 +184,39 @@ if __name__ == "__main__":
         title="✈️ Mission: Airport Dark Mode (B1+)",
         description="Risky phrases. Learn for understanding only; do not use casually.",
     )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/hotel_a1_core.csv",
+        out_path="data/packs/it_a1_mission_hotel_v1.json",
+        pack_id="it_a1_mission_hotel_v1",
+        target_language="it",
+        level="A1",
+        title="🏨 Mission: Hotel Survival (A1)",
+        description="Check-in, keys, Wi-Fi, directions — the essentials.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/hotel_a2_glue.csv",
+        out_path="data/packs/it_a2_mission_hotel_glue_v1.json",
+        pack_id="it_a2_mission_hotel_glue_v1",
+        target_language="it",
+        level="A2",
+        title="🏨 Mission: Hotel Glue (A2)",
+        description="Polite problem‑solving and common service requests.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/hotel_b1_pressure.csv",
+        out_path="data/packs/it_b1_mission_hotel_pressure_v1.json",
+        pack_id="it_b1_mission_hotel_pressure_v1",
+        target_language="it",
+        level="B1",
+        title="🏨 Mission: Hotel Pressure (B1)",
+        description="Booking disputes and resolution language.",
+    )
+    make_pack_from_csv(
+        csv_path="data/pack_sources/hotel_b1_dark_mode.csv",
+        out_path="data/packs/it_b1_mission_hotel_dark_v1.json",
+        pack_id="it_b1_mission_hotel_dark_v1",
+        target_language="it",
+        level="B1+",
+        title="🏨 Mission: Hotel Dark Mode (B1+)",
+        description="Risky phrases. Learn for understanding only; do not use casually.",
+    )

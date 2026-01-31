@@ -199,7 +199,7 @@
       "source_uid": "mi_pu_mostrare_il_su_627ce64018",
       "card_id": "mi_pu_mostrare_il_su_627ce64018",
       "focus": "phrase",
-      "meaning_en": "Can you show me your passport, please?",
+      "meaning_en": "Show me your passport, please.",
       "contexts_it": [
         "Mi può mostrare il suo passaporto, per favore?"
       ],
@@ -304,7 +304,7 @@
       "source_uid": "qual_la_sua_valigia_02fb6c5d15",
       "card_id": "qual_la_sua_valigia_02fb6c5d15",
       "focus": "phrase",
-      "meaning_en": "Which is your suitcase?",
+      "meaning_en": "Which is your luggage?",
       "contexts_it": [
         "Qual è la sua valigia?"
       ],
@@ -1102,7 +1102,7 @@
       "source_uid": "ho_qualcosa_da_dichi_2543922fd8",
       "card_id": "ho_qualcosa_da_dichi_2543922fd8",
       "focus": "phrase",
-      "meaning_en": "I have something to declare",
+      "meaning_en": "Do I have something to declare?",
       "contexts_it": [
         "Ho qualcosa da dichiarare?"
       ],

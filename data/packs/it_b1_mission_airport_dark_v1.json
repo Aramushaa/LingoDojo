@@ -173,6 +173,102 @@
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
       },
       "phrase": "Non devo rispondere."
+    },
+    {
+      "source_uid": "non_rispondo_alle_vo_aa9b9c0f4f",
+      "card_id": "non_rispondo_alle_vo_aa9b9c0f4f",
+      "focus": "phrase",
+      "meaning_en": "I won't answer your questions.",
+      "contexts_it": [
+        "Non rispondo alle vostre domande."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "airport",
+          "dark"
+        ],
+        "cultural_note": "A calm tone helps keep the interaction professional.",
+        "trap": "Refusal can escalate the interaction.",
+        "native_sauce": "Safer alternative: Preferirei chiarire con calma."
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non rispondo alle vostre domande."
+    },
+    {
+      "source_uid": "state_violando_i_mie_8705f91454",
+      "card_id": "state_violando_i_mie_8705f91454",
+      "focus": "phrase",
+      "meaning_en": "You're violating my rights.",
+      "contexts_it": [
+        "State violando i miei diritti."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "airport",
+          "dark"
+        ],
+        "cultural_note": "Ask for clarification instead of accusing.",
+        "trap": "Accusatory and confrontational.",
+        "native_sauce": "Safer alternative: Posso avere un chiarimento, per favore?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "State violando i miei diritti."
+    },
+    {
+      "source_uid": "non_toccate_le_mie_c_39ca7a0b13",
+      "card_id": "non_toccate_le_mie_c_39ca7a0b13",
+      "focus": "phrase",
+      "meaning_en": "Don't touch my things.",
+      "contexts_it": [
+        "Non toccate le mie cose."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "airport",
+          "dark"
+        ],
+        "cultural_note": "Offer cooperation while keeping boundaries.",
+        "trap": "Sounds hostile in security contexts.",
+        "native_sauce": "Safer alternative: Per favore, posso aprirla io?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non toccate le mie cose."
+    },
+    {
+      "source_uid": "non_avete_il_diritto_ad2ba7d97b",
+      "card_id": "non_avete_il_diritto_ad2ba7d97b",
+      "focus": "phrase",
+      "meaning_en": "You don't have the right.",
+      "contexts_it": [
+        "Non avete il diritto."
+      ],
+      "meta": {
+        "register": "direct",
+        "risk": "dark",
+        "tags": [
+          "airport",
+          "dark"
+        ],
+        "cultural_note": "Escalate politely if needed.",
+        "trap": "Challenges authority directly.",
+        "native_sauce": "Safer alternative: Posso parlare con un responsabile?"
+      },
+      "drills": {
+        "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
+      },
+      "phrase": "Non avete il diritto."
     }
   ],
   "scenes": []

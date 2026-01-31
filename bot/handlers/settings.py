@@ -118,13 +118,20 @@ def build_category_text(category_key: str) -> str:
     return "📦 <b>Packs</b>"
 
 
-def build_category_keyboard(category_key: str):
+def build_category_keyboard(category_key: str, pack_ids: set[str]):
     rows = []
     if category_key == "survival":
-        rows.append([InlineKeyboardButton("✈️ Airport", callback_data="PACKMOD|airport")])
-        rows.append([InlineKeyboardButton("☕ Bar", callback_data="PACKMOD|bar")])
+        if any("airport" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("✈️ Airport", callback_data="PACKMOD|airport")])
+        if any("hotel" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🏨 Hotel / Airbnb", callback_data="PACKMOD|hotel")])
+        if any("bar" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("☕ Bar", callback_data="PACKMOD|bar")])
     elif category_key == "dark":
-        rows.append([InlineKeyboardButton("✈️ Airport Dark Mode", callback_data="PACKMOD|airport_dark")])
+        if any("airport_dark" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("✈️ Airport Dark Mode", callback_data="PACKMOD|airport_dark")])
+        if any("hotel_dark" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🏨 Hotel Dark Mode", callback_data="PACKMOD|hotel_dark")])
     rows.append([InlineKeyboardButton("⬅️ Back", callback_data="SETTINGS|PACKS")])
     return InlineKeyboardMarkup(rows)
 
@@ -136,9 +143,22 @@ def build_module_text(module_key: str, user_level: str) -> str:
             f"Your level: <b>{user_level}</b>\n"
             "Pick a pack:"
         )
+    if module_key == "hotel":
+        return (
+            "🏨 <b>Hotel / Airbnb</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "Pick a pack:"
+        )
     if module_key == "airport_dark":
         return (
             "🟥 <b>Airport Dark Mode</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "⚠️ These phrases can escalate situations.\n"
+            "Learn for understanding only — do NOT use casually."
+        )
+    if module_key == "hotel_dark":
+        return (
+            "🟥 <b>Hotel Dark Mode</b>\n\n"
             f"Your level: <b>{user_level}</b>\n"
             "⚠️ These phrases can escalate situations.\n"
             "Learn for understanding only — do NOT use casually."
@@ -168,6 +188,27 @@ def build_module_keyboard(user_id: int, target: str, user_level: str, module_key
         ]
         if module_key == "airport_dark":
             ordered = [("it_b1_mission_airport_dark_v1", "🟥 Dark Mode")]
+
+        for pack_id, label in ordered:
+            if pack_id not in pack_map:
+                continue
+            level, title, description = pack_map[pack_id]
+            unlocked = _is_unlocked(user_level, level)
+            on = pack_id in active
+            if unlocked:
+                state = "✅" if on else "⬜"
+                rows.append([InlineKeyboardButton(f"{state} {label}", callback_data=f"PKTOG|{pack_id}|{module_key}")])
+            else:
+                rows.append([InlineKeyboardButton(f"🔒 {label} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
+    elif module_key in ("hotel", "hotel_dark"):
+        ordered = [
+            ("it_a1_mission_hotel_v1", "🟢 Core Survival"),
+            ("it_a2_mission_hotel_glue_v1", "🔒 Glue & Expansion"),
+            ("it_b1_mission_hotel_pressure_v1", "🔒 Real Pressure"),
+            ("it_b1_mission_hotel_dark_v1", "🟥 Dark Mode"),
+        ]
+        if module_key == "hotel_dark":
+            ordered = [("it_b1_mission_hotel_dark_v1", "🟥 Dark Mode")]
 
         for pack_id, label in ordered:
             if pack_id not in pack_map:
@@ -284,9 +325,11 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     if data.startswith("PACKCAT|"):
         _, category = data.split("|", 1)
+        packs = list_packs(target)
+        pack_ids = {pid for pid, _, _, _ in packs}
         await query.edit_message_text(
             build_category_text(category),
-            reply_markup=build_category_keyboard(category),
+            reply_markup=build_category_keyboard(category, pack_ids),
             parse_mode="HTML",
         )
         return
@@ -294,12 +337,12 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if data.startswith("PACKMOD|"):
         _, module_key = data.split("|", 1)
         level = get_user_level(user.id)
-        if module_key == "airport_dark":
+        if module_key in ("airport_dark", "hotel_dark"):
             await query.edit_message_text(
                 build_module_text(module_key, level),
                 parse_mode="HTML",
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("⚠️ I Understand — Continue", callback_data="PACKDARK|airport_dark")],
+                    [InlineKeyboardButton("⚠️ I Understand — Continue", callback_data=f"PACKDARK|{module_key}")],
                     [InlineKeyboardButton("⬅️ Back", callback_data="PACKCAT|dark")],
                 ]),
             )
