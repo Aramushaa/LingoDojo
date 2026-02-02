@@ -480,7 +480,10 @@ async def generate_roleplay_feedback(
     target_language: str,
     user_sentence: str,
     setting: str = "",
-    bot_role: str = ""
+    bot_role: str = "",
+    expected_phrase: str | None = None,
+    ui_language: str = "en",
+    helper_language: str | None = None,
 ) -> dict:
     """
     Lightweight correction for roleplay.
@@ -493,6 +496,9 @@ async def generate_roleplay_feedback(
         if not (GEMINI_API_KEYS or GEMINI_API_KEY):
             return _fallback_feedback(user_sentence, reason="GEMINI_API_KEY(S) missing/empty")
 
+        expected = (expected_phrase or "").strip()
+        lang_primary = ui_language or "en"
+        lang_helper = helper_language or ""
         prompt = f"""
 You are a friendly native Italian tutor.
 The user is a beginner.
@@ -504,19 +510,33 @@ ROLEPLAY CONTEXT:
 User message:
 "{user_sentence}"
 
+Expected phrase (if any):
+{expected or "(none)"}
+
+OUTPUT LANGUAGE:
+- Write notes/tips/grammar in {lang_primary}.
+- If {lang_helper or "no secondary language"} is provided, include a second line in that language in notes/tips/grammar (prefix each line with the language code, e.g. "EN:" / "FA:").
+
 RULES:
+- If an expected phrase is provided, set ok=false if the user did not use it (or a clear equivalent).
+- Accept minor typos or extra words if the expected phrase is clearly present.
+- If ok=false, notes should briefly say to use the expected phrase.
 - Keep correction minimal.
 - If acceptable, do not correct.
 - rewrite is optional (more natural, same meaning).
 - notes max 2 short lines.
 - examples MUST be exactly 3 short sentences.
+- Provide short "tips" and "grammar" only if helpful (max 2 bullets each).
 
 Return JSON ONLY:
 {{
+  "ok": true/false,
   "correction": string | null,
   "rewrite": string | null,
   "notes": string,
-  "examples": [string, string, string]
+  "examples": [string, string, string],
+  "tips": [string, string],
+  "grammar": [string, string]
 }}
 """.strip()
         last_err: Exception | None = None
@@ -531,6 +551,12 @@ Return JSON ONLY:
                     if not data:
                         return _fallback_feedback(user_sentence, reason="AI returned invalid JSON")
 
+                    ok = data.get("ok")
+                    if ok is None:
+                        ok = True
+                    if isinstance(ok, str):
+                        ok = ok.strip().lower() in ("true", "yes", "1")
+
                     examples = data.get("examples") or []
                     if not isinstance(examples, list):
                         examples = []
@@ -538,12 +564,24 @@ Return JSON ONLY:
                     while len(examples) < 3:
                         examples.append("")
 
+                    tips = data.get("tips") or []
+                    if not isinstance(tips, list):
+                        tips = []
+                    tips = [str(x) for x in tips if x][:2]
+
+                    grammar = data.get("grammar") or []
+                    if not isinstance(grammar, list):
+                        grammar = []
+                    grammar = [str(x) for x in grammar if x][:2]
+
                     return {
-                        "ok": True,
+                        "ok": bool(ok),
                         "correction": data.get("correction"),
                         "rewrite": data.get("rewrite"),
                         "notes": data.get("notes") or "",
                         "examples": examples,
+                        "tips": tips,
+                        "grammar": grammar,
                         "provider": "gemini",
                     }
                 except Exception as e:

@@ -1,0 +1,103 @@
+{
+  "pack_id": "it_a1_foundation_repair_yesno",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "phrase",
+  "chunk_size": 5,
+  "missions_enabled": 1,
+  "title": "🧱 Foundation: Yes/No & Repair Language (A1)",
+  "description": "Clarify, slow down, confirm, and fix misunderstandings.",
+  "cards": [
+    {
+      "source_uid": "phrase_puo_ripetere",
+      "card_id": "phrase_puo_ripetere",
+      "focus": "phrase",
+      "phrase": "Può ripetere, per favore?",
+      "meaning_en": "Can you repeat, please?",
+      "contexts_it": ["Può ripetere, per favore?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["repair", "polite"] }
+    },
+    {
+      "source_uid": "phrase_piu_lento",
+      "card_id": "phrase_piu_lento",
+      "focus": "phrase",
+      "phrase": "Più lentamente, per favore.",
+      "meaning_en": "More slowly, please.",
+      "contexts_it": ["Più lentamente, per favore."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["repair", "polite"] }
+    },
+    {
+      "source_uid": "phrase_come_si_dice",
+      "card_id": "phrase_come_si_dice",
+      "focus": "phrase",
+      "phrase": "Come si dice…?",
+      "meaning_en": "How do you say…?",
+      "contexts_it": ["Come si dice…?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["repair"] }
+    },
+    {
+      "source_uid": "phrase_ho_capito",
+      "card_id": "phrase_ho_capito",
+      "focus": "phrase",
+      "phrase": "Ho capito.",
+      "meaning_en": "I understand.",
+      "contexts_it": ["Ho capito."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["repair"] }
+    },
+    {
+      "source_uid": "phrase_non_ho_capito",
+      "card_id": "phrase_non_ho_capito",
+      "focus": "phrase",
+      "phrase": "Non ho capito.",
+      "meaning_en": "I didn’t understand.",
+      "contexts_it": ["Non ho capito."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["repair"] }
+    },
+    {
+      "source_uid": "phrase_e_giusto",
+      "card_id": "phrase_e_giusto",
+      "focus": "phrase",
+      "phrase": "È giusto?",
+      "meaning_en": "Is that correct?",
+      "contexts_it": ["È giusto?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["repair"] }
+    },
+    {
+      "source_uid": "phrase_si_esatto",
+      "card_id": "phrase_si_esatto",
+      "focus": "phrase",
+      "phrase": "Sì, esatto.",
+      "meaning_en": "Yes, exactly.",
+      "contexts_it": ["Sì, esatto."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["yesno"] }
+    },
+    {
+      "source_uid": "phrase_no_grazie",
+      "card_id": "phrase_no_grazie",
+      "focus": "phrase",
+      "phrase": "No, grazie.",
+      "meaning_en": "No, thanks.",
+      "contexts_it": ["No, grazie."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["yesno"] }
+    },
+    {
+      "source_uid": "phrase_puo_scriverlo",
+      "card_id": "phrase_puo_scriverlo",
+      "focus": "phrase",
+      "phrase": "Può scriverlo, per favore?",
+      "meaning_en": "Can you write it down, please?",
+      "contexts_it": ["Può scriverlo, per favore?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["repair", "polite"] }
+    },
+    {
+      "source_uid": "phrase_mi_puo_correggere",
+      "card_id": "phrase_mi_puo_correggere",
+      "focus": "phrase",
+      "phrase": "Mi può correggere?",
+      "meaning_en": "Can you correct me?",
+      "contexts_it": ["Mi può correggere?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["repair", "polite"] }
+    }
+  ]
+}

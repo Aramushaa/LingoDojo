@@ -1,0 +1,103 @@
+{
+  "pack_id": "it_a1_foundation_phrases",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "phrase",
+  "chunk_size": 5,
+  "missions_enabled": 1,
+  "title": "🧱 Foundation: Instant Phrases (A1)",
+  "description": "Short, instant phrases to survive any situation.",
+  "cards": [
+    {
+      "source_uid": "phrase_non_capisco",
+      "card_id": "phrase_non_capisco",
+      "focus": "phrase",
+      "phrase": "Non capisco.",
+      "meaning_en": "I don’t understand.",
+      "contexts_it": ["Non capisco."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "survival"] }
+    },
+    {
+      "source_uid": "phrase_va_bene",
+      "card_id": "phrase_va_bene",
+      "focus": "phrase",
+      "phrase": "Va bene.",
+      "meaning_en": "Okay / That’s fine.",
+      "contexts_it": ["Va bene."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "survival"] }
+    },
+    {
+      "source_uid": "phrase_scusi",
+      "card_id": "phrase_scusi",
+      "focus": "phrase",
+      "phrase": "Scusi.",
+      "meaning_en": "Excuse me (polite).",
+      "contexts_it": ["Scusi, posso chiedere?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "polite"] }
+    },
+    {
+      "source_uid": "phrase_per_favore",
+      "card_id": "phrase_per_favore",
+      "focus": "phrase",
+      "phrase": "Per favore.",
+      "meaning_en": "Please.",
+      "contexts_it": ["Per favore."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "polite"] }
+    },
+    {
+      "source_uid": "phrase_grazie",
+      "card_id": "phrase_grazie",
+      "focus": "phrase",
+      "phrase": "Grazie.",
+      "meaning_en": "Thank you.",
+      "contexts_it": ["Grazie."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "polite"] }
+    },
+    {
+      "source_uid": "phrase_mi_scusi",
+      "card_id": "phrase_mi_scusi",
+      "focus": "phrase",
+      "phrase": "Mi scusi.",
+      "meaning_en": "Excuse me / Sorry (polite).",
+      "contexts_it": ["Mi scusi, dov’è l’uscita?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "polite"] }
+    },
+    {
+      "source_uid": "phrase_ho_bisogno_di_aiuto",
+      "card_id": "phrase_ho_bisogno_di_aiuto",
+      "focus": "phrase",
+      "phrase": "Ho bisogno di aiuto.",
+      "meaning_en": "I need help.",
+      "contexts_it": ["Ho bisogno di aiuto."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "survival"] }
+    },
+    {
+      "source_uid": "phrase_puo_aiutarmi",
+      "card_id": "phrase_puo_aiutarmi",
+      "focus": "phrase",
+      "phrase": "Può aiutarmi?",
+      "meaning_en": "Can you help me?",
+      "contexts_it": ["Può aiutarmi?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "survival"] }
+    },
+    {
+      "source_uid": "phrase_un_attimo",
+      "card_id": "phrase_un_attimo",
+      "focus": "phrase",
+      "phrase": "Un attimo, per favore.",
+      "meaning_en": "One moment, please.",
+      "contexts_it": ["Un attimo, per favore."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "survival"] }
+    },
+    {
+      "source_uid": "phrase_non_lo_so",
+      "card_id": "phrase_non_lo_so",
+      "focus": "phrase",
+      "phrase": "Non lo so.",
+      "meaning_en": "I don’t know.",
+      "contexts_it": ["Non lo so."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "survival"] }
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "pack_id": "it_a1_foundation_verbs",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "word",
+  "missions_enabled": 0,
+  "title": "🧱 Foundation: Survival Verbs (A1)",
+  "description": "Core verbs you need everywhere: go, do, take, have, be, say, see, come, want, can, must.",
+  "cards": [
+    {
+      "source_uid": "verb_andare",
+      "card_id": "verb_andare",
+      "focus": "word",
+      "lemma": "andare",
+      "phrase_hint": "Vado a casa.",
+      "meaning_en": "to go",
+      "contexts_it": ["Vado a casa."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_fare",
+      "card_id": "verb_fare",
+      "focus": "word",
+      "lemma": "fare",
+      "phrase_hint": "Che cosa fai?",
+      "meaning_en": "to do / to make",
+      "contexts_it": ["Che cosa fai?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_prendere",
+      "card_id": "verb_prendere",
+      "focus": "word",
+      "lemma": "prendere",
+      "phrase_hint": "Prendo un taxi.",
+      "meaning_en": "to take / to have",
+      "contexts_it": ["Prendo un taxi."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_avere",
+      "card_id": "verb_avere",
+      "focus": "word",
+      "lemma": "avere",
+      "phrase_hint": "Ho bisogno di aiuto.",
+      "meaning_en": "to have",
+      "contexts_it": ["Ho bisogno di aiuto."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_essere",
+      "card_id": "verb_essere",
+      "focus": "word",
+      "lemma": "essere",
+      "phrase_hint": "Sono qui.",
+      "meaning_en": "to be",
+      "contexts_it": ["Sono qui."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_dire",
+      "card_id": "verb_dire",
+      "focus": "word",
+      "lemma": "dire",
+      "phrase_hint": "Mi può dire?",
+      "meaning_en": "to say / to tell",
+      "contexts_it": ["Mi può dire?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_vedere",
+      "card_id": "verb_vedere",
+      "focus": "word",
+      "lemma": "vedere",
+      "phrase_hint": "Può vedere?",
+      "meaning_en": "to see",
+      "contexts_it": ["Può vedere?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_venire",
+      "card_id": "verb_venire",
+      "focus": "word",
+      "lemma": "venire",
+      "phrase_hint": "Viene qui?",
+      "meaning_en": "to come",
+      "contexts_it": ["Viene qui?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_volere",
+      "card_id": "verb_volere",
+      "focus": "word",
+      "lemma": "volere",
+      "phrase_hint": "Vorrei un caffè.",
+      "meaning_en": "to want (polite: vorrei)",
+      "contexts_it": ["Vorrei un caffè."],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_potere",
+      "card_id": "verb_potere",
+      "focus": "word",
+      "lemma": "potere",
+      "phrase_hint": "Posso entrare?",
+      "meaning_en": "to be able / can",
+      "contexts_it": ["Posso entrare?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["core", "verb"] }
+    },
+    {
+      "source_uid": "verb_dovere",
+      "card_id": "verb_dovere",
+      "focus": "word",
+      "lemma": "dovere",
+      "phrase_hint": "Devo partire.",
+      "meaning_en": "must / to have to",
+      "contexts_it": ["Devo partire."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["core", "verb"] }
+    }
+  ]
+}

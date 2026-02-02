@@ -2,6 +2,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from bot.utils.telegram import get_chat_sender
+from html import escape
 
 
 from bot.db import (
@@ -10,10 +11,12 @@ from bot.db import (
     set_user_ui_language,
     set_user_helper_language,
     list_packs,
-    get_user_active_packs,
-    toggle_pack,get_user_level,
+    get_user_level,
     set_user_level,
+    get_pack_info,
 )
+from bot.handlers.learn import start_pack_learn
+from bot.handlers.review import review_pack
 
 TARGET_LANG_OPTIONS = [("it", "🇮🇹 Italian"), ("en", "🇬🇧 English")]
 UI_LANG_OPTIONS = [("en", "EN"), ("fa", "FA")]
@@ -26,6 +29,8 @@ HELPER_LANG_OPTIONS = [
 
 
 
+def h(text: str) -> str:
+    return escape(text or "")
 
 def build_settings_text(target: str, ui: str, helper: str | None, level: str):
     return (
@@ -91,11 +96,13 @@ def build_packs_text(target: str):
         "📦 <b>Packs</b>\n\n"
         "Choose a category:\n"
         f"Target language: <b>{target}</b>\n"
+        "Tip: Pick a pack and start — no activation needed."
     )
 
 
 def build_packs_keyboard(user_level: str):
     rows = [
+        [InlineKeyboardButton("🧠 Foundation (A1)", callback_data="PACKCAT|foundation")],
         [InlineKeyboardButton("🧳 Survival Italian", callback_data="PACKCAT|survival")],
         [InlineKeyboardButton("🟥 Dark Mode (locked)", callback_data="PACKCAT|dark")],
         [InlineKeyboardButton("⬅️ Back", callback_data="SETTINGS|BACK")],
@@ -104,6 +111,11 @@ def build_packs_keyboard(user_level: str):
 
 
 def build_category_text(category_key: str) -> str:
+    if category_key == "foundation":
+        return (
+            "🧠 <b>Foundation (A1)</b>\n\n"
+            "Core building blocks. Pick a pack:"
+        )
     if category_key == "survival":
         return (
             "🧳 <b>Survival Italian</b>\n\n"
@@ -120,13 +132,20 @@ def build_category_text(category_key: str) -> str:
 
 def build_category_keyboard(category_key: str, pack_ids: set[str]):
     rows = []
-    if category_key == "survival":
+    if category_key == "foundation":
+        if any("foundation_verbs" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🧱 Survival Verbs", callback_data="PACKMOD|foundation_verbs")])
+        if any("foundation_phrases" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🧱 Instant Phrases", callback_data="PACKMOD|foundation_phrases")])
+        if any("foundation_numbers_time_price" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🧱 Numbers • Time • Price", callback_data="PACKMOD|foundation_numbers")])
+        if any("foundation_repair_yesno" in pid for pid in pack_ids):
+            rows.append([InlineKeyboardButton("🧱 Yes/No & Repair", callback_data="PACKMOD|foundation_repair")])
+    elif category_key == "survival":
         if any("airport" in pid for pid in pack_ids):
             rows.append([InlineKeyboardButton("✈️ Airport", callback_data="PACKMOD|airport")])
         if any("hotel" in pid for pid in pack_ids):
             rows.append([InlineKeyboardButton("🏨 Hotel / Airbnb", callback_data="PACKMOD|hotel")])
-        if any("bar" in pid for pid in pack_ids):
-            rows.append([InlineKeyboardButton("☕ Bar", callback_data="PACKMOD|bar")])
     elif category_key == "dark":
         if any("airport_dark" in pid for pid in pack_ids):
             rows.append([InlineKeyboardButton("✈️ Airport Dark Mode", callback_data="PACKMOD|airport_dark")])
@@ -137,6 +156,30 @@ def build_category_keyboard(category_key: str, pack_ids: set[str]):
 
 
 def build_module_text(module_key: str, user_level: str) -> str:
+    if module_key == "foundation_verbs":
+        return (
+            "🧱 <b>Survival Verbs</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "Pick a pack:"
+        )
+    if module_key == "foundation_phrases":
+        return (
+            "🧱 <b>Instant Phrases</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "Pick a pack:"
+        )
+    if module_key == "foundation_numbers":
+        return (
+            "🧱 <b>Numbers • Time • Price</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "Pick a pack:"
+        )
+    if module_key == "foundation_repair":
+        return (
+            "🧱 <b>Yes/No & Repair</b>\n\n"
+            f"Your level: <b>{user_level}</b>\n"
+            "Pick a pack:"
+        )
     if module_key == "airport":
         return (
             "✈️ <b>Airport</b>\n\n"
@@ -163,23 +206,59 @@ def build_module_text(module_key: str, user_level: str) -> str:
             "⚠️ These phrases can escalate situations.\n"
             "Learn for understanding only — do NOT use casually."
         )
-    if module_key == "bar":
-        return (
-            "☕ <b>Bar</b>\n\n"
-            f"Your level: <b>{user_level}</b>\n"
-            "Pick a pack:"
-        )
     return "📦 <b>Packs</b>"
+
+
+def build_pack_detail_text(pack_info, active: bool, user_level: str) -> str:
+    if not pack_info:
+        return "Pack not found."
+    pack_id, level, title, description, pack_type, chunk_size, missions_enabled, _ = pack_info
+    return (
+        f"📦 <b>{h(title)}</b>\n\n"
+        f"Level: <b>{h(level or 'A1')}</b>\n"
+        f"Type: <b>{h(pack_type or 'word')}</b>\n"
+        f"Chunk size: <b>{h(str(chunk_size or '-'))}</b>\n"
+        f"\n"
+        f"{h(description or '')}"
+    )
+
+
+def build_pack_detail_keyboard(pack_id: str, module_key: str, active: bool):
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("▶️ Start Pack", callback_data=f"PACKSTART|journey|{pack_id}|{module_key}")],
+        [InlineKeyboardButton("🔁 Review this pack", callback_data=f"PACKSTART|review|{pack_id}|{module_key}")],
+        [InlineKeyboardButton("⬅️ Back", callback_data=f"PACKMOD|{module_key}")],
+    ])
 
 
 def build_module_keyboard(user_id: int, target: str, user_level: str, module_key: str):
     packs = list_packs(target)
-    active = set(get_user_active_packs(user_id))
     pack_map = {pid: (lvl, title, desc) for pid, lvl, title, desc in packs}
 
     rows = []
 
-    if module_key in ("airport", "airport_dark"):
+    if module_key in ("foundation_verbs", "foundation_phrases", "foundation_numbers", "foundation_repair"):
+        ordered = []
+        if module_key == "foundation_verbs":
+            ordered = [("it_a1_foundation_verbs", "🧱 Survival Verbs (A1)")]
+        elif module_key == "foundation_phrases":
+            ordered = [("it_a1_foundation_phrases", "🧱 Instant Phrases (A1)")]
+        elif module_key == "foundation_numbers":
+            ordered = [("it_a1_foundation_numbers_time_price", "🧱 Numbers • Time • Price (A1)")]
+        elif module_key == "foundation_repair":
+            ordered = [("it_a1_foundation_repair_yesno", "🧱 Yes/No & Repair (A1)")]
+
+        for pack_id, label in ordered:
+            if pack_id not in pack_map:
+                continue
+            level, title, description = pack_map[pack_id]
+            unlocked = _is_unlocked(user_level, level)
+            if unlocked:
+                rows.append([InlineKeyboardButton(f"{label}", callback_data=f"PACKOPEN|{pack_id}|{module_key}")])
+            else:
+                rows.append([InlineKeyboardButton(f"🔒 {label} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
+
+    elif module_key in ("airport", "airport_dark"):
         ordered = [
             ("it_a1_mission_airport_v2", "🟢 Core Survival"),
             ("it_a2_mission_airport_glue_v1", "🔒 Glue & Expansion"),
@@ -194,10 +273,8 @@ def build_module_keyboard(user_id: int, target: str, user_level: str, module_key
                 continue
             level, title, description = pack_map[pack_id]
             unlocked = _is_unlocked(user_level, level)
-            on = pack_id in active
             if unlocked:
-                state = "✅" if on else "⬜"
-                rows.append([InlineKeyboardButton(f"{state} {label}", callback_data=f"PKTOG|{pack_id}|{module_key}")])
+                rows.append([InlineKeyboardButton(f"{label}", callback_data=f"PACKOPEN|{pack_id}|{module_key}")])
             else:
                 rows.append([InlineKeyboardButton(f"🔒 {label} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
     elif module_key in ("hotel", "hotel_dark"):
@@ -215,25 +292,10 @@ def build_module_keyboard(user_id: int, target: str, user_level: str, module_key
                 continue
             level, title, description = pack_map[pack_id]
             unlocked = _is_unlocked(user_level, level)
-            on = pack_id in active
             if unlocked:
-                state = "✅" if on else "⬜"
-                rows.append([InlineKeyboardButton(f"{state} {label}", callback_data=f"PKTOG|{pack_id}|{module_key}")])
+                rows.append([InlineKeyboardButton(f"{label}", callback_data=f"PACKOPEN|{pack_id}|{module_key}")])
             else:
                 rows.append([InlineKeyboardButton(f"🔒 {label} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
-    elif module_key == "bar":
-        # Simple Bar module (A1 only for now)
-        for pack_id in ("it_a1_mission_bar_v2",):
-            if pack_id not in pack_map:
-                continue
-            level, title, description = pack_map[pack_id]
-            unlocked = _is_unlocked(user_level, level)
-            on = pack_id in active
-            if unlocked:
-                state = "✅" if on else "⬜"
-                rows.append([InlineKeyboardButton(f"{state} {title}", callback_data=f"PKTOG|{pack_id}|{module_key}")])
-            else:
-                rows.append([InlineKeyboardButton(f"🔒 {title} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
 
     rows.append([InlineKeyboardButton("⬅️ Back", callback_data="SETTINGS|PACKS")])
     return InlineKeyboardMarkup(rows)
@@ -354,6 +416,25 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         return
 
+    if data.startswith("PACKOPEN|"):
+        _, pack_id, module_key = data.split("|", 2)
+        pack_info = get_pack_info(pack_id)
+        level = get_user_level(user.id)
+        await query.edit_message_text(
+            build_pack_detail_text(pack_info, False, level),
+            parse_mode="HTML",
+            reply_markup=build_pack_detail_keyboard(pack_id, module_key, False),
+        )
+        return
+
+    if data.startswith("PACKSTART|"):
+        _, action, pack_id, module_key = data.split("|", 3)
+        if action == "journey":
+            await start_pack_learn(update, context, pack_id)
+        elif action == "review":
+            await review_pack(update, context, pack_id)
+        return
+
     if data.startswith("PACKDARK|"):
         _, module_key = data.split("|", 1)
         level = get_user_level(user.id)
@@ -406,21 +487,10 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         helper_code = None if code == "none" else code
         set_user_helper_language(user.id, helper_code)
     elif action == "PKTOG":
-        pack_id = parts[1] if len(parts) > 1 else ""
-        module_key = parts[2] if len(parts) > 2 else ""
-        toggle_pack(user.id, pack_id)
-        level = get_user_level(user.id)
-        # stay on module screen if available
-        if module_key:
-            await query.edit_message_text(
-                build_module_text(module_key, level),
-                reply_markup=build_module_keyboard(user.id, target, level, module_key),
-                parse_mode="HTML",
-            )
-            return
+        module_key = parts[2] if len(parts) > 2 else "survival"
         await query.edit_message_text(
-            build_packs_text(target),
-            reply_markup=build_packs_keyboard(level),
+            "✅ Pack activation has been removed.\n\nStart a pack directly instead.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data=f"PACKMOD|{module_key}")]]),
             parse_mode="HTML",
         )
         return

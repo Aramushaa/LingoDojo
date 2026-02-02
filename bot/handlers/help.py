@@ -11,21 +11,19 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "🫧 <b>LingoDojo — Command Glass</b>\n"
         "<i>(tap a card)</i>\n\n"
-        "🧠 <b>/learn</b> — New items from active packs\n"
-        "🎯 <b>/missions</b> — Mission flow (inside Learn)\n"
-        "📦 <b>/packs</b> — Browse & activate packs\n"
+        "🧭 <b>/journey</b> — Guided level‑up path\n"
+        "📦 <b>/packs</b> — Browse packs\n"
         "📊 <b>/progress</b> — Stats + streak\n"
         "⚙️ <b>/settings</b> — Languages + level\n"
         "🧰 <b>/help</b> — Show this menu\n\n"
-        "Tip: Activate packs in 📦 Packs, then /learn becomes a smooth stream."
+        "Tip: Journey is the recommended path. Packs are for custom training."
     )
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🧠 Learn", callback_data="home:learn"),
-         InlineKeyboardButton("🎯 Missions", callback_data="home:missions")],
-        [InlineKeyboardButton("📦 Packs", callback_data="home:packs"),
-         InlineKeyboardButton("📊 Progress", callback_data="home:progress")],
-        [InlineKeyboardButton("⚙️ Settings", callback_data="home:settings")],
+        [InlineKeyboardButton("🧭 Journey", callback_data="home:journey"),
+         InlineKeyboardButton("📦 Packs", callback_data="home:packs")],
+        [InlineKeyboardButton("📊 Progress", callback_data="home:progress"),
+         InlineKeyboardButton("⚙️ Settings", callback_data="home:settings")],
     ])
 
     await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)

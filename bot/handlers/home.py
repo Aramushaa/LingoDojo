@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from bot.handlers.learn import learn
+from bot.handlers.journey import journey
 from bot.handlers.stats import stats
 from bot.handlers.settings import settings, open_packs
 
@@ -14,12 +14,8 @@ async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Make the chat feel "app-like": remove the menu message if you want
     # await query.message.delete()
 
-    if data == "home:learn":
-        await learn(update, context)
-
-    elif data == "home:missions":
-        # Missions are integrated into Learn for now
-        await learn(update, context)
+    if data == "home:journey":
+        await journey(update, context)
 
     elif data == "home:packs":
         await open_packs(update, context)

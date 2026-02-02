@@ -48,7 +48,10 @@ def init_db():
         target_language TEXT NOT NULL,
         level TEXT,
         title TEXT NOT NULL,
-        description TEXT
+        description TEXT,
+        pack_type TEXT,
+        chunk_size INTEGER,
+        missions_enabled INTEGER
     )
     """)
 
@@ -125,6 +128,9 @@ def init_db():
     _add_column_if_missing(cursor, "users", "target_language", "TEXT NOT NULL DEFAULT 'it'")
     _add_column_if_missing(cursor, "users", "ui_language", "TEXT NOT NULL DEFAULT 'en'")
     _add_column_if_missing(cursor, "users", "learn_since_scene", "INTEGER NOT NULL DEFAULT 0")
+    _add_column_if_missing(cursor, "packs", "pack_type", "TEXT")
+    _add_column_if_missing(cursor, "packs", "chunk_size", "INTEGER")
+    _add_column_if_missing(cursor, "packs", "missions_enabled", "INTEGER")
         # --- reviews undo support ---
     _add_column_if_missing(cursor, "reviews", "prev_status", "TEXT")
     _add_column_if_missing(cursor, "reviews", "prev_interval_days", "INTEGER")
@@ -317,17 +323,37 @@ def import_packs_from_folder():
         level = pack.get("level")
         title = pack.get("title", pack_id)
         description = pack.get("description", "")
+        pack_type = pack.get("pack_type")
+        chunk_size = pack.get("chunk_size")
+        missions_enabled = pack.get("missions_enabled")
+
+        # Infer pack type if not provided
+        if not pack_type:
+            cards = pack.get("cards") or []
+            if cards:
+                phrase_count = sum(1 for c in cards if (c.get("focus") or "").lower() == "phrase")
+                pack_type = "phrase" if phrase_count >= max(1, len(cards) // 2) else "word"
+            else:
+                pack_type = "word"
+
+        if chunk_size is None and pack_type == "phrase":
+            chunk_size = 5
+        if missions_enabled is None:
+            missions_enabled = 1 if pack_type == "phrase" else 0
 
         # Upsert pack metadata
         cursor.execute("""
-            INSERT INTO packs (pack_id, target_language, level, title, description)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO packs (pack_id, target_language, level, title, description, pack_type, chunk_size, missions_enabled)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(pack_id) DO UPDATE SET
                 target_language=excluded.target_language,
                 level=excluded.level,
                 title=excluded.title,
-                description=excluded.description
-        """, (pack_id, target_language, level, title, description))
+                description=excluded.description,
+                pack_type=excluded.pack_type,
+                chunk_size=excluded.chunk_size,
+                missions_enabled=excluded.missions_enabled
+        """, (pack_id, target_language, level, title, description, pack_type, chunk_size, missions_enabled))
 
         # --------- Import legacy items OR v2 cards ---------
         cards = pack.get("cards")
@@ -491,6 +517,19 @@ def list_packs(target_language: str):
     conn.close()
     return rows
 
+
+def get_pack_info(pack_id: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT pack_id, level, title, description, pack_type, chunk_size, missions_enabled, target_language
+        FROM packs
+        WHERE pack_id = ?
+    """, (pack_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
 def activate_pack(user_id: int, pack_id: str):
     conn = get_connection()
     cursor = conn.cursor()
@@ -579,7 +618,7 @@ def get_item_by_id(item_id: int):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT item_id, term, chunk, translation_en, note
+        SELECT item_id, term, chunk, translation_en, note, pack_id, focus
         FROM pack_items
         WHERE item_id = ?
     """, (item_id,))
@@ -655,6 +694,37 @@ def get_due_item(user_id: int):
             return item_id
 
         # stale review row -> delete and continue
+        cursor.execute("DELETE FROM reviews WHERE user_id = ? AND item_id = ?", (user_id, item_id))
+        conn.commit()
+
+
+def get_due_item_in_pack(user_id: int, pack_id: str):
+    """
+    Return one due item_id from a specific pack.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    while True:
+        cursor.execute("""
+            SELECT r.item_id
+            FROM reviews r
+            JOIN pack_items pi ON pi.item_id = r.item_id
+            WHERE r.user_id = ? AND r.due_date <= ? AND pi.pack_id = ?
+            ORDER BY r.due_date ASC
+            LIMIT 1
+        """, (user_id, today_str(), pack_id))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return None
+
+        item_id = row[0]
+        cursor.execute("SELECT 1 FROM pack_items WHERE item_id = ?", (item_id,))
+        if cursor.fetchone():
+            conn.close()
+            return item_id
+
         cursor.execute("DELETE FROM reviews WHERE user_id = ? AND item_id = ?", (user_id, item_id))
         conn.commit()
 
@@ -914,6 +984,24 @@ def get_random_meanings_from_active_packs(user_id: int, target_language: str, ex
     conn.close()
     return [r[0] for r in rows if r and r[0]]
 
+
+def get_random_meanings_from_pack(pack_id: str, exclude_item_id: int, limit: int = 2) -> list[str]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT translation_en
+        FROM pack_items
+        WHERE pack_id = ?
+          AND item_id != ?
+          AND translation_en IS NOT NULL
+          AND TRIM(translation_en) != ''
+        ORDER BY RANDOM()
+        LIMIT ?
+    """, (pack_id, exclude_item_id, limit))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]]
+
 def get_lexicon_cache_it(term: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -985,7 +1073,7 @@ def pick_one_item_for_user(user_id: int, target_language: str):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note
+        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note, pi.pack_id, pi.focus
         FROM pack_items pi
         JOIN packs p ON p.pack_id = pi.pack_id
         JOIN user_packs up ON up.pack_id = p.pack_id
@@ -1063,7 +1151,7 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note
+        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note, pi.pack_id, pi.focus
         FROM pack_items pi
         JOIN packs p ON p.pack_id = pi.pack_id
         JOIN user_packs up ON up.pack_id = p.pack_id
@@ -1084,6 +1172,52 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
     row = cur.fetchone()
     conn.close()
     return row
+
+
+def pick_next_new_item_for_user_in_pack(user_id: int, pack_id: str):
+    """
+    Pick the next *not-yet-introduced* item from a specific pack.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note, pi.pack_id, pi.focus
+        FROM pack_items pi
+        WHERE pi.pack_id = ?
+          AND NOT EXISTS (
+              SELECT 1 FROM reviews r
+              WHERE r.user_id = ? AND r.item_id = pi.item_id
+          )
+        ORDER BY pi.item_id ASC
+        LIMIT 1
+    """, (pack_id, user_id))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def get_pack_item_counts(user_id: int, pack_id: str) -> tuple[int, int]:
+    """
+    Return (total_items, introduced_items) for a specific pack.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM pack_items
+        WHERE pack_id = ?
+    """, (pack_id,))
+    (total,) = cur.fetchone()
+
+    cur.execute("""
+        SELECT COUNT(DISTINCT pi.item_id)
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        WHERE r.user_id = ? AND pi.pack_id = ?
+    """, (user_id, pack_id))
+    (introduced,) = cur.fetchone()
+    conn.close()
+    return int(total or 0), int(introduced or 0)
 
 def get_random_context_for_item(item_id: int, lang: str = "it") -> str | None:
     conn = get_connection()

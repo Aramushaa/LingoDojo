@@ -14,6 +14,7 @@ from bot.db import (
     clear_session, get_item_by_id, ensure_review_row,
     get_user_languages, get_lexicon_cache_it,pick_one_item_for_user,
     pick_next_new_item_for_user,
+    pick_next_new_item_for_user_in_pack,
     get_active_items_total,
     get_active_items_introduced,get_user_profile,
     get_random_context_for_item, get_item_holographic_meta,
@@ -21,21 +22,268 @@ from bot.db import (
     set_learn_since_scene,
     pick_one_scene_for_user_active_packs,
     get_random_meanings_from_active_packs,
+    get_random_meanings_from_pack,
+    get_pack_info,
+    get_pack_item_counts,
     mark_item_mature,
 
 )
 
 from bot.services.dictionary_it import validate_it_term
-from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz,generate_roleplay_feedback
+from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz,generate_roleplay_feedback 
+from bot.services.validation import validate_sentence, build_anchors
+import random
 from bot.services.lexicon_it import get_or_fetch_lexicon_it
 from bot.services.tts_edge import tts_it
 
 
 SCENE_EVERY_N_NEW_ITEMS = 3
 
+# Simple progression map for guided packs
+PACK_PROGRESS = {
+    "it_a1_mission_airport_v2": "it_a2_mission_airport_glue_v1",
+    "it_a2_mission_airport_glue_v1": "it_b1_mission_airport_pressure_v1",
+    "it_a1_mission_hotel_v1": "it_a2_mission_hotel_glue_v1",
+    "it_a2_mission_hotel_glue_v1": "it_b1_mission_hotel_pressure_v1",
+}
+
 
 def h(text: str) -> str:
     return escape(text or "")
+
+
+def _role_for_pack(pack_id: str) -> str:
+    pid = (pack_id or "").lower()
+    if "airport" in pid:
+        return "Staff"
+    if "hotel" in pid:
+        return "Reception"
+    return "Staff"
+
+
+def _setting_for_pack(pack_id: str) -> str:
+    pid = (pack_id or "").lower()
+    if "airport" in pid:
+        return "Fiumicino airport, boarding starts in 10 minutes, screens just changed"
+    if "hotel" in pid:
+        return "Hotel reception at night, booking mix‑up, you’re tired"
+    return "Real-life mission"
+
+
+def _bot_line_for_pack(pack_id: str, idx: int) -> str:
+    pid = (pack_id or "").lower()
+    if "airport" in pid:
+        lines = [
+            "Buongiorno. In cosa posso aiutarla?",
+            "Mi dica pure.",
+            "Un attimo… controllo.",
+            "Capisco. Vediamo.",
+            "Sì, certo.",
+        ]
+        return lines[idx % len(lines)]
+    if "hotel" in pid:
+        lines = [
+            "Buonasera. Come posso aiutarla?",
+            "Controllo subito la prenotazione.",
+            "Mi dica, qual è il problema?",
+            "Va bene. Vediamo una soluzione.",
+            "Certo, un attimo.",
+        ]
+        return lines[idx % len(lines)]
+    return "Va bene. Mi dica."
+
+
+async def _start_phrase_mission(user, msg, meta: dict):
+    chunk_items = (meta or {}).get("chunk_items") or []
+    if not chunk_items:
+        return
+
+    pack_id = (meta or {}).get("pack_id") or ""
+    pack_info = get_pack_info(pack_id) or ()
+    pack_title = pack_info[2] if len(pack_info) > 2 else "Mission"
+    setting = _setting_for_pack(pack_id)
+
+    turns = []
+    for i, ci in enumerate(chunk_items):
+        phrase = ci.get("phrase") or ""
+        scenario = ci.get("scenario") or "Use this naturally."
+        prompt = (
+            f"Scenario: {scenario}\n"
+            f"Use the phrase you learned."
+        )
+        turns.append({"bot": _bot_line_for_pack(pack_id, i)})
+        turns.append({"user_task": prompt, "expected_phrase": phrase})
+
+    meta["scene"] = {
+        "pack_id": pack_id,
+        "scene_id": f"chunk_{user.id}",
+        "roleplay": {
+            "setting": f"{pack_title} — {setting}",
+            "bot_role": _role_for_pack(pack_id),
+            "turns": turns,
+        },
+        "turns": turns,
+        "idx": 0
+    }
+    meta["chunk_items"] = []
+
+    set_session(user.id, mode="learn", item_id=meta.get("item_id"), stage="scene_turn", meta=meta)
+    await send_scene_prompt(msg, meta)
+
+
+async def _send_next_learn_card(user, msg, target: str, pack_id: str | None, meta: dict | None = None) -> bool:
+    meta_in = meta or {}
+    if pack_id:
+        item = pick_next_new_item_for_user_in_pack(user.id, pack_id)
+    else:
+        item = pick_next_new_item_for_user(user.id, target_language=target)
+
+    if not item:
+        if pack_id:
+            total, introduced = get_pack_item_counts(user.id, pack_id)
+            next_pack = PACK_PROGRESS.get(pack_id)
+            kb = None
+            journey_path = meta_in.get("journey_path") if meta_in else None
+            journey_index = int(meta_in.get("journey_index", 0)) if meta_in else 0
+            if journey_path and journey_index + 1 < len(journey_path):
+                next_pack = journey_path[journey_index + 1]
+
+            if next_pack:
+                next_info = get_pack_info(next_pack)
+                if next_info:
+                    _, next_level, next_title, _, _, _, _, _ = next_info
+                    kb = InlineKeyboardMarkup([
+                        [InlineKeyboardButton(f"🔓 Unlock {next_title}", callback_data=f"UNLOCKNEXT|{pack_id}|{next_pack}")],
+                        [InlineKeyboardButton("⬅️ Back to Packs", callback_data="SETTINGS|PACKS")],
+                    ])
+                    await msg.reply_text(
+                        f"✅ You finished all NEW items in this pack.\n"
+                        f"Progress: {introduced}/{total}\n\n"
+                        f"Next recommended pack: <b>{h(next_title)}</b> (level {h(next_level or '-')}).",
+                        parse_mode=ParseMode.HTML,
+                        reply_markup=kb
+                    )
+                    clear_session(user.id)
+                    return False
+
+            await msg.reply_text(
+                f"✅ You finished all NEW items in this pack.\n"
+                f"Progress: {introduced}/{total}\n\n"
+                f"Now go /review 🔁",
+                reply_markup=kb
+            )
+        else:
+            total = get_active_items_total(user.id, target)
+            introduced = get_active_items_introduced(user.id, target)
+            await msg.reply_text(
+                f"✅ You finished all NEW items in your packs.\n"
+                f"Progress: {introduced}/{total}\n\n"
+                f"Now go /review 🔁"
+            )
+        clear_session(user.id)
+        return False
+
+    # Support older tuple shapes
+    if len(item) >= 7:
+        item_id, term, chunk, translation_en, note, pack_id_row, focus = item[:7]
+    else:
+        item_id, term, chunk, translation_en, note = item[:5]
+        pack_id_row = None
+        focus = None
+
+    if not pack_id and pack_id_row:
+        pack_id = pack_id_row
+
+    ctx_it = get_random_context_for_item(item_id)
+    holo = get_item_holographic_meta(item_id)
+
+    try:
+        get_or_fetch_lexicon_it(term)
+    except Exception:
+        pass
+
+    ensure_review_row(user.id, item_id)
+
+    lexicon = get_lexicon_cache_it(term)
+    if pack_id:
+        distractors = get_random_meanings_from_pack(pack_id, item_id, limit=2)
+    else:
+        distractors = get_random_meanings_from_active_packs(user.id, target, item_id, limit=2)
+
+    quiz = await generate_reverse_context_quiz(
+        term=term,
+        chunk=chunk,
+        translation_en=translation_en,
+        lexicon=lexicon,
+        context_it=ctx_it,
+        distractors_en=distractors,
+    )
+
+    pack_info = get_pack_info(pack_id) if pack_id else None
+    if pack_info and len(pack_info) > 4 and pack_info[4]:
+        pack_type = pack_info[4]
+    elif focus:
+        pack_type = "phrase" if focus == "phrase" else "word"
+    else:
+        pack_type = "word"
+    chunk_size = (pack_info[5] if pack_info else None) or (5 if pack_type == "phrase" else None)
+
+    chunk_items = meta_in.get("chunk_items") or []
+    prev_pack = meta_in.get("pack_id")
+    if prev_pack and pack_id and prev_pack != pack_id:
+        chunk_items = []
+
+    meta = {
+        "term": term,
+        "chunk": chunk,
+        "translation_en": translation_en,
+        "quiz": quiz,
+        "holo": holo,
+        "pack_id": pack_id,
+        "pack_type": pack_type,
+        "chunk_size": chunk_size,
+        "chunk_items": chunk_items,
+        "item_id": item_id,
+    }
+
+    # carry journey info if provided
+    if "journey_path" in meta_in:
+        meta["journey_path"] = meta_in.get("journey_path")
+        meta["journey_index"] = meta_in.get("journey_index", 0)
+
+    if not quiz.get("ok"):
+        meta["pending_ai"] = {
+            "kind": "quiz",
+            "term": term,
+            "chunk": chunk,
+            "translation_en": translation_en,
+            "context_it": ctx_it,
+        }
+        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_QUIZ")],
+            [InlineKeyboardButton("⏭ Skip quiz", callback_data="AI|SKIP_QUIZ")]
+        ])
+        await msg.reply_text(
+            "⚠️ <b>AI quiz not available</b>\n"
+            "Do you want to try again, or skip the quiz?",
+            parse_mode=ParseMode.HTML,
+            reply_markup=kb
+        )
+        return True
+
+    if pack_id:
+        total, introduced = get_pack_item_counts(user.id, pack_id)
+        progress_line = f"📦 Progress: {introduced}/{total}"
+    else:
+        total = get_active_items_total(user.id, target)
+        introduced = get_active_items_introduced(user.id, target)
+        progress_line = f"📦 Progress: {introduced}/{total}"
+
+    set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
+    text, keyboard = _build_quiz_message(term, quiz, progress_line)
+    await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
+    return True
 
 def _build_quiz_message(term: str, quiz: dict, progress_line: str | None = None):
     opts = quiz.get("options_en", ["A", "B", "C"])
@@ -62,7 +310,7 @@ async def offer_scene(msg, user_id: int, item_id: int, meta: dict):
     """
     scene = pick_one_scene_for_user_active_packs(user_id)
     if not scene:
-        await msg.reply_text("🎭 No scenes found in your active packs yet.")
+        await msg.reply_text("🎭 No scenes found in your packs yet.")
         return
 
     roleplay = scene.get("roleplay") or {}
@@ -180,8 +428,23 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 keyboard = InlineKeyboardMarkup([
                     [InlineKeyboardButton("✅ I know it (skip)", callback_data="LEARN|SKIP")]
                 ])
+                is_phrase = len((term or "").split()) > 1
+                if is_phrase:
+                    anchors = build_anchors(term or "")
+                    hint = ", ".join(anchors[:4]) if anchors else ""
+                    extra = f"\nKey parts: <b>{h(hint)}</b>" if hint else ""
+                    prompt = (
+                        "✍️ Finish your current card first.\n\n"
+                        f"Write one Italian sentence using the key parts of: <b>{h(term)}</b>."
+                        f"{extra}"
+                    )
+                else:
+                    prompt = (
+                        "✍️ Finish your current card first.\n\n"
+                        f"Write one Italian sentence using <b>{h(term)}</b>."
+                    )
                 await msg.reply_text(
-                    f"✍️ Finish your current card first.\n\nWrite one Italian sentence using <b>{h(term)}</b>.",
+                    prompt,
                     parse_mode=ParseMode.HTML,
                     reply_markup=keyboard
                 )
@@ -193,92 +456,11 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("⚙️ Open Settings → Packs", callback_data="HOME|SETTINGS")]
         ])
         await msg.reply_text(
-            "You don’t have any active packs yet.\n\nGo to ⚙️ Settings → 📦 Packs and turn at least one ON.",
+            "You haven’t started any packs yet.\n\nGo to 📦 Packs and start one, or use /journey.",
             reply_markup=kb
         )
         return
-
-    item = pick_next_new_item_for_user(user.id, target_language=target)
-    if not item:
-        total = get_active_items_total(user.id, target_language)
-        introduced = get_active_items_introduced(user.id, target_language)
-        await msg.reply_text(
-            f"✅ You finished all NEW items in your active packs.\n"
-            f"Progress: {introduced}/{total}\n\n"
-            f"Now go /review 🔁"
-        )
-        return
-
-    item_id, term, chunk, translation_en, note = item
-
-    ctx_it = get_random_context_for_item(item_id)
-    holo = get_item_holographic_meta(item_id)
-
-
-    # Prefetch/cache lexicon (silent)
-    try:
-        get_or_fetch_lexicon_it(term)
-    except Exception:
-        pass
-
-    ensure_review_row(user.id, item_id)
-
-    lexicon = get_lexicon_cache_it(term)
-    distractors = get_random_meanings_from_active_packs(user.id, target, item_id, limit=2)
-    quiz = await generate_reverse_context_quiz(
-    term=term,
-    chunk=chunk,
-    translation_en=translation_en,
-    lexicon=lexicon,
-    context_it=ctx_it,   # ✅ use fixed context if available
-    distractors_en=distractors,
-    )
-
-
-    meta = {
-        "term": term,
-        "chunk": chunk,
-        "translation_en": translation_en,
-        "quiz": quiz,
-        "holo": holo,
-    }
-
-    # Progress header
-    total = get_active_items_total(user.id, target)
-    introduced = get_active_items_introduced(user.id, target)
-    progress_line = f"📦 Progress: {introduced}/{total}"
-
-    if not quiz.get("ok"):
-        meta = meta or {}
-        meta["pending_ai"] = {
-            "kind": "quiz",
-            "term": term,
-            "chunk": chunk,
-            "translation_en": translation_en,
-            "context_it": ctx_it,
-        }
-        set_session(user.id, mode="learn", item_id=item_id, stage="await_ai_choice", meta=meta)
-
-        kb = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔁 Try again", callback_data="AI|RETRY_QUIZ")],
-            [InlineKeyboardButton("⏭ Skip quiz", callback_data="AI|SKIP_QUIZ")]
-        ])
-
-        try:
-            await msg.reply_text(
-                "⚠️ <b>AI quiz not available</b>\n"
-                "Do you want to try again, or skip the quiz?",
-                parse_mode=ParseMode.HTML,
-                reply_markup=kb
-            )
-        except BadRequest as e:
-            if "Message is not modified" not in str(e):
-                raise
-        return
-
-    set_session(user.id, mode="learn", item_id=item_id, stage="await_guess", meta=meta)
-    text, keyboard = _build_quiz_message(term, quiz, progress_line)
-    await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
+    await _send_next_learn_card(user, msg, target, pack_id=None, meta=None)
 
 
 
@@ -312,7 +494,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_text("Session error. Try /learn again.")
         return
 
-    _, term_db, chunk_db, translation_en_db, note = item
+    _, term_db, chunk_db, translation_en_db, note, _, focus_db = item
 
     # 2) Meta (preferred source)
     meta = meta or {}
@@ -336,9 +518,6 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-    lower = text.casefold()
-    term_low = (term or "").casefold()
-
     # 1) Too short
     if len(text) < 3:
         await msg.reply_text("⚠️ Write a full sentence (not just one word). Try again 🙂")
@@ -349,14 +528,16 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_text("⚠️ Please write a sentence with letters 🙂")
         return
 
-    # 3) Must use the target word (simple MVP check)
-    if term_low and term_low not in lower:
-        await msg.reply_text(
-            f"⚠️ Your sentence must include the word <b>{h(term)}</b>.\n"
-            f"Try again (any tense/person is ok).",
-            parse_mode=ParseMode.HTML
-        )
-        return
+    # 3) Must include the target word (word packs only)
+    if (focus_db or "").lower() != "phrase":
+        target_phrase = (term or "").strip()
+        ok, meta_val = validate_sentence(text, target_phrase, min_hits=1)
+        if not ok:
+            await msg.reply_text(
+                f"⚠️ Your sentence must include the word <b>{h(term)}</b>.\nTry again 🙂",
+                parse_mode=ParseMode.HTML
+            )
+            return
 
     # 4) AI feedback
     try:
@@ -726,55 +907,80 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ok = (picked == correct)
     status = "🎯 Correct!" if ok else "😅 Not quite."
 
-    # Move to sentence stage
-    set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence", meta=meta)
-
     holo = (meta or {}).get("holo") or {}
     drills = holo.get("drills") or {}
     scenario = drills.get("scenario_prompt") if isinstance(drills, dict) else None
 
     term = (meta or {}).get("term") or ""
+    pack_type = (meta or {}).get("pack_type") or "word"
+    pack_id = (meta or {}).get("pack_id")
+    chunk_size = (meta or {}).get("chunk_size") or 5
 
     lines = []
     lines.append(f"{status}")
-    lines.append(f"<b>Meaning:</b> {h(meaning)}")
+    lines.append(f"<b>Italian:</b> {h(term)}")
+    lines.append(f"<b>English:</b> {h(meaning)}")
 
-    if clue:
-        lines.append(f"<i>Clue:</i> {h(clue)}")
-
-    # --- Deconstruct panel (short + native) ---
-    reg = holo.get("register")
-    risk = holo.get("risk")
+    # minimal tips
     trap = holo.get("trap")
     culture = holo.get("cultural_note")
     sauce = holo.get("native_sauce")
-
-    if reg:
-        lines.append(f"\n🧭 <b>Register</b>: <i>{h(reg)}</i>")
-
-    # show risk only if not safe
-    if risk and str(risk).strip().lower() != "safe":
-        lines.append(f"⚠️ <b>Risk</b>: {h(risk)}")
-
-    if trap:
-        lines.append(f"🪤 <b>Trap</b>: {h(trap)}")
-
-    if culture:
-        lines.append(f"🍝 <b>Culture</b>: {h(culture)}")
-
+    tip_lines = []
     if sauce:
-        lines.append(f"🧃 <b>Native sauce</b>: {h(sauce)}")
+        tip_lines.append(f"🧃 {h(sauce)}")
+    if culture:
+        tip_lines.append(f"🍝 {h(culture)}")
+    if trap:
+        tip_lines.append(f"🪤 {h(trap)}")
+    if tip_lines:
+        lines.append("\n<b>Tip</b>: " + " ".join(tip_lines[:1]))
 
-    # Scenario prompt (optional)
+    # Scenario prompt (optional, short)
     if scenario:
         lines.append(f"\n🎬 <b>Scenario</b>: {h(scenario)}")
 
-    # Production task (always)
-    lines.append(
-        f"\n✍️ Now you:\n"
-        f"Write <b>one Italian sentence</b> using the word <b>{h(term)}</b>.\n"
-        f"<i>(Any tense/form is OK. Don’t copy the chunk — just use the word naturally.)</i>"
-    )
+    if pack_type == "phrase":
+        # record chunk item
+        chunk_items = (meta or {}).get("chunk_items") or []
+        if not any(ci.get("item_id") == item_id for ci in chunk_items):
+            chunk_items.append({
+                "item_id": item_id,
+                "phrase": term,
+                "scenario": scenario,
+            })
+        meta["chunk_items"] = chunk_items
+
+        await query.edit_message_text("\n".join(lines), parse_mode=ParseMode.HTML)
+
+        # start mission if chunk complete
+        if len(chunk_items) >= int(chunk_size or 5):
+            msg = get_chat_sender(update)
+            await msg.reply_text("🎭 Mission starting…", parse_mode=ParseMode.HTML)
+            await _start_phrase_mission(user, msg, meta)
+            return
+
+        # otherwise continue to next card in this pack
+        profile = get_user_profile(user.id)
+        target = profile[0] if profile else "it"
+        msg = get_chat_sender(update)
+        await _send_next_learn_card(user, msg, target, pack_id=pack_id, meta=meta)
+        return
+
+    # word packs: move to sentence stage
+    set_session(user.id, mode="learn", item_id=item_id, stage="await_sentence", meta=meta)
+
+    if len((term or "").split()) > 1:
+        lines.append(
+            f"\n✍️ Now you:\n"
+            f"Write <b>one Italian sentence</b> using: <b>{h(term)}</b>.\n"
+            f"<i>(Any tense/form is OK. Don’t copy the whole phrase.)</i>"
+        )
+    else:
+        lines.append(
+            f"\n✍️ Now you:\n"
+            f"Write <b>one Italian sentence</b> using the word <b>{h(term)}</b>.\n"
+            f"<i>(Any tense/form is OK. Don’t copy the chunk — just use the word naturally.)</i>"
+        )
 
     await query.edit_message_text("\n".join(lines), parse_mode=ParseMode.HTML)
 
@@ -823,6 +1029,25 @@ async def on_pronounce_button(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.message.reply_text(f"TTS failed: {type(e).__name__}: {e}")
 
 
+async def start_pack_learn(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_id: str, journey_meta: dict | None = None):
+    user = update.effective_user
+    msg = get_chat_sender(update)
+
+    profile = get_user_profile(user.id)
+    if not profile:
+        await msg.reply_text("Use /start first.")
+        return
+
+    target, ui, helper = profile
+    activate_pack(user.id, pack_id)
+
+    clear_session(user.id)
+    meta = {"pack_id": pack_id, "chunk_items": []}
+    if journey_meta:
+        meta.update(journey_meta)
+    await _send_next_learn_card(user, msg, target, pack_id=pack_id, meta=meta)
+
+
 async def on_learn_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -843,6 +1068,27 @@ async def on_learn_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.edit_message_text("✅ Skipped. Type /learn for the next item.")
 
+
+async def on_unlock_next(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+    parts = query.data.split("|")
+    if len(parts) < 3:
+        return
+    _, current_pack, next_pack = parts[0], parts[1], parts[2]
+
+    next_info = get_pack_info(next_pack)
+    if not next_info:
+        await query.edit_message_text("Next pack not found. Go to /packs.")
+        return
+
+    # activate and start
+    activate_pack(user.id, next_pack)
+    await query.edit_message_text("✅ Unlocked! Starting the next pack…", parse_mode=ParseMode.HTML)
+    await start_pack_learn(update, context, next_pack)
+
 async def handle_scene_reply(update, context, item_id: int, meta: dict):
     user = update.effective_user
     msg = get_chat_sender(update)
@@ -855,29 +1101,54 @@ async def handle_scene_reply(update, context, item_id: int, meta: dict):
 
     setting = roleplay.get("setting", "")
     bot_role = roleplay.get("bot_role", "Bot")
+    expected_phrase = None
+    if idx < len(turns):
+        expected_phrase = turns[idx].get("expected_phrase")
 
     # tiny correction (optional but good)
+    profile = get_user_profile(user.id)
+    ui_lang = profile[1] if profile else "en"
+    helper_lang = profile[2] if profile else None
     try:
         fb = await generate_roleplay_feedback(
             target_language="it",
             user_sentence=user_text,
             setting=setting,
-            bot_role=bot_role
+            bot_role=bot_role,
+            expected_phrase=expected_phrase,
+            ui_language=ui_lang,
+            helper_language=helper_lang,
         )
     except Exception:
         fb = {}
         await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
 
+    if fb.get("ok") is False and fb.get("provider") == "gemini" and expected_phrase:
+        hint = fb.get("notes") or "Try again."
+        await msg.reply_text(
+            f"⚠️ {h(hint)}\nUse this phrase:\n<b>{h(expected_phrase)}</b>",
+            parse_mode=ParseMode.HTML
+        )
+        return
+
     if not fb.get("ok"):
         await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
 
     out = []
+    if fb.get("ok") and not (fb.get("correction") or fb.get("rewrite") or fb.get("notes")):
+        out.append("✅ <b>Acceptable</b>")
     if fb.get("correction"):
         out.append(f"🛠 <b>Correction</b>: {h(fb['correction'])}")
     if fb.get("rewrite"):
         out.append(f"✨ <b>Native</b>: {h(fb['rewrite'])}")
     if fb.get("notes"):
         out.append(f"💡 {h(fb['notes'])}")
+    tips = fb.get("tips") or []
+    if tips:
+        out.append("\n🧠 <b>Tips</b>:\n" + "\n".join([f"• {h(t)}" for t in tips]))
+    grammar = fb.get("grammar") or []
+    if grammar:
+        out.append("\n📚 <b>Grammar</b>:\n" + "\n".join([f"• {h(g)}" for g in grammar]))
 
     # Advance idx past the user_task we just answered
     while idx < len(turns) and "user_task" not in turns[idx]:

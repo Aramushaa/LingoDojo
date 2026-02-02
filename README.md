@@ -18,13 +18,17 @@ Telegram-First — High-frequency, low-friction interactions via Telegram + Mini
 
 ✅ User Profiles — SQLite-backed storage for user preferences and target/UI languages.
 
-✅ Vocabulary Packs — Modular JSON-based packs (demo English & Italian packs included).
+✅ Modular Packs — JSON packs for Survival + Travel domains (Airport, Hotel).
 
-✅ Active Learning — /learn flow that requires composing sentences with chunks.
+✅ Journey Mode — Guided roadmap A1 → A2 → B1 with progress tracking.
+
+✅ Phrase Missions — After short chunks, roleplay missions practice the exact phrases learned.
+
+✅ AI Feedback — Mission answers get corrections, tips, and grammar notes (EN/FA supported).
 
 ✅ SRS Reviews — /review flow with basic spaced repetition scheduling.
 
-✅ Dynamic Settings — Change target/UI languages via /settings.
+✅ Dynamic Settings — Change target/UI/helper languages via /settings.
 
 ✅ Web Stats UI — Mini WebApp dashboard at `/stats`.
 
@@ -111,10 +115,12 @@ python -m bot.main
 - Open your bot chat
 - Send `/start`
 - Use the inline menu:
-  - 🧠 Learn
-  - 🔁 Review
-  - 📊 Stats
+  - 🧭 Journey
+  - 📦 Packs
+  - 📊 Progress
   - ⚙️ Settings
+
+Journey is the recommended path. Packs are for manual training.
 
 WebApp access:
 - The Mini WebApp is served at `https://<ngrok-domain>/stats`
@@ -137,9 +143,9 @@ Troubleshooting
 
 🗺 Roadmap
 
-- Multimedia Context: Integrate YouGlish for pronunciation examples.
-- Culture Capsules: Short interactive notes on cultural nuances.
-- Smarter SRS Scheduling: More robust review intervals and ease factors.
+- Journey expansions: words → grammar → stories → listening.
+- Smarter SRS Scheduling: more robust review intervals and ease factors.
+- Better mission templates per domain (airport/hotel/restaurant).
 
 🤝 Contributing
 

@@ -1,0 +1,103 @@
+{
+  "pack_id": "it_a1_foundation_numbers_time_price",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "phrase",
+  "chunk_size": 5,
+  "missions_enabled": 1,
+  "title": "🧱 Foundation: Numbers • Time • Price (A1)",
+  "description": "Essential money/time phrases: ask price, ask time, pay, and totals.",
+  "cards": [
+    {
+      "source_uid": "phrase_quanto_costa",
+      "card_id": "phrase_quanto_costa",
+      "focus": "phrase",
+      "phrase": "Quanto costa?",
+      "meaning_en": "How much does it cost?",
+      "contexts_it": ["Quanto costa?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["numbers", "price"] }
+    },
+    {
+      "source_uid": "phrase_che_ore_sono",
+      "card_id": "phrase_che_ore_sono",
+      "focus": "phrase",
+      "phrase": "Che ore sono?",
+      "meaning_en": "What time is it?",
+      "contexts_it": ["Che ore sono?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["time"] }
+    },
+    {
+      "source_uid": "phrase_sono_le_cinque",
+      "card_id": "phrase_sono_le_cinque",
+      "focus": "phrase",
+      "phrase": "Sono le cinque.",
+      "meaning_en": "It’s five o’clock.",
+      "contexts_it": ["Sono le cinque."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["time"] }
+    },
+    {
+      "source_uid": "phrase_quanto_viene_in_totale",
+      "card_id": "phrase_quanto_viene_in_totale",
+      "focus": "phrase",
+      "phrase": "Quanto viene in totale?",
+      "meaning_en": "How much is it in total?",
+      "contexts_it": ["Quanto viene in totale?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["price"] }
+    },
+    {
+      "source_uid": "phrase_e_troppo_caro",
+      "card_id": "phrase_e_troppo_caro",
+      "focus": "phrase",
+      "phrase": "È troppo caro.",
+      "meaning_en": "It’s too expensive.",
+      "contexts_it": ["È troppo caro."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["price"] }
+    },
+    {
+      "source_uid": "phrase_ha_il_resto",
+      "card_id": "phrase_ha_il_resto",
+      "focus": "phrase",
+      "phrase": "Ha il resto?",
+      "meaning_en": "Do you have change?",
+      "contexts_it": ["Ha il resto?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["price"] }
+    },
+    {
+      "source_uid": "phrase_posso_pagare_con_carta",
+      "card_id": "phrase_posso_pagare_con_carta",
+      "focus": "phrase",
+      "phrase": "Posso pagare con carta?",
+      "meaning_en": "Can I pay by card?",
+      "contexts_it": ["Posso pagare con carta?"],
+      "meta": { "register": "polite", "risk": "safe", "tags": ["price"] }
+    },
+    {
+      "source_uid": "phrase_quanto_tempo_ci_vuole",
+      "card_id": "phrase_quanto_tempo_ci_vuole",
+      "focus": "phrase",
+      "phrase": "Quanto tempo ci vuole?",
+      "meaning_en": "How long does it take?",
+      "contexts_it": ["Quanto tempo ci vuole?"],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["time"] }
+    },
+    {
+      "source_uid": "phrase_tra_cinque_minuti",
+      "card_id": "phrase_tra_cinque_minuti",
+      "focus": "phrase",
+      "phrase": "Tra cinque minuti.",
+      "meaning_en": "In five minutes.",
+      "contexts_it": ["Tra cinque minuti."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["time"] }
+    },
+    {
+      "source_uid": "phrase_mezz_ora",
+      "card_id": "phrase_mezz_ora",
+      "focus": "phrase",
+      "phrase": "Mezz’ora.",
+      "meaning_en": "Half an hour.",
+      "contexts_it": ["Mezz’ora."],
+      "meta": { "register": "neutral", "risk": "safe", "tags": ["time"] }
+    }
+  ]
+}
