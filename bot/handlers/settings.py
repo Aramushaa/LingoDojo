@@ -238,23 +238,25 @@ def build_module_keyboard(user_id: int, target: str, user_level: str, module_key
     rows = []
 
     if module_key in ("foundation_verbs", "foundation_phrases", "foundation_numbers", "foundation_repair"):
-        ordered = []
         if module_key == "foundation_verbs":
-            ordered = [("it_a1_foundation_verbs", "🧱 Survival Verbs (A1)")]
+            prefix = "foundation_verbs"
         elif module_key == "foundation_phrases":
-            ordered = [("it_a1_foundation_phrases", "🧱 Instant Phrases (A1)")]
+            prefix = "foundation_phrases"
         elif module_key == "foundation_numbers":
-            ordered = [("it_a1_foundation_numbers_time_price", "🧱 Numbers • Time • Price (A1)")]
-        elif module_key == "foundation_repair":
-            ordered = [("it_a1_foundation_repair_yesno", "🧱 Yes/No & Repair (A1)")]
+            prefix = "foundation_numbers"
+        else:
+            prefix = "foundation_repair"
 
-        for pack_id, label in ordered:
-            if pack_id not in pack_map:
+        for pack_id, (level, title, description) in pack_map.items():
+            if prefix not in pack_id:
                 continue
-            level, title, description = pack_map[pack_id]
             unlocked = _is_unlocked(user_level, level)
+            title_label = title
+            if level and f"({level})" not in title_label:
+                title_label = f"{title_label} ({level})"
+            label = f"{title_label}"
             if unlocked:
-                rows.append([InlineKeyboardButton(f"{label}", callback_data=f"PACKOPEN|{pack_id}|{module_key}")])
+                rows.append([InlineKeyboardButton(label, callback_data=f"PACKOPEN|{pack_id}|{module_key}")])
             else:
                 rows.append([InlineKeyboardButton(f"🔒 {label} (unlock {level})", callback_data=f"PACKLOCK|{level}|{module_key}")])
 

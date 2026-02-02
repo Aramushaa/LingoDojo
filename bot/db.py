@@ -276,7 +276,7 @@ def import_packs_from_folder():
 
     # Load all pack files first so we can clean up removed packs
     packs = []
-    for path in PACKS_DIR.glob("*.json"):
+    for path in PACKS_DIR.rglob("*.json"):
         with open(path, "r", encoding="utf-8") as f:
             pack = json.load(f)
             packs.append(pack)
