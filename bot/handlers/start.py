@@ -31,5 +31,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     "Welcome to LingoDojo 🥋\nPick a mode:",
     reply_markup=home_keyboard()
     )
+    await msg.reply_text(
+        "🧭 <b>Quick Guide</b>\n\n"
+        "1) <b>Journey</b> — your guided path A1 → A2 → B1\n"
+        "   • Warm‑up review\n"
+        "   • Learn new items\n"
+        "   • Mission practice\n\n"
+        "2) <b>Packs</b> — choose what to focus on (Airport, Hotel, etc.)\n"
+        "3) <b>Progress</b> — stats + streak\n\n"
+        "Tip: Start with Survival packs, then move to Glue + Pressure.\n",
+        parse_mode="HTML"
+    )
 
 

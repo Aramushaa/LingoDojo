@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 from html import escape
-from bot.db import get_due_item, get_item_by_id, set_session, get_session, clear_session, apply_grade, undo_last_grade
+from bot.db import get_due_item, get_due_item_in_pack, get_item_by_id, set_session, get_session, clear_session, apply_grade, undo_last_grade
 from bot.utils.telegram import get_chat_sender
 
 
@@ -33,7 +33,7 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = get_chat_sender(update)
 
     if not item_id:
-        await msg.reply_text("🎉 Nothing due today. Use /learn to add more words.")
+        await msg.reply_text("🎉 Nothing due today. Use /journey to add more.")
         return
 
     item = get_item_by_id(item_id)
@@ -41,12 +41,39 @@ async def review(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_text("Review error. Try /review again.")
         return
 
-    _, term, chunk, translation_en, note = item
+    _, term, chunk, translation_en, note, _, _ = item
 
     set_session(user.id, mode="review", item_id=item_id, stage="await_sentence")
 
     text = (
         f"🧠 <b>Review</b>\n\n"
+        f"Chunk: <b>{h(chunk)}</b>\n"
+        f"(Hint EN: {h(translation_en or '-')})\n\n"
+        f"👉 Write <b>one sentence</b> using the chunk."
+    )
+
+    await msg.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+async def review_pack(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_id: str):
+    user = update.effective_user
+    msg = get_chat_sender(update)
+
+    item_id = get_due_item_in_pack(user.id, pack_id)
+    if not item_id:
+        await msg.reply_text("🎉 Nothing due in this pack. Use /journey or /packs.")
+        return
+
+    item = get_item_by_id(item_id)
+    if not item:
+        await msg.reply_text("Review error. Try again.")
+        return
+
+    _, term, chunk, translation_en, note, _, _ = item
+    set_session(user.id, mode="review", item_id=item_id, stage="await_sentence")
+
+    text = (
+        f"🧠 <b>Pack Review</b>\n\n"
         f"Chunk: <b>{h(chunk)}</b>\n"
         f"(Hint EN: {h(translation_en or '-')})\n\n"
         f"👉 Write <b>one sentence</b> using the chunk."
@@ -101,7 +128,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ Saved ({grade}).\n"
         f"Status: {new_status}\n"
         f"Next due: {new_due} (in {new_interval} day(s))\n\n"
-        f"Type /review for the next due item or /learn to add more.",
+        f"Type /review for the next due item or /journey to add more.",
         reply_markup=undo_keyboard(item_id)
     )
 
@@ -109,7 +136,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     next_item_id = get_due_item(user.id)
 
     if not next_item_id:
-        await query.message.reply_text("🎉 All done for today. Type /learn to add more.")
+        await query.message.reply_text("🎉 All done for today. Type /journey to add more.")
         return
 
     next_item = get_item_by_id(next_item_id)
@@ -117,7 +144,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("Review error loading next item. Type /review.")
         return
 
-    _, term, chunk, translation_en, note = next_item
+    _, term, chunk, translation_en, note, _, _ = next_item
 
     set_session(user.id, mode="review", item_id=next_item_id, stage="await_sentence")
 
