@@ -1,0 +1,59 @@
+{
+  "scenario_id": "hotel_a2_services",
+  "pack_key": "hotel_a2",
+  "location": "Reception desk",
+  "time_pressure": "low",
+  "mood": "neutral",
+  "role_user": "Guest",
+  "role_ai": "Reception",
+  "goal": "Ask about services",
+  "required_phrases": [
+    "La colazione è inclusa?",
+    "A che ora apre la reception?",
+    "Potrebbe aiutarmi?",
+    "Mi dispiace, c'è un problema.",
+    "Possiamo cambiare stanza?"
+  ],
+  "intro_lines": [
+    "🎭 HOTEL — Services",
+    "🍳 You need info",
+    "🧾 Quick questions"
+  ],
+  "turns": [
+    {
+      "bot": "Mi dica."
+    },
+    {
+      "user_task": "Ask if breakfast is included.",
+      "expected_phrase": "La colazione è inclusa?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask when reception opens.",
+      "expected_phrase": "A che ora apre la reception?"
+    },
+    {
+      "bot": "Alle 7."
+    },
+    {
+      "user_task": "Ask for help.",
+      "expected_phrase": "Potrebbe aiutarmi?"
+    },
+    {
+      "bot": "Certamente."
+    },
+    {
+      "user_task": "Soft‑start a complaint.",
+      "expected_phrase": "Mi dispiace, c'è un problema."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Ask to change rooms.",
+      "expected_phrase": "Possiamo cambiare stanza?"
+    }
+  ]
+}

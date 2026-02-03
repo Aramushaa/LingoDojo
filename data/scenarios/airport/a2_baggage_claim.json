@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a2_baggage_claim",
+  "pack_key": "airport_a2",
+  "location": "Arrivals — baggage desk",
+  "time_pressure": "medium",
+  "mood": "frustrated",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Report missing baggage",
+  "required_phrases": [
+    "Il mio bagaglio non è arrivato.",
+    "Dove posso fare un reclamo?",
+    "Dove devo andare adesso?",
+    "Mi può aiutare a cambiare il volo?",
+    "Ho una coincidenza stretta."
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Arrivals",
+    "🧳 Bag missing",
+    "⏱ Tight connection"
+  ],
+  "turns": [
+    {
+      "bot": "Mi dica."
+    },
+    {
+      "user_task": "Say your bag didn’t arrive.",
+      "expected_phrase": "Il mio bagaglio non è arrivato."
+    },
+    {
+      "bot": "Mi dispiace."
+    },
+    {
+      "user_task": "Ask where to file a claim.",
+      "expected_phrase": "Dove posso fare un reclamo?"
+    },
+    {
+      "bot": "Allo sportello."
+    },
+    {
+      "user_task": "Ask where you should go now.",
+      "expected_phrase": "Dove devo andare adesso?"
+    },
+    {
+      "bot": "Subito."
+    },
+    {
+      "user_task": "Say you have a tight connection.",
+      "expected_phrase": "Ho una coincidenza stretta."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Ask for help changing the flight.",
+      "expected_phrase": "Mi può aiutare a cambiare il volo?"
+    }
+  ]
+}

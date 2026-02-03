@@ -20,7 +20,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Sto cercando di spiegare."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -41,7 +44,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Capisco, ma ho bisogno di aiuto."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -62,7 +68,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Posso sapere il motivo?"
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -83,7 +92,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: È un malinteso."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -104,7 +116,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Forse c’è un errore."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -125,7 +140,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Preferirei capire prima."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -146,7 +164,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: È possibile evitare?"
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -167,7 +188,10 @@
         "tags": [
           "airport",
           "dark"
-        ]
+        ],
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "native_sauce": "Alternativa più sicura: Preferirei capire il motivo."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -184,14 +208,14 @@
       ],
       "meta": {
         "register": "direct",
-        "risk": "dark",
+        "risk": "avoid",
         "tags": [
           "airport",
           "dark"
         ],
-        "cultural_note": "A calm tone helps keep the interaction professional.",
-        "trap": "Refusal can escalate the interaction.",
-        "native_sauce": "Safer alternative: Preferirei chiarire con calma."
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "native_sauce": "Alternativa più sicura: Posso collaborare, ma vorrei capire."
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -208,14 +232,14 @@
       ],
       "meta": {
         "register": "direct",
-        "risk": "dark",
+        "risk": "avoid",
         "tags": [
           "airport",
           "dark"
         ],
-        "cultural_note": "Ask for clarification instead of accusing.",
-        "trap": "Accusatory and confrontational.",
-        "native_sauce": "Safer alternative: Posso avere un chiarimento, per favore?"
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "native_sauce": "Alternativa più sicura: Posso sapere il motivo?"
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -232,14 +256,14 @@
       ],
       "meta": {
         "register": "direct",
-        "risk": "dark",
+        "risk": "avoid",
         "tags": [
           "airport",
           "dark"
         ],
-        "cultural_note": "Offer cooperation while keeping boundaries.",
-        "trap": "Sounds hostile in security contexts.",
-        "native_sauce": "Safer alternative: Per favore, posso aprirla io?"
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "native_sauce": "Alternativa più sicura: Per favore, posso tenerle io?"
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."
@@ -256,14 +280,14 @@
       ],
       "meta": {
         "register": "direct",
-        "risk": "dark",
+        "risk": "avoid",
         "tags": [
           "airport",
           "dark"
         ],
-        "cultural_note": "Escalate politely if needed.",
-        "trap": "Challenges authority directly.",
-        "native_sauce": "Safer alternative: Posso parlare con un responsabile?"
+        "cultural_note": "In contesti ufficiali, un tono calmo e collaborativo aiuta molto.",
+        "trap": "Tono diretto/accusatorio: può aumentare la tensione.",
+        "native_sauce": "Alternativa più sicura: C’è un problema? Possiamo chiarire?"
       },
       "drills": {
         "scenario_prompt": "⚠️ Dark Mode: Learn for understanding only. Do NOT use casually."

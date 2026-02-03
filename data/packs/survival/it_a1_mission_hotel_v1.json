@@ -20,33 +20,13 @@
         "tags": [
           "hotel",
           "checkin"
-        ]
+        ],
+        "phase": "checkin"
       },
       "drills": {
         "scenario_prompt": "Check in at hotel reception."
       },
       "phrase": "Ho una prenotazione."
-    },
-    {
-      "source_uid": "a_nome_di_rossi_7a860742e2",
-      "card_id": "a_nome_di_rossi_7a860742e2",
-      "focus": "phrase",
-      "meaning_en": "Under the name Rossi.",
-      "contexts_it": [
-        "A nome di Rossi."
-      ],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": [
-          "hotel",
-          "checkin"
-        ]
-      },
-      "drills": {
-        "scenario_prompt": "Confirm reservation name."
-      },
-      "phrase": "A nome di Rossi."
     },
     {
       "source_uid": "posso_fare_il_check__75d1e33590",
@@ -62,7 +42,8 @@
         "tags": [
           "hotel",
           "checkin"
-        ]
+        ],
+        "phase": "checkin"
       },
       "drills": {
         "scenario_prompt": "Arriving at hotel."
@@ -83,12 +64,35 @@
         "tags": [
           "hotel",
           "checkout"
-        ]
+        ],
+        "phase": "checkin"
       },
       "drills": {
         "scenario_prompt": "Understand hotel rules."
       },
       "phrase": "A che ora è il check-out?"
+    },
+    {
+      "source_uid": "la_chiave_per_favore_60fefa6e49",
+      "card_id": "la_chiave_per_favore_60fefa6e49",
+      "focus": "phrase",
+      "meaning_en": "The key, please.",
+      "contexts_it": [
+        "La chiave, per favore."
+      ],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "checkin"
+        ],
+        "phase": "checkin"
+      },
+      "drills": {
+        "scenario_prompt": "Getting room key."
+      },
+      "phrase": "La chiave, per favore."
     },
     {
       "source_uid": "la_mia_stanza_pronta_e864f5a86d",
@@ -104,12 +108,35 @@
         "tags": [
           "hotel",
           "room"
-        ]
+        ],
+        "phase": "room"
       },
       "drills": {
         "scenario_prompt": "Waiting for room."
       },
       "phrase": "La mia stanza è pronta?"
+    },
+    {
+      "source_uid": "dov_la_mia_stanza_044dd38ddc",
+      "card_id": "dov_la_mia_stanza_044dd38ddc",
+      "focus": "phrase",
+      "meaning_en": "Where is my room?",
+      "contexts_it": [
+        "Dov'è la mia stanza?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "directions"
+        ],
+        "phase": "room"
+      },
+      "drills": {
+        "scenario_prompt": "Finding room."
+      },
+      "phrase": "Dov'è la mia stanza?"
     },
     {
       "source_uid": "c_il_wi_fi_9dda3479c6",
@@ -125,7 +152,8 @@
         "tags": [
           "hotel",
           "amenities"
-        ]
+        ],
+        "phase": "amenities"
       },
       "drills": {
         "scenario_prompt": "Basic amenities."
@@ -146,33 +174,13 @@
         "tags": [
           "hotel",
           "amenities"
-        ]
+        ],
+        "phase": "amenities"
       },
       "drills": {
         "scenario_prompt": "Internet access."
       },
       "phrase": "Qual è la password del Wi-Fi?"
-    },
-    {
-      "source_uid": "la_chiave_per_favore_60fefa6e49",
-      "card_id": "la_chiave_per_favore_60fefa6e49",
-      "focus": "phrase",
-      "meaning_en": "The key, please.",
-      "contexts_it": [
-        "La chiave, per favore."
-      ],
-      "meta": {
-        "register": "polite",
-        "risk": "safe",
-        "tags": [
-          "hotel",
-          "checkin"
-        ]
-      },
-      "drills": {
-        "scenario_prompt": "Getting room key."
-      },
-      "phrase": "La chiave, per favore."
     },
     {
       "source_uid": "dov_l_ascensore_a9042fab15",
@@ -188,7 +196,8 @@
         "tags": [
           "hotel",
           "directions"
-        ]
+        ],
+        "phase": "directions"
       },
       "drills": {
         "scenario_prompt": "Moving around hotel."
@@ -196,26 +205,69 @@
       "phrase": "Dov'è l'ascensore?"
     },
     {
-      "source_uid": "dov_la_mia_stanza_044dd38ddc",
-      "card_id": "dov_la_mia_stanza_044dd38ddc",
+      "source_uid": "a_nome_di_rossi_7a860742e2",
+      "card_id": "a_nome_di_rossi_7a860742e2",
       "focus": "phrase",
-      "meaning_en": "Where is my room?",
+      "meaning_en": "Under the name Rossi.",
       "contexts_it": [
-        "Dov'è la mia stanza?"
+        "A nome di Rossi."
       ],
       "meta": {
         "register": "neutral",
         "risk": "safe",
         "tags": [
           "hotel",
-          "directions"
-        ]
+          "checkin"
+        ],
+        "phase": "other"
       },
       "drills": {
-        "scenario_prompt": "Finding room."
+        "scenario_prompt": "Confirm reservation name."
       },
-      "phrase": "Dov'è la mia stanza?"
+      "phrase": "A nome di Rossi."
     }
   ],
-  "scenes": []
+  "scenes": [],
+  "card_groups": [
+    {
+      "phase": "checkin",
+      "title": "Phase 1 — Check-in",
+      "card_ids": [
+        "ho_una_prenotazione_4f2b20dc55",
+        "posso_fare_il_check__75d1e33590",
+        "a_che_ora_il_check_o_30b8f3a72d",
+        "la_chiave_per_favore_60fefa6e49"
+      ]
+    },
+    {
+      "phase": "room",
+      "title": "Phase 2 — Room",
+      "card_ids": [
+        "la_mia_stanza_pronta_e864f5a86d",
+        "dov_la_mia_stanza_044dd38ddc"
+      ]
+    },
+    {
+      "phase": "amenities",
+      "title": "Phase 3 — Amenities",
+      "card_ids": [
+        "c_il_wi_fi_9dda3479c6",
+        "qual_la_password_del_a6f47f1eb2"
+      ]
+    },
+    {
+      "phase": "directions",
+      "title": "Phase 4 — Directions",
+      "card_ids": [
+        "dov_l_ascensore_a9042fab15"
+      ]
+    },
+    {
+      "phase": "other",
+      "title": "Phase 5 — Extras",
+      "card_ids": [
+        "a_nome_di_rossi_7a860742e2"
+      ]
+    }
+  ]
 }

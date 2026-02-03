@@ -1,0 +1,59 @@
+{
+  "scenario_id": "hotel_a2_room_problems",
+  "pack_key": "hotel_a2",
+  "location": "Hotel room",
+  "time_pressure": "medium",
+  "mood": "annoyed",
+  "role_user": "Guest",
+  "role_ai": "Reception",
+  "goal": "Report issues and ask for a change",
+  "required_phrases": [
+    "La stanza è troppo rumorosa.",
+    "L'aria condizionata non funziona.",
+    "C'è un problema con la doccia.",
+    "Possiamo cambiare stanza?",
+    "Mi dispiace, c'è un problema."
+  ],
+  "intro_lines": [
+    "🎭 HOTEL — Room problems",
+    "🔧 Things don’t work",
+    "🗣 You need a solution"
+  ],
+  "turns": [
+    {
+      "bot": "Buonasera."
+    },
+    {
+      "user_task": "Say the room is too noisy.",
+      "expected_phrase": "La stanza è troppo rumorosa."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Say the AC doesn't work.",
+      "expected_phrase": "L'aria condizionata non funziona."
+    },
+    {
+      "bot": "Mi dispiace."
+    },
+    {
+      "user_task": "Say there's a problem with the shower.",
+      "expected_phrase": "C'è un problema con la doccia."
+    },
+    {
+      "bot": "Vediamo."
+    },
+    {
+      "user_task": "Ask to change rooms.",
+      "expected_phrase": "Possiamo cambiare stanza?"
+    },
+    {
+      "bot": "Forse."
+    },
+    {
+      "user_task": "Soft‑start your complaint.",
+      "expected_phrase": "Mi dispiace, c'è un problema."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a1_checkin_counter",
+  "pack_key": "airport_a1",
+  "location": "Check‑in hall",
+  "time_pressure": "medium",
+  "mood": "neutral",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Check in and get a seat",
+  "required_phrases": [
+    "Dov'è il banco check-in?",
+    "Posso fare il check-in qui?",
+    "Posso vedere la carta d'imbarco, per favore?",
+    "Ecco la mia carta d'imbarco.",
+    "Qual è il mio posto?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Check‑in",
+    "🧳 One bag only",
+    "🕒 Flight departs in 2 hours"
+  ],
+  "turns": [
+    {
+      "bot": "Buongiorno."
+    },
+    {
+      "user_task": "Ask where the check‑in counter is.",
+      "expected_phrase": "Dov'è il banco check-in?"
+    },
+    {
+      "bot": "È qui."
+    },
+    {
+      "user_task": "Ask if you can check in here.",
+      "expected_phrase": "Posso fare il check-in qui?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask for the boarding pass.",
+      "expected_phrase": "Posso vedere la carta d'imbarco, per favore?"
+    },
+    {
+      "bot": "Va bene."
+    },
+    {
+      "user_task": "Hand it over.",
+      "expected_phrase": "Ecco la mia carta d'imbarco."
+    },
+    {
+      "bot": "Grazie."
+    },
+    {
+      "user_task": "Ask your seat.",
+      "expected_phrase": "Qual è il mio posto?"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a1_passport_control",
+  "pack_key": "airport_a1",
+  "location": "Passport control",
+  "time_pressure": "medium",
+  "mood": "formal",
+  "role_user": "Staff",
+  "role_ai": "Passenger",
+  "goal": "Check documents",
+  "required_phrases": [
+    "Passaporto, per favore.",
+    "Posso vedere il suo passaporto, per favore?",
+    "Mi può mostrare il suo passaporto, per favore?",
+    "Posso vedere la carta d'imbarco, per favore?",
+    "Posso vedere il suo passaporto?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Passport control",
+    "🛂 You are the officer",
+    "📄 Check documents quickly"
+  ],
+  "turns": [
+    {
+      "bot": "Buongiorno."
+    },
+    {
+      "user_task": "Ask for passport (short).",
+      "expected_phrase": "Passaporto, per favore."
+    },
+    {
+      "bot": "Ecco."
+    },
+    {
+      "user_task": "Ask to see the passport (polite).",
+      "expected_phrase": "Posso vedere il suo passaporto, per favore?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask to show the passport (polite).",
+      "expected_phrase": "Mi può mostrare il suo passaporto, per favore?"
+    },
+    {
+      "bot": "Certo."
+    },
+    {
+      "user_task": "Ask for boarding pass.",
+      "expected_phrase": "Posso vedere la carta d'imbarco, per favore?"
+    },
+    {
+      "bot": "Va bene."
+    },
+    {
+      "user_task": "Ask to see the passport (short).",
+      "expected_phrase": "Posso vedere il suo passaporto?"
+    }
+  ]
+}

@@ -5,7 +5,8 @@ from telegram.constants import ParseMode
 from bot.utils.telegram import get_chat_sender
 from bot.handlers.learn import start_pack_learn
 from bot.handlers.review import review
-from bot.db import get_due_item, get_pack_info, get_pack_item_counts
+from bot.db import get_due_item, get_pack_info, get_pack_item_counts, count_completed_scenarios
+from bot.scenarios import list_scenarios_by_pack_key
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
@@ -66,9 +67,14 @@ async def journey(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lines.extend(locked_lines)
 
     current_section = "Complete"
+    journey_index = len(JOURNEY_PATH)
     if next_pack:
         info = get_pack_info(next_pack)
         current_section = info[2] if info else "Current Pack"
+        try:
+            journey_index = JOURNEY_PATH.index(next_pack)
+        except ValueError:
+            journey_index = len(JOURNEY_PATH)
 
     a1_bar = _progress_bar(level_done.get("A1", 0), level_totals.get("A1", 0))
     a2_bar = _progress_bar(level_done.get("A2", 0), level_totals.get("A2", 0))
@@ -85,8 +91,34 @@ async def journey(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lines.append(f"A2 {a2_bar}  {pct('A2')}%")
     lines.append(f"B1 {b1_bar}  {pct('B1')}%")
 
+    # Scenario progress for current pack
+    current_pack = JOURNEY_PATH[journey_index] if journey_index < len(JOURNEY_PATH) else None
+    scenario_line = ""
+    if current_pack:
+        pk = current_pack
+        pack_key = "generic"
+        if "airport" in pk and "a1" in pk:
+            pack_key = "airport_a1"
+        elif "airport" in pk and "a2" in pk:
+            pack_key = "airport_a2"
+        elif "airport" in pk and "b1" in pk:
+            pack_key = "airport_b1"
+        elif "hotel" in pk and "a1" in pk:
+            pack_key = "hotel_a1"
+        elif "hotel" in pk and "a2" in pk:
+            pack_key = "hotel_a2"
+        elif "hotel" in pk and "b1" in pk:
+            pack_key = "hotel_b1"
+        scenarios = list_scenarios_by_pack_key(pack_key)
+        if scenarios:
+            ids = [s.get("scenario_id") for s in scenarios if s.get("scenario_id")]
+            done_s = count_completed_scenarios(user.id, ids)
+            scenario_line = f"🎭 Scenarios: {done_s}/{len(ids)}"
+
     lines.append("\n🎯 <b>Current Mission</b>:")
     lines.append(f"{current_section}")
+    if scenario_line:
+        lines.append(scenario_line)
     lines.append("━━━━━━━━━━━━━━")
 
     lines.append(
@@ -94,6 +126,12 @@ async def journey(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Survival Phrases\n"
         "→ recognition + instant meaning\n"
         "(no forced sentence production)\n\n"
+        "Response Glue\n"
+        "→ short replies that sound natural\n"
+        "(capisco, perfetto, va bene)\n\n"
+        "Politeness Modulators\n"
+        "→ soften requests, avoid friction\n"
+        "(per cortesia, se possibile)\n\n"
         "Core Words (Builder Packs)\n"
         "→ verbs, nouns, connectors that power phrases\n\n"
         "Micro‑Pronunciation 🔊 (NEW)\n"

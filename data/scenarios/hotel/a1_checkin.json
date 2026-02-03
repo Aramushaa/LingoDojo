@@ -1,0 +1,59 @@
+{
+  "scenario_id": "hotel_a1_checkin",
+  "pack_key": "hotel_a1",
+  "location": "Hotel reception",
+  "time_pressure": "low",
+  "mood": "neutral",
+  "role_user": "Guest",
+  "role_ai": "Reception",
+  "goal": "Check in and get the key",
+  "required_phrases": [
+    "Ho una prenotazione.",
+    "A nome di Rossi.",
+    "Posso fare il check-in?",
+    "La mia stanza è pronta?",
+    "La chiave, per favore."
+  ],
+  "intro_lines": [
+    "🎭 HOTEL — Reception",
+    "🧳 You just arrived",
+    "🕒 It’s late"
+  ],
+  "turns": [
+    {
+      "bot": "Buonasera."
+    },
+    {
+      "user_task": "Say you have a reservation.",
+      "expected_phrase": "Ho una prenotazione."
+    },
+    {
+      "bot": "A nome di?"
+    },
+    {
+      "user_task": "Give the name.",
+      "expected_phrase": "A nome di Rossi."
+    },
+    {
+      "bot": "Va bene."
+    },
+    {
+      "user_task": "Ask if you can check in.",
+      "expected_phrase": "Posso fare il check-in?"
+    },
+    {
+      "bot": "Un attimo."
+    },
+    {
+      "user_task": "Ask if the room is ready.",
+      "expected_phrase": "La mia stanza è pronta?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask for the key.",
+      "expected_phrase": "La chiave, per favore."
+    }
+  ]
+}

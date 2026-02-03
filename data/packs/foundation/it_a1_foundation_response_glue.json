@@ -1,0 +1,203 @@
+{
+  "pack_id": "it_a1_foundation_response_glue",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "phrase",
+  "chunk_size": 5,
+  "missions_enabled": 1,
+  "title": "Foundation: Response Glue (A1)",
+  "description": "Short response phrases that make you sound natural.",
+  "cards": [
+    {
+      "source_uid": "resp_ah_ok",
+      "card_id": "resp_ah_ok",
+      "focus": "phrase",
+      "phrase": "Ah, ok.",
+      "meaning_en": "Ah, ok.",
+      "contexts_it": [
+        "Ah, ok."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_capisco",
+      "card_id": "resp_capisco",
+      "focus": "phrase",
+      "phrase": "Capisco.",
+      "meaning_en": "I understand.",
+      "contexts_it": [
+        "Capisco."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_perfetto",
+      "card_id": "resp_perfetto",
+      "focus": "phrase",
+      "phrase": "Perfetto.",
+      "meaning_en": "Perfect.",
+      "contexts_it": [
+        "Perfetto."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_va_bene_grazie",
+      "card_id": "resp_va_bene_grazie",
+      "focus": "phrase",
+      "phrase": "Va bene, grazie.",
+      "meaning_en": "All good, thanks.",
+      "contexts_it": [
+        "Va bene, grazie."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_un_attimo",
+      "card_id": "resp_un_attimo",
+      "focus": "phrase",
+      "phrase": "Un attimo.",
+      "meaning_en": "One moment.",
+      "contexts_it": [
+        "Un attimo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_un_momento",
+      "card_id": "resp_un_momento",
+      "focus": "phrase",
+      "phrase": "Un momento.",
+      "meaning_en": "One moment.",
+      "contexts_it": [
+        "Un momento."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_daccordo",
+      "card_id": "resp_daccordo",
+      "focus": "phrase",
+      "phrase": "D'accordo.",
+      "meaning_en": "Alright / agreed.",
+      "contexts_it": [
+        "D'accordo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_certo",
+      "card_id": "resp_certo",
+      "focus": "phrase",
+      "phrase": "Certo.",
+      "meaning_en": "Sure.",
+      "contexts_it": [
+        "Certo."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_subito",
+      "card_id": "resp_subito",
+      "focus": "phrase",
+      "phrase": "Subito.",
+      "meaning_en": "Right away.",
+      "contexts_it": [
+        "Subito."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    },
+    {
+      "source_uid": "resp_come_va",
+      "card_id": "resp_come_va",
+      "focus": "phrase",
+      "phrase": "Come va?",
+      "meaning_en": "How are you?",
+      "contexts_it": [
+        "Come va?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "response",
+          "glue"
+        ]
+      }
+    }
+  ]
+}

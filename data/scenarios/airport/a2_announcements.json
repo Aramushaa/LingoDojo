@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a2_announcements",
+  "pack_key": "airport_a2",
+  "location": "Gate area",
+  "time_pressure": "medium",
+  "mood": "neutral",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Understand announcements",
+  "required_phrases": [
+    "Questa è la chiamata d'imbarco finale.",
+    "Il gate è stato cambiato.",
+    "Il volo è stato posticipato.",
+    "Non ho capito, può ripetere?",
+    "Può ripetere, per favore?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Announcements",
+    "📣 Loudspeaker messages",
+    "🔁 Ask to repeat"
+  ],
+  "turns": [
+    {
+      "bot": "Ascolti l'annuncio."
+    },
+    {
+      "user_task": "Say this is the final boarding call.",
+      "expected_phrase": "Questa è la chiamata d'imbarco finale."
+    },
+    {
+      "bot": "Il gate è cambiato."
+    },
+    {
+      "user_task": "Say the gate was changed.",
+      "expected_phrase": "Il gate è stato cambiato."
+    },
+    {
+      "bot": "Il volo è posticipato."
+    },
+    {
+      "user_task": "Say the flight was postponed.",
+      "expected_phrase": "Il volo è stato posticipato."
+    },
+    {
+      "bot": "Non ha capito?"
+    },
+    {
+      "user_task": "Say you didn't understand.",
+      "expected_phrase": "Non ho capito, può ripetere?"
+    },
+    {
+      "bot": "Certo."
+    },
+    {
+      "user_task": "Ask to repeat (polite).",
+      "expected_phrase": "Può ripetere, per favore?"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "scenario_id": "hotel_b1_dispute",
+  "pack_key": "hotel_b1",
+  "location": "Reception — dispute",
+  "time_pressure": "medium",
+  "mood": "tense",
+  "role_user": "Guest",
+  "role_ai": "Reception",
+  "goal": "Negotiate a solution",
+  "required_phrases": [
+    "La stanza non corrisponde alla descrizione.",
+    "Abbiamo prenotato una stanza diversa.",
+    "C'è stato un errore nella prenotazione.",
+    "Non è quello che avevamo concordato.",
+    "Possiamo trovare una soluzione?"
+  ],
+  "intro_lines": [
+    "🎭 HOTEL — Dispute",
+    "⚠️ Booking mismatch",
+    "🗣 Stay firm but polite"
+  ],
+  "turns": [
+    {
+      "bot": "Mi dica."
+    },
+    {
+      "user_task": "Say the room doesn’t match the description.",
+      "expected_phrase": "La stanza non corrisponde alla descrizione."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Say you booked a different room.",
+      "expected_phrase": "Abbiamo prenotato una stanza diversa."
+    },
+    {
+      "bot": "Vediamo."
+    },
+    {
+      "user_task": "Say there was a booking error.",
+      "expected_phrase": "C'è stato un errore nella prenotazione."
+    },
+    {
+      "bot": "Mi dispiace."
+    },
+    {
+      "user_task": "Say it’s not what was agreed.",
+      "expected_phrase": "Non è quello che avevamo concordato."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Ask to find a solution.",
+      "expected_phrase": "Possiamo trovare una soluzione?"
+    }
+  ]
+}

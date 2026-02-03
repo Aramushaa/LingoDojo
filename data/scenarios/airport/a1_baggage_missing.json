@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a1_baggage_missing",
+  "pack_key": "airport_a1",
+  "location": "Baggage claim",
+  "time_pressure": "medium",
+  "mood": "worried",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Report missing luggage",
+  "required_phrases": [
+    "Dove ritiro i bagagli?",
+    "Dov'è la mia valigia?",
+    "Ha visto la mia valigia?",
+    "La compagnia aerea ha perso la mia valigia.",
+    "La mia valigia è stata rubata."
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Baggage claim",
+    "🧳 Your bag didn’t arrive",
+    "📍 You need help fast"
+  ],
+  "turns": [
+    {
+      "bot": "Buonasera. Mi dica."
+    },
+    {
+      "user_task": "Ask where to pick up baggage.",
+      "expected_phrase": "Dove ritiro i bagagli?"
+    },
+    {
+      "bot": "Su quel nastro."
+    },
+    {
+      "user_task": "Ask where your suitcase is.",
+      "expected_phrase": "Dov'è la mia valigia?"
+    },
+    {
+      "bot": "Non la vedo."
+    },
+    {
+      "user_task": "Ask if they have seen your suitcase.",
+      "expected_phrase": "Ha visto la mia valigia?"
+    },
+    {
+      "bot": "Non ancora."
+    },
+    {
+      "user_task": "Say the airline lost it.",
+      "expected_phrase": "La compagnia aerea ha perso la mia valigia."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Say it was stolen at the airport.",
+      "expected_phrase": "La mia valigia è stata rubata."
+    }
+  ]
+}

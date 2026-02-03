@@ -197,6 +197,17 @@ def init_db():
     )
     """)
 
+    # --- scenario progress (missions) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS scenario_progress (
+        user_id INTEGER NOT NULL,
+        scenario_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        completed_at TEXT,
+        PRIMARY KEY (user_id, scenario_id)
+    )
+    """)
+
 
 
 
@@ -1218,6 +1229,71 @@ def get_pack_item_counts(user_id: int, pack_id: str) -> tuple[int, int]:
     (introduced,) = cur.fetchone()
     conn.close()
     return int(total or 0), int(introduced or 0)
+
+
+def get_learned_terms_for_pack(user_id: int, pack_id: str) -> set[str]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT pi.term
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        WHERE r.user_id = ?
+          AND pi.pack_id = ?
+          AND pi.term IS NOT NULL
+          AND TRIM(pi.term) != ''
+    """, (user_id, pack_id))
+    rows = cur.fetchall()
+    conn.close()
+    return {r[0] for r in rows if r and r[0]}
+
+
+def has_completed_scenario(user_id: int, scenario_id: str) -> bool:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT status
+        FROM scenario_progress
+        WHERE user_id = ? AND scenario_id = ?
+    """, (user_id, scenario_id))
+    row = cur.fetchone()
+    conn.close()
+    return bool(row and row[0] == "completed")
+
+
+def mark_scenario_completed(user_id: int, scenario_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO scenario_progress (user_id, scenario_id, status, completed_at)
+        VALUES (?, ?, 'completed', ?)
+        ON CONFLICT(user_id, scenario_id) DO UPDATE SET
+            status='completed',
+            completed_at=excluded.completed_at
+    """, (user_id, scenario_id, utc_now_iso()))
+    conn.commit()
+    conn.close()
+
+
+def count_completed_scenarios(user_id: int, scenario_ids: list[str]) -> int:
+    if not scenario_ids:
+        return 0
+    conn = get_connection()
+    cur = conn.cursor()
+    placeholders = ",".join(["?"] * len(scenario_ids))
+    cur.execute(
+        f"""
+        SELECT COUNT(*)
+        FROM scenario_progress
+        WHERE user_id = ?
+          AND scenario_id IN ({placeholders})
+          AND status = 'completed'
+        """,
+        [user_id] + scenario_ids
+    )
+    (cnt,) = cur.fetchone()
+    conn.close()
+    return int(cnt or 0)
 
 def get_random_context_for_item(item_id: int, lang: str = "it") -> str | None:
     conn = get_connection()

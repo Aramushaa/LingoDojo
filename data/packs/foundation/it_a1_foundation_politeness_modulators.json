@@ -1,0 +1,193 @@
+{
+  "pack_id": "it_a1_foundation_politeness_modulators",
+  "target_language": "it",
+  "level": "A1",
+  "type": "builder",
+  "pack_type": "phrase",
+  "chunk_size": 5,
+  "missions_enabled": 1,
+  "title": "Foundation: Politeness Modulators (A1)",
+  "description": "Polite softeners that make any request safer.",
+  "cards": [
+    {
+      "source_uid": "polite_per_favore",
+      "card_id": "polite_per_favore",
+      "focus": "phrase",
+      "phrase": "Per favore.",
+      "meaning_en": "Please.",
+      "contexts_it": [
+        "Per favore."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_per_cortesia",
+      "card_id": "polite_per_cortesia",
+      "focus": "phrase",
+      "phrase": "Per cortesia.",
+      "meaning_en": "Please (polite).",
+      "contexts_it": [
+        "Per cortesia."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_gentilmente",
+      "card_id": "polite_gentilmente",
+      "focus": "phrase",
+      "phrase": "Gentilmente.",
+      "meaning_en": "Kindly.",
+      "contexts_it": [
+        "Gentilmente."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_se_possibile",
+      "card_id": "polite_se_possibile",
+      "focus": "phrase",
+      "phrase": "Se possibile.",
+      "meaning_en": "If possible.",
+      "contexts_it": [
+        "Se possibile."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_se_puo",
+      "card_id": "polite_se_puo",
+      "focus": "phrase",
+      "phrase": "Se può.",
+      "meaning_en": "If you can.",
+      "contexts_it": [
+        "Se può."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_mi_dispiace_ma",
+      "card_id": "polite_mi_dispiace_ma",
+      "focus": "phrase",
+      "phrase": "Mi dispiace, ma…",
+      "meaning_en": "I'm sorry, but…",
+      "contexts_it": [
+        "Mi dispiace, ma…"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_scusi_ma",
+      "card_id": "polite_scusi_ma",
+      "focus": "phrase",
+      "phrase": "Scusi, ma…",
+      "meaning_en": "Excuse me, but…",
+      "contexts_it": [
+        "Scusi, ma…"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_la_ringrazio",
+      "card_id": "polite_la_ringrazio",
+      "focus": "phrase",
+      "phrase": "La ringrazio.",
+      "meaning_en": "Thank you (formal).",
+      "contexts_it": [
+        "La ringrazio."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_sarebbe_possibile",
+      "card_id": "polite_sarebbe_possibile",
+      "focus": "phrase",
+      "phrase": "Sarebbe possibile…?",
+      "meaning_en": "Would it be possible…?",
+      "contexts_it": [
+        "Sarebbe possibile…?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    },
+    {
+      "source_uid": "polite_potrebbe",
+      "card_id": "polite_potrebbe",
+      "focus": "phrase",
+      "phrase": "Potrebbe…?",
+      "meaning_en": "Could you…?",
+      "contexts_it": [
+        "Potrebbe…?"
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "foundation",
+          "politeness"
+        ]
+      }
+    }
+  ]
+}

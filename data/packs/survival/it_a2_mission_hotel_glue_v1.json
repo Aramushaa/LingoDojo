@@ -20,7 +20,8 @@
         "tags": [
           "hotel",
           "problems"
-        ]
+        ],
+        "phase": "problems"
       },
       "drills": {
         "scenario_prompt": "Complain politely."
@@ -41,7 +42,8 @@
         "tags": [
           "hotel",
           "problems"
-        ]
+        ],
+        "phase": "problems"
       },
       "drills": {
         "scenario_prompt": "Report an issue."
@@ -62,7 +64,8 @@
         "tags": [
           "hotel",
           "problems"
-        ]
+        ],
+        "phase": "problems"
       },
       "drills": {
         "scenario_prompt": "Bathroom issues."
@@ -83,12 +86,35 @@
         "tags": [
           "hotel",
           "problems"
-        ]
+        ],
+        "phase": "problems"
       },
       "drills": {
         "scenario_prompt": "Ask for solution."
       },
       "phrase": "Possiamo cambiare stanza?"
+    },
+    {
+      "source_uid": "mi_dispiace_c_un_pro_c821fb8754",
+      "card_id": "mi_dispiace_c_un_pro_c821fb8754",
+      "focus": "phrase",
+      "meaning_en": "Sorry, there's a problem.",
+      "contexts_it": [
+        "Mi dispiace, c'è un problema."
+      ],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": [
+          "hotel",
+          "problems"
+        ],
+        "phase": "problems"
+      },
+      "drills": {
+        "scenario_prompt": "Softening complaints."
+      },
+      "phrase": "Mi dispiace, c'è un problema."
     },
     {
       "source_uid": "la_colazione_inclusa_668b61ce42",
@@ -104,7 +130,8 @@
         "tags": [
           "hotel",
           "services"
-        ]
+        ],
+        "phase": "services"
       },
       "drills": {
         "scenario_prompt": "Clarify services."
@@ -125,7 +152,8 @@
         "tags": [
           "hotel",
           "services"
-        ]
+        ],
+        "phase": "services"
       },
       "drills": {
         "scenario_prompt": "Hotel logistics."
@@ -146,34 +174,42 @@
         "tags": [
           "hotel",
           "polite"
-        ]
+        ],
+        "phase": "politeness"
       },
       "drills": {
         "scenario_prompt": "General politeness."
       },
       "phrase": "Potrebbe aiutarmi?"
-    },
-    {
-      "source_uid": "mi_dispiace_c_un_pro_c821fb8754",
-      "card_id": "mi_dispiace_c_un_pro_c821fb8754",
-      "focus": "phrase",
-      "meaning_en": "Sorry, there's a problem.",
-      "contexts_it": [
-        "Mi dispiace, c'è un problema."
-      ],
-      "meta": {
-        "register": "neutral",
-        "risk": "safe",
-        "tags": [
-          "hotel",
-          "problems"
-        ]
-      },
-      "drills": {
-        "scenario_prompt": "Softening complaints."
-      },
-      "phrase": "Mi dispiace, c'è un problema."
     }
   ],
-  "scenes": []
+  "scenes": [],
+  "card_groups": [
+    {
+      "phase": "problems",
+      "title": "Phase 1 — Problems",
+      "card_ids": [
+        "la_stanza_troppo_rum_52567da977",
+        "l_aria_condizionata__317f4fee87",
+        "c_un_problema_con_la_4939b93835",
+        "possiamo_cambiare_st_979c3e6e25",
+        "mi_dispiace_c_un_pro_c821fb8754"
+      ]
+    },
+    {
+      "phase": "services",
+      "title": "Phase 2 — Services & Rules",
+      "card_ids": [
+        "la_colazione_inclusa_668b61ce42",
+        "a_che_ora_apre_la_re_7fa2609ce7"
+      ]
+    },
+    {
+      "phase": "politeness",
+      "title": "Phase 3 — Polite Requests",
+      "card_ids": [
+        "potrebbe_aiutarmi_ae49d0c18b"
+      ]
+    }
+  ]
 }

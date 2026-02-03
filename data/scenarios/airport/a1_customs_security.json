@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a1_customs_security",
+  "pack_key": "airport_a1",
+  "location": "Customs & security",
+  "time_pressure": "low",
+  "mood": "neutral",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Find customs and answer declaration",
+  "required_phrases": [
+    "Dov'è la dogana?",
+    "Ho qualcosa da dichiarare?",
+    "Non ho nulla da dichiarare.",
+    "Dov'è il controllo di sicurezza?",
+    "Dov'è l'uscita?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Customs",
+    "🚨 Choose the correct lane",
+    "🧾 Quick questions"
+  ],
+  "turns": [
+    {
+      "bot": "Avanti."
+    },
+    {
+      "user_task": "Ask where customs is.",
+      "expected_phrase": "Dov'è la dogana?"
+    },
+    {
+      "bot": "Lì."
+    },
+    {
+      "user_task": "Ask if you have something to declare.",
+      "expected_phrase": "Ho qualcosa da dichiarare?"
+    },
+    {
+      "bot": "Ha qualcosa?"
+    },
+    {
+      "user_task": "Say you have nothing to declare.",
+      "expected_phrase": "Non ho nulla da dichiarare."
+    },
+    {
+      "bot": "Va bene."
+    },
+    {
+      "user_task": "Ask where security is.",
+      "expected_phrase": "Dov'è il controllo di sicurezza?"
+    },
+    {
+      "bot": "In fondo."
+    },
+    {
+      "user_task": "Ask where the exit is.",
+      "expected_phrase": "Dov'è l'uscita?"
+    }
+  ]
+}

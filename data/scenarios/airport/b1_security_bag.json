@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_b1_security_bag",
+  "pack_key": "airport_b1",
+  "location": "Security check",
+  "time_pressure": "low",
+  "mood": "serious",
+  "role_user": "Officer",
+  "role_ai": "Passenger",
+  "goal": "Check baggage responsibility",
+  "required_phrases": [
+    "Ha preparato lei la valigia?",
+    "È responsabile del contenuto?",
+    "Qualcuno le ha chiesto di trasportare qualcosa?",
+    "Ha farmaci o liquidi nel bagaglio?",
+    "Può aprire la valigia, per favore?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Security check",
+    "🧳 You must ask clearly",
+    "⚠️ Keep it professional"
+  ],
+  "turns": [
+    {
+      "bot": "Buongiorno."
+    },
+    {
+      "user_task": "Ask if they packed the bag.",
+      "expected_phrase": "Ha preparato lei la valigia?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask if they are responsible for contents.",
+      "expected_phrase": "È responsabile del contenuto?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask if anyone asked them to carry something.",
+      "expected_phrase": "Qualcuno le ha chiesto di trasportare qualcosa?"
+    },
+    {
+      "bot": "No."
+    },
+    {
+      "user_task": "Ask about medicines or liquids.",
+      "expected_phrase": "Ha farmaci o liquidi nel bagaglio?"
+    },
+    {
+      "bot": "No."
+    },
+    {
+      "user_task": "Ask to open the bag.",
+      "expected_phrase": "Può aprire la valigia, per favore?"
+    }
+  ]
+}

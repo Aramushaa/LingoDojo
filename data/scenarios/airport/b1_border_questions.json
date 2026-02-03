@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_b1_border_questions",
+  "pack_key": "airport_b1",
+  "location": "Border control",
+  "time_pressure": "medium",
+  "mood": "serious",
+  "role_user": "Officer",
+  "role_ai": "Passenger",
+  "goal": "Ask standard border questions",
+  "required_phrases": [
+    "Qual è lo scopo del viaggio?",
+    "Quanto tempo resterà?",
+    "Dove alloggerà?",
+    "Ha un biglietto di ritorno?",
+    "Viaggia per lavoro o turismo?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Border control",
+    "🛂 You are the officer",
+    "🧠 Be clear and firm"
+  ],
+  "turns": [
+    {
+      "bot": "Buongiorno."
+    },
+    {
+      "user_task": "Ask the purpose of the trip.",
+      "expected_phrase": "Qual è lo scopo del viaggio?"
+    },
+    {
+      "bot": "Turismo."
+    },
+    {
+      "user_task": "Ask how long they will stay.",
+      "expected_phrase": "Quanto tempo resterà?"
+    },
+    {
+      "bot": "Due settimane."
+    },
+    {
+      "user_task": "Ask where they will stay.",
+      "expected_phrase": "Dove alloggerà?"
+    },
+    {
+      "bot": "In un hotel."
+    },
+    {
+      "user_task": "Ask if they have a return ticket.",
+      "expected_phrase": "Ha un biglietto di ritorno?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask if they travel for work or tourism.",
+      "expected_phrase": "Viaggia per lavoro o turismo?"
+    }
+  ]
+}

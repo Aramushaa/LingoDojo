@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a1_gate_rush",
+  "pack_key": "airport_a1",
+  "location": "Fiumicino Airport — Gate area",
+  "time_pressure": "high",
+  "mood": "stressed",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Find the correct gate before boarding closes",
+  "required_phrases": [
+    "Dov'è il gate?",
+    "Qual è l'ora di imbarco?",
+    "È questo il mio gate?",
+    "Il volo è in ritardo?",
+    "Dov'è la porta d'imbarco?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Fiumicino",
+    "⏱ Boarding in 8 minutes",
+    "📍 Screens just changed"
+  ],
+  "turns": [
+    {
+      "bot": "Buongiorno. Mi dica."
+    },
+    {
+      "user_task": "Ask where the gate is.",
+      "expected_phrase": "Dov'è il gate?"
+    },
+    {
+      "bot": "È al 23B."
+    },
+    {
+      "user_task": "Ask the boarding time.",
+      "expected_phrase": "Qual è l'ora di imbarco?"
+    },
+    {
+      "bot": "Tra dieci minuti."
+    },
+    {
+      "user_task": "Confirm if this is your gate.",
+      "expected_phrase": "È questo il mio gate?"
+    },
+    {
+      "bot": "Potrebbe cambiare."
+    },
+    {
+      "user_task": "Ask if the flight is delayed.",
+      "expected_phrase": "Il volo è in ritardo?"
+    },
+    {
+      "bot": "Forse di pochi minuti."
+    },
+    {
+      "user_task": "Ask where the boarding gate is.",
+      "expected_phrase": "Dov'è la porta d'imbarco?"
+    }
+  ]
+}

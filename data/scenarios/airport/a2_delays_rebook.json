@@ -1,0 +1,59 @@
+{
+  "scenario_id": "airport_a2_delays_rebook",
+  "pack_key": "airport_a2",
+  "location": "Gate information desk",
+  "time_pressure": "high",
+  "mood": "stressed",
+  "role_user": "Passenger",
+  "role_ai": "Staff",
+  "goal": "Understand delay and rebook",
+  "required_phrases": [
+    "Cosa sta causando il ritardo?",
+    "Il volo è in ritardo di due ore.",
+    "Posso cambiare il volo?",
+    "Quando parte il prossimo volo?",
+    "C'è un altro volo oggi?"
+  ],
+  "intro_lines": [
+    "🎭 AIRPORT — Delay",
+    "⏱ Your flight is delayed",
+    "📍 You need options"
+  ],
+  "turns": [
+    {
+      "bot": "Mi dica."
+    },
+    {
+      "user_task": "Ask what is causing the delay.",
+      "expected_phrase": "Cosa sta causando il ritardo?"
+    },
+    {
+      "bot": "Il volo è in ritardo."
+    },
+    {
+      "user_task": "Say the flight is delayed by two hours.",
+      "expected_phrase": "Il volo è in ritardo di due ore."
+    },
+    {
+      "bot": "Capisco."
+    },
+    {
+      "user_task": "Ask if you can change the flight.",
+      "expected_phrase": "Posso cambiare il volo?"
+    },
+    {
+      "bot": "Forse."
+    },
+    {
+      "user_task": "Ask when the next flight leaves.",
+      "expected_phrase": "Quando parte il prossimo volo?"
+    },
+    {
+      "bot": "Più tardi."
+    },
+    {
+      "user_task": "Ask if there is another flight today.",
+      "expected_phrase": "C'è un altro volo oggi?"
+    }
+  ]
+}

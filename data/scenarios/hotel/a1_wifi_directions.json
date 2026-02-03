@@ -1,0 +1,59 @@
+{
+  "scenario_id": "hotel_a1_wifi_directions",
+  "pack_key": "hotel_a1",
+  "location": "Hotel lobby",
+  "time_pressure": "low",
+  "mood": "neutral",
+  "role_user": "Guest",
+  "role_ai": "Reception",
+  "goal": "Get Wi‑Fi and find the room",
+  "required_phrases": [
+    "C'è il Wi-Fi?",
+    "Qual è la password del Wi-Fi?",
+    "Dov'è l'ascensore?",
+    "Dov'è la mia stanza?",
+    "A che ora è il check-out?"
+  ],
+  "intro_lines": [
+    "🎭 HOTEL — Lobby",
+    "📶 You need Wi‑Fi",
+    "🧭 Find your room"
+  ],
+  "turns": [
+    {
+      "bot": "Mi dica."
+    },
+    {
+      "user_task": "Ask if there is Wi‑Fi.",
+      "expected_phrase": "C'è il Wi-Fi?"
+    },
+    {
+      "bot": "Sì."
+    },
+    {
+      "user_task": "Ask for the Wi‑Fi password.",
+      "expected_phrase": "Qual è la password del Wi-Fi?"
+    },
+    {
+      "bot": "Ecco."
+    },
+    {
+      "user_task": "Ask where the elevator is.",
+      "expected_phrase": "Dov'è l'ascensore?"
+    },
+    {
+      "bot": "Lì."
+    },
+    {
+      "user_task": "Ask where your room is.",
+      "expected_phrase": "Dov'è la mia stanza?"
+    },
+    {
+      "bot": "Secondo piano."
+    },
+    {
+      "user_task": "Ask check‑out time.",
+      "expected_phrase": "A che ora è il check-out?"
+    }
+  ]
+}
