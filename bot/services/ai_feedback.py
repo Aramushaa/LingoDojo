@@ -315,9 +315,10 @@ async def generate_phrase_scenario(
     term: str,
     meaning_en: Optional[str] = None,
     helper_language: str = "fa",
+    level: str = "A1",
 ) -> Dict[str, Any]:
     term = (term or "").strip()
-    raw_key = f"phrase_scene|{helper_language}|{term}|{meaning_en or ''}"
+    raw_key = f"phrase_scene|{helper_language}|{level}|{term}|{meaning_en or ''}"
     cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
     cached = ai_cache_get(cache_key)
     if cached:
@@ -331,6 +332,7 @@ async def generate_phrase_scenario(
     prompt = f"""
 Create a very short mini-scene to practice this Italian phrase.
 Tone: funny but real-life (not absurd).
+Level: {level} (keep vocabulary and sentence structure at this level).
 
 PHRASE: "{term}"
 Meaning (EN): "{meaning_en or ''}"
@@ -341,7 +343,9 @@ Output JSON only:
   "setting": "one short line",
   "npc_line": "one short line",
   "task": "what the user should say",
-  "hint": "short hint"
+  "hint": "short hint",
+  "meaning_en": "short meaning in English",
+  "meaning_helper": "short meaning in helper language"
 }}
 """.strip()
 

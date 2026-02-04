@@ -14,23 +14,27 @@ Contextual Mastery — Real usage through scenarios, register, and cultural cont
 
 Telegram-First — High-frequency, low-friction interactions via Telegram + Mini WebApp.
 
-✨ Features (Current)
+✅ Tested & Working (Right Now)
 
-✅ User Profiles — SQLite-backed storage for user preferences and target/UI languages.
+✅ ➕ Add My Words — Users can add their own words/phrases with examples.
 
-✅ Modular Packs — JSON packs for Survival + Travel domains (Airport, Hotel).
+✅ 🔁 Review My Words — Dedicated review flow for user‑added words.
 
-✅ Journey Mode — Guided roadmap A1 → A2 → B1 with progress tracking.
+🚧 Under Development
 
-✅ Phrase Missions — After short chunks, roleplay missions practice the exact phrases learned.
+🧭 Journey Mode — Guided roadmap A1 → A2 → B1 with progress tracking.
 
-✅ AI Feedback — Mission answers get corrections, tips, and grammar notes (EN/FA supported).
+📦 Modular Packs — JSON packs for Survival + Travel (Airport, Hotel).
 
-✅ SRS Reviews — /review flow with basic spaced repetition scheduling.
+🎭 Phrase Missions — Roleplay missions to practice phrases in context.
 
-✅ Dynamic Settings — Change target/UI/helper languages via /settings.
+🧠 AI Feedback — Corrections, tips, and grammar notes (EN/FA supported).
 
-✅ Web Stats UI — Mini WebApp dashboard at `/stats`.
+🗓 SRS Reviews — Global /review flow with spaced repetition scheduling.
+
+⚙️ Settings — Change target/UI/helper languages via /settings.
+
+📊 Web Stats UI — Mini WebApp dashboard at `/stats`.
 
 🛠 Tech Stack
 
@@ -131,7 +135,7 @@ Optional: Add a WebApp button
 If you want `/start` to include a Telegram WebApp button, add a button in `bot/handlers/start.py`
 using `WebAppInfo(url=f"{WEBAPP_PUBLIC_URL}/stats")`.
 
-Troubleshooting
+🧩 Troubleshooting
 
 - WebApp shows “Invalid Telegram initData”:
   - Make sure you opened the URL inside Telegram (via a WebApp button), not a normal browser tab.

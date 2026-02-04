@@ -19,6 +19,16 @@ def h(text: str) -> str:
     return escape(text or "")
 
 
+async def _send_tts(message, text: str):
+    audio_path = await tts_it(text)
+    suffix = audio_path.suffix.lower()
+    with open(audio_path, "rb") as f:
+        if suffix == ".ogg":
+            await message.reply_voice(voice=InputFile(f, filename=f"{text}.ogg"))
+        else:
+            await message.reply_audio(audio=InputFile(f, filename=f"{text}{suffix}"), title=text)
+
+
 def grade_keyboard(item_id: int, is_phrase: bool):
     return InlineKeyboardMarkup([
         [
@@ -543,8 +553,7 @@ async def on_review_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     if action == "PRON":
         try:
-            audio_path = await tts_it(chunk or term or "")
-            await query.message.reply_voice(voice=InputFile(audio_path))
+            await _send_tts(query.message, chunk or term or "")
         except Exception as e:
             await query.message.reply_text(
                 f"Pronunciation unavailable ({type(e).__name__}).",

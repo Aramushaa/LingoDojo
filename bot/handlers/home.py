@@ -5,6 +5,8 @@ from bot.handlers.journey import journey
 from bot.handlers.stats import stats
 from bot.handlers.settings import settings, open_packs
 from bot.handlers.addword import add_command, mywords_command
+from bot.utils.telegram import get_chat_sender
+from bot.ui import home_keyboard
 
 
 async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -35,3 +37,8 @@ async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     else:
         await query.message.reply_text("Unknown action.")
+
+
+async def home_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = get_chat_sender(update)
+    await msg.reply_text("🏠 <b>Home</b>\nChoose where to go next:", reply_markup=home_keyboard(), parse_mode="HTML")

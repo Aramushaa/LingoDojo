@@ -11,7 +11,7 @@ from bot.handlers.learn import on_text as on_learn_text
 from bot.handlers.journey import journey, on_journey_choice
 from bot.handlers.settings import settings, on_settings_button, open_packs
 from bot.handlers.review import review, on_review_text, on_grade_button, on_undo_button, on_review_action, on_review_flow, on_review_choice
-from bot.handlers.home import on_home_button
+from bot.handlers.home import on_home_button, home_command
 from bot.handlers.reloadpacks import reloadpacks_command
 from bot.handlers.help import help_command, sos_command
 from bot.handlers.persona import persona_command, on_persona_text
@@ -60,19 +60,17 @@ async def post_init(application):
     commands = [
         BotCommand("start", "Setup your profile (languages + level)"),
         BotCommand("add", "Add your own word(s)"),
+        BotCommand("home", "Show main menu"),
         BotCommand("ttscheck", "Check TTS health"),
         BotCommand("journey", "Guided level‑up path"),
         BotCommand("packs", "Browse packs"),
         BotCommand("progress", "Stats + streak"),
         BotCommand("review", "Review due items (SRS)"),
         BotCommand("settings", "Languages + level"),
-        BotCommand("setlevel", "Set your level (A1/A2/B1/...)"),
-        BotCommand("persona", "Edit your Alter‑Ego"),
         BotCommand("mywords", "Browse your saved words"),
         BotCommand("hint", "Show a quick hint"),
         BotCommand("why", "Show extra context"),
         BotCommand("help", "Show command menu"),
-        BotCommand("sos", "Emergency help menu"),
         BotCommand("reloadpacks", "Reload packs from /data/packs (dev)"),
     ]
     await application.bot.set_my_commands(commands)
@@ -98,6 +96,7 @@ def main():
     app.add_handler(CommandHandler("settings", settings))
     app.add_handler(CommandHandler("packs", open_packs))
     app.add_handler(CommandHandler("review", review))
+    app.add_handler(CommandHandler("home", home_command))
     app.add_handler(CommandHandler("setlevel", setlevel))
     app.add_handler(CommandHandler("persona", persona_command))
     app.add_handler(CommandHandler("add", add_command))

@@ -18,8 +18,13 @@ async def ttscheck_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.reply_text("Running TTS health check…")
     try:
         audio_path = await tts_it("Ciao! Questo è un test.")
-        await msg.reply_text("✅ TTS OK. Playing sample:")
-        await msg.reply_voice(voice=InputFile(audio_path))
+        suffix = audio_path.suffix.lower()
+        with open(audio_path, "rb") as f:
+            if suffix == ".ogg":
+                await msg.reply_voice(voice=InputFile(f, filename="tts_test.ogg"))
+            else:
+                await msg.reply_audio(audio=InputFile(f, filename=f"tts_test{suffix}"), title="TTS Test")
+        await msg.reply_text("✅ TTS OK.")
     except Exception as e:
         await msg.reply_text(
             f"❌ TTS failed ({type(e).__name__}).",
@@ -37,8 +42,13 @@ async def on_tts_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     try:
         audio_path = await tts_it("Ciao! Questo è un test.")
-        await query.message.reply_text("✅ TTS OK. Playing sample:")
-        await query.message.reply_voice(voice=InputFile(audio_path))
+        suffix = audio_path.suffix.lower()
+        with open(audio_path, "rb") as f:
+            if suffix == ".ogg":
+                await query.message.reply_voice(voice=InputFile(f, filename="tts_test.ogg"))
+            else:
+                await query.message.reply_audio(audio=InputFile(f, filename=f"tts_test{suffix}"), title="TTS Test")
+        await query.message.reply_text("✅ TTS OK.")
     except Exception as e:
         await query.message.reply_text(
             f"❌ TTS failed ({type(e).__name__}).",

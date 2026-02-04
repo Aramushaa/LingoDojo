@@ -12,6 +12,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🫧 <b>LingoDojo — Command Glass</b>\n"
         "<i>(tap a card)</i>\n\n"
         "🧭 <b>/journey</b> — Guided level‑up path\n"
+        "🏠 <b>/home</b> — Main menu\n"
         "📦 <b>/packs</b> — Browse packs\n"
         "📊 <b>/progress</b> — Stats + streak\n"
         "⚙️ <b>/settings</b> — Languages + level\n"

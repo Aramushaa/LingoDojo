@@ -159,12 +159,12 @@ def _word_card_text(card: dict, helper_lang: str | None) -> str:
             ha = ex.get("helper") or ""
             line = f"• {h(it)}"
             if en:
-                line += f" — {h(en)}"
+                line += f"   —   {h(en)}"
             if helper_lang and ha:
-                line += f" — {h(ha)}"
+                line += f"   —   {h(ha)}"
             lines.append(line)
 
-    return "\n".join(lines)
+    return "\n\n".join(lines)
 
 
 def _phrase_card_text(card: dict, helper_lang: str | None) -> str:
@@ -248,10 +248,10 @@ def _mywords_menu(pack_id: str) -> tuple[str, InlineKeyboardMarkup]:
         kb.append([InlineKeyboardButton("➕ Add words", callback_data="home:add")])
         return "\n".join(lines), InlineKeyboardMarkup(kb)
 
-    lines.append("Choose a category or action:")
-    for cat, count in categories:
-        lines.append(f"• {h(cat)} ({count})")
-        kb.append([InlineKeyboardButton(f"{cat} ({count})", callback_data=f"MYWORDS|CAT|{cat}")])
+    total = sum(c[1] for c in categories)
+    lines.append(f"Total: <b>{total}</b>")
+    lines.append("Choose an action:")
+    kb.append([InlineKeyboardButton("📂 Categories", callback_data="MYWORDS|CATS")])
     kb.append([InlineKeyboardButton("📜 Show all", callback_data="MYWORDS|ALL")])
     kb.append([InlineKeyboardButton("🔎 Search", callback_data="MYWORDS|SEARCH")])
     kb.append([InlineKeyboardButton("🗑 Delete a word", callback_data="MYWORDS|DELETE")])
@@ -285,10 +285,40 @@ def _conjugation_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton("Imperative", callback_data="ADDWORD|CONJ|Imperative"),
         ],
         [
+            InlineKeyboardButton("Past Remote (Passato remoto)", callback_data="ADDWORD|CONJ|Past Remote"),
+            InlineKeyboardButton("Pluperfect (Trapassato prossimo)", callback_data="ADDWORD|CONJ|Pluperfect"),
+        ],
+        [
+            InlineKeyboardButton("Past Anterior (Trapassato remoto)", callback_data="ADDWORD|CONJ|Past Anterior"),
+            InlineKeyboardButton("Future Perfect (Futuro anteriore)", callback_data="ADDWORD|CONJ|Future Perfect"),
+        ],
+        [
+            InlineKeyboardButton("Conditional Past", callback_data="ADDWORD|CONJ|Conditional Past"),
+            InlineKeyboardButton("Subjunctive Imperfect", callback_data="ADDWORD|CONJ|Subjunctive Imperfect"),
+        ],
+        [
+            InlineKeyboardButton("Subjunctive Pluperfect", callback_data="ADDWORD|CONJ|Subjunctive Pluperfect"),
+            InlineKeyboardButton("Gerund", callback_data="ADDWORD|CONJ|Gerund"),
+        ],
+        [
+            InlineKeyboardButton("Participle", callback_data="ADDWORD|CONJ|Participle"),
+            InlineKeyboardButton("Infinitive", callback_data="ADDWORD|CONJ|Infinitive"),
+        ],
+        [
             InlineKeyboardButton("⬅️ Back to card", callback_data="ADDWORD|BACK"),
         ],
     ]
     return InlineKeyboardMarkup(rows)
+
+
+async def _send_tts(message, text: str):
+    audio_path = await tts_it(text)
+    suffix = audio_path.suffix.lower()
+    with open(audio_path, "rb") as f:
+        if suffix == ".ogg":
+            await message.reply_voice(voice=InputFile(f, filename=f"{text}.ogg"))
+        else:
+            await message.reply_audio(audio=InputFile(f, filename=f"{text}{suffix}"), title=text)
 
 
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -354,6 +384,20 @@ async def on_mywords_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "SEARCH":
         set_session(user.id, mode="addword", item_id=None, stage="await_search", meta={})
         await query.message.reply_text("Send a word to search.")
+        return
+
+    if action == "CATS":
+        categories = list_my_words_categories(pack_id)
+        if not categories:
+            await query.edit_message_text("No categories yet.")
+            return
+        lines = ["📂 <b>Categories</b>"]
+        kb = []
+        for cat, count in categories:
+            lines.append(f"• {h(cat)} ({count})")
+            kb.append([InlineKeyboardButton(f"{cat} ({count})", callback_data=f"MYWORDS|CAT|{cat}")])
+        kb.append([InlineKeyboardButton("⬅️ Back", callback_data="MYWORDS|BACK")])
+        await query.edit_message_text("\n".join(lines), parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(kb))
         return
 
     if action == "ALL":
@@ -622,25 +666,31 @@ async def _process_current_word(update: Update, context: ContextTypes.DEFAULT_TY
 
     term = queue[idx]
     focus = "phrase" if _is_phrase(term) else "word"
-    v = validate_it_term(term)
-    if not v.get("ok") and focus == "word":
-        sug = v.get("suggestion")
-        if sug:
-            meta["suggestion"] = sug
-            set_session(user.id, mode="addword", item_id=None, stage="show_card", meta=meta)
-            await msg.reply_text(
-                f"Did you mean <b>{h(sug)}</b>?",
-                parse_mode=ParseMode.HTML,
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("✅ Use suggestion", callback_data="ADDWORD|USE_SUG")],
-                    [InlineKeyboardButton("⏭ Skip", callback_data="ADDWORD|NEXT")],
-                ])
-            )
+    skip_validation = bool(meta.get("skip_validation")) and meta.get("skip_term") == term
+    if not skip_validation:
+        v = validate_it_term(term)
+        if not v.get("ok") and focus == "word":
+            sug = v.get("suggestion")
+            if sug:
+                meta["suggestion"] = sug
+                meta["skip_term"] = term
+                set_session(user.id, mode="addword", item_id=None, stage="show_card", meta=meta)
+                await msg.reply_text(
+                    f"Did you mean <b>{h(sug)}</b>?",
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🟢 Use mine", callback_data="ADDWORD|USE_ORIG")],
+                        [InlineKeyboardButton("✅ Use suggestion", callback_data="ADDWORD|USE_SUG")],
+                        [InlineKeyboardButton("⏭ Skip", callback_data="ADDWORD|NEXT")],
+                    ])
+                )
+                return
+            await msg.reply_text("Word not found. Skipping.")
+            meta["index"] = int(meta.get("index") or 0) + 1
+            await _process_current_word(update, context, meta)
             return
-        await msg.reply_text("Word not found. Skipping.")
-        meta["index"] = int(meta.get("index") or 0) + 1
-        await _process_current_word(update, context, meta)
-        return
+    else:
+        meta["skip_validation"] = False
 
     card = await generate_word_card(term=term, focus=focus, helper_language=helper or "fa")
     if not card or not card.get("ok"):
@@ -763,6 +813,10 @@ async def on_addword_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 meta["queue"] = queue
             await _process_current_word(update, context, meta)
             return
+    if action == "USE_ORIG":
+        meta["skip_validation"] = True
+        await _process_current_word(update, context, meta)
+        return
 
     if action == "SAVE":
         await _save_current_word(update, context)
@@ -804,6 +858,14 @@ async def on_addword_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         card = (meta or {}).get("card") or {}
         term = card.get("term") or ""
         if len(parts) == 2:
+            has_conj = bool(card.get("conjugation"))
+            looks_like_verb = any(term.endswith(suf) for suf in ("are", "ere", "ire"))
+            if not (has_conj or looks_like_verb):
+                await query.message.reply_text(
+                    "No conjugation available.",
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back to card", callback_data="ADDWORD|BACK")]]),
+                )
+                return
             await query.message.reply_text(
                 "Choose a tense:",
                 reply_markup=_conjugation_keyboard(),
@@ -829,8 +891,7 @@ async def on_addword_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         card = (meta or {}).get("card") or {}
         term = card.get("term") or ""
         try:
-            audio_path = await tts_it(term)
-            await query.message.reply_voice(voice=InputFile(audio_path))
+            await _send_tts(query.message, term)
         except Exception as e:
             await query.message.reply_text(
                 f"Pronunciation unavailable ({type(e).__name__}).",
@@ -847,7 +908,12 @@ async def on_addword_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if focus == "phrase":
             scenario = card.get("scenario")
             if not scenario:
-                scenario = await generate_phrase_scenario(term=card.get("term"), meaning_en=card.get("meaning_en"), helper_language=(meta or {}).get("helper_lang") or "fa")
+                scenario = await generate_phrase_scenario(
+                    term=card.get("term"),
+                    meaning_en=card.get("meaning_en"),
+                    helper_language=(meta or {}).get("helper_lang") or "fa",
+                    level=get_user_level(user.id),
+                )
             meta["expected_phrase"] = card.get("term")
             meta["scenario"] = scenario
             set_session(user.id, mode="addword", item_id=None, stage="await_phrase", meta=meta)
@@ -870,10 +936,25 @@ async def on_addword_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if action == "HELP":
         scenario = (meta or {}).get("scenario") or {}
-        hint = scenario.get("hint")
-        expected = (meta or {}).get("expected_phrase") or (meta.get("card") or {}).get("term") or ""
-        out = hint or expected
-        await query.message.reply_text(f"💡 Hint: <b>{h(out)}</b>", parse_mode=ParseMode.HTML)
+        card = (meta or {}).get("card") or {}
+        expected = (meta or {}).get("expected_phrase") or card.get("term") or ""
+        hint = scenario.get("hint") or expected
+        meaning_en = scenario.get("meaning_en") or card.get("meaning_en") or ""
+        meaning_helper = scenario.get("meaning_helper") or card.get("meaning_helper") or ""
+        grammar = card.get("grammar") or ""
+
+        lines = [f"💡 <b>Hint</b>\n{h(hint)}"]
+        if meaning_en or meaning_helper:
+            lines.append("")
+            lines.append("Meaning:")
+            if meaning_en:
+                lines.append(f"EN: {h(meaning_en)}")
+            if meaning_helper:
+                lines.append(f"FA: {h(meaning_helper)}")
+        if grammar:
+            lines.append("")
+            lines.append(f"Grammar:\n{h(grammar)}")
+        await query.message.reply_text("\n".join(lines), parse_mode=ParseMode.HTML)
         return
 
     if action == "BACK":
