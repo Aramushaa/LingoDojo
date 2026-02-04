@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 from bot.handlers.journey import journey
 from bot.handlers.stats import stats
 from bot.handlers.settings import settings, open_packs
+from bot.handlers.addword import add_command, mywords_command
 
 
 async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -19,6 +20,12 @@ async def on_home_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "home:packs":
         await open_packs(update, context)
+
+    elif data == "home:add":
+        await add_command(update, context)
+
+    elif data == "home:mywords":
+        await mywords_command(update, context)
 
     elif data == "home:progress":
         await stats(update, context)

@@ -86,17 +86,288 @@ def _extract_json(text: str) -> Optional[dict]:
     text = (text or "").strip()
     if not text:
         return None
+    # strip common code fences
+    if text.startswith("```"):
+        text = text.strip("`").strip()
 
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
         return None
 
-    chunk = text[start:end+1]
+    chunk = text[start:end + 1]
     try:
         return json.loads(chunk)
     except Exception:
         return None
+
+
+async def generate_sentence_upgrade(
+    *,
+    term: str,
+    user_sentence: str,
+    level_from: str = "A1",
+    level_to: str = "A2",
+) -> Dict[str, Any]:
+    """
+    Returns a better sentence + level-up version + native sentence.
+    """
+    raw_key = f"sentence_upgrade|{term}|{user_sentence}|{level_from}|{level_to}"
+    cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    cached = ai_cache_get(cache_key)
+    if cached:
+        return cached
+
+    if AI_PROVIDER != "gemini" or not (GEMINI_API_KEYS or GEMINI_API_KEY):
+        out = {"ok": False}
+        ai_cache_set(cache_key, out)
+        return out
+
+    prompt = f"""
+You are an Italian tutor. Improve a learner sentence.
+
+TERM: "{term}"
+Learner sentence: "{user_sentence}"
+Learner level: {level_from}
+Target level: {level_to}
+
+Return JSON only:
+{{
+  "ok": true,
+  "better": "corrected or more natural same-level sentence",
+  "level_up": "more natural version at next level",
+  "native_sentence": "native-like sentence using the term",
+  "tip": "one short tip for improvement"
+}}
+""".strip()
+
+    last_err: Exception | None = None
+    try:
+        for model in _gemini_models():
+            for _ in range(_num_keys()):
+                try:
+                    client = genai.Client(api_key=_next_gemini_key())
+                    resp = client.models.generate_content(model=model, contents=prompt)
+                    data = _extract_json((resp.text or "").strip())
+                    if data:
+                        data["ok"] = True
+                        ai_cache_set(cache_key, data)
+                        return data
+                except Exception as e:
+                    last_err = e
+                    if _is_quota_or_rate_error(e):
+                        continue
+                    raise
+    except Exception:
+        pass
+
+    out = {"ok": False, "error": str(last_err) if last_err else "ai_failed"}
+    ai_cache_set(cache_key, out)
+    return out
+
+
+async def generate_word_card(
+    *,
+    term: str,
+    focus: str,
+    helper_language: str = "fa",
+) -> Dict[str, Any]:
+    """
+    Returns a structured word/phrase card with meanings and examples.
+    """
+    term = (term or "").strip()
+    focus = (focus or "word").strip().lower()
+    raw_key = f"word_card|{focus}|{helper_language}|{term}"
+    cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    cached = ai_cache_get(cache_key)
+    if cached:
+        return cached
+
+    if AI_PROVIDER != "gemini" or not (GEMINI_API_KEYS or GEMINI_API_KEY):
+        out = {"ok": False, "term": term, "focus": focus}
+        ai_cache_set(cache_key, out)
+        return out
+
+    prompt = f"""
+You are a professional Italian tutor.
+Return a compact word/phrase card in JSON only.
+
+TERM: "{term}"
+FOCUS: "{focus}"  (word or phrase)
+TARGET LANGUAGE: Italian
+HELPER LANGUAGE: {helper_language}
+
+Rules:
+- Italian first, then English, then helper language.
+- Keep output short and practical.
+- If multiple meanings, return them as \"senses\" list.
+- Provide exactly 3 examples. Each example: it + en + helper.
+- Provide a short grammar note only if relevant.
+- If focus=word and it's a verb, include short conjugation note (present tense only).
+- Suggested categories: pick 2-4 from: Verbs, Travel, Food & Drink, Shopping, Daily Life, Work & Study, Emotions, Time & Dates, Politeness, General.
+- Use \"safe\" risk unless it is clearly risky slang.
+
+Output JSON schema:
+{{
+  "ok": true,
+  "term": "...",
+  "focus": "word|phrase",
+  "meaning_en": "...",
+  "meaning_helper": "...",
+  "senses": [{{"meaning_en":"...", "meaning_helper":"...", "usage":"..."}}],
+  "examples": [{{"it":"...", "en":"...", "helper":"..."}}],
+  "grammar": "...",
+  "conjugation": "...",
+  "cultural_note": "...",
+  "native_sauce": "...",
+  "trap": "...",
+  "register": "neutral|polite|slang",
+  "risk": "safe|caution|avoid",
+  "suggested_categories": ["...","..."]
+}}
+""".strip()
+
+    last_err: Exception | None = None
+    try:
+        for model in _gemini_models():
+            for _ in range(_num_keys()):
+                try:
+                    client = genai.Client(api_key=_next_gemini_key())
+                    resp = client.models.generate_content(model=model, contents=prompt)
+                    data = _extract_json((resp.text or "").strip())
+                    if data:
+                        data["ok"] = True
+                        ai_cache_set(cache_key, data)
+                        return data
+                except Exception as e:
+                    last_err = e
+                    if _is_quota_or_rate_error(e):
+                        continue
+                    raise
+    except Exception:
+        pass
+
+    out = {"ok": False, "term": term, "focus": focus, "error": str(last_err) if last_err else "ai_failed"}
+    ai_cache_set(cache_key, out)
+    return out
+
+
+async def generate_conjugation(
+    *,
+    term: str,
+    tense: str,
+) -> Dict[str, Any]:
+    """
+    Returns a conjugation table for a given tense.
+    """
+    term = (term or "").strip()
+    tense = (tense or "").strip()
+    raw_key = f"conjugation|{term}|{tense}"
+    cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    cached = ai_cache_get(cache_key)
+    if cached:
+        return cached
+
+    if AI_PROVIDER != "gemini" or not (GEMINI_API_KEYS or GEMINI_API_KEY):
+        out = {"ok": False, "term": term, "tense": tense}
+        ai_cache_set(cache_key, out)
+        return out
+
+    prompt = f"""
+You are an Italian tutor. Provide the conjugation of the verb.
+Verb: "{term}"
+Tense: "{tense}"
+
+Return JSON only:
+{{
+  "ok": true,
+  "tense": "{tense}",
+  "conjugation": "io ...\\ntu ...\\nlui/lei ...\\nnoi ...\\nvoi ...\\nloro ..."
+}}
+""".strip()
+
+    last_err: Exception | None = None
+    try:
+        for model in _gemini_models():
+            for _ in range(_num_keys()):
+                try:
+                    client = genai.Client(api_key=_next_gemini_key())
+                    resp = client.models.generate_content(model=model, contents=prompt)
+                    data = _extract_json((resp.text or "").strip())
+                    if data:
+                        data["ok"] = True
+                        ai_cache_set(cache_key, data)
+                        return data
+                except Exception as e:
+                    last_err = e
+                    if _is_quota_or_rate_error(e):
+                        continue
+                    raise
+    except Exception:
+        pass
+
+    out = {"ok": False, "term": term, "tense": tense, "error": str(last_err) if last_err else "ai_failed"}
+    ai_cache_set(cache_key, out)
+    return out
+
+async def generate_phrase_scenario(
+    *,
+    term: str,
+    meaning_en: Optional[str] = None,
+    helper_language: str = "fa",
+) -> Dict[str, Any]:
+    term = (term or "").strip()
+    raw_key = f"phrase_scene|{helper_language}|{term}|{meaning_en or ''}"
+    cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+    cached = ai_cache_get(cache_key)
+    if cached:
+        return cached
+
+    if AI_PROVIDER != "gemini" or not (GEMINI_API_KEYS or GEMINI_API_KEY):
+        out = {"ok": False, "setting": "Real life", "npc_line": "Mi dica.", "task": "Respond."}
+        ai_cache_set(cache_key, out)
+        return out
+
+    prompt = f"""
+Create a very short mini-scene to practice this Italian phrase.
+Tone: funny but real-life (not absurd).
+
+PHRASE: "{term}"
+Meaning (EN): "{meaning_en or ''}"
+
+Output JSON only:
+{{
+  "ok": true,
+  "setting": "one short line",
+  "npc_line": "one short line",
+  "task": "what the user should say",
+  "hint": "short hint"
+}}
+""".strip()
+
+    last_err: Exception | None = None
+    try:
+        for model in _gemini_models():
+            for _ in range(_num_keys()):
+                try:
+                    client = genai.Client(api_key=_next_gemini_key())
+                    resp = client.models.generate_content(model=model, contents=prompt)
+                    data = _extract_json((resp.text or "").strip())
+                    if data:
+                        data["ok"] = True
+                        ai_cache_set(cache_key, data)
+                        return data
+                except Exception as e:
+                    last_err = e
+                    if _is_quota_or_rate_error(e):
+                        continue
+                    raise
+    except Exception:
+        pass
+
+    out = {"ok": False, "setting": "Real life", "npc_line": "Mi dica.", "task": "Respond.", "error": str(last_err) if last_err else "ai_failed"}
+    ai_cache_set(cache_key, out)
+    return out
 
 
 def _build_prompt(

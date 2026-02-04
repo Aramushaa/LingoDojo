@@ -340,16 +340,19 @@ def import_packs_from_folder():
             pack = json.load(f)
             packs.append(pack)
 
-    # Remove packs that no longer exist on disk
+    # Remove packs that no longer exist on disk (ignore user-created packs)
     pack_ids_in_files = {p.get("pack_id") for p in packs if p.get("pack_id")}
     if pack_ids_in_files:
-        cursor.execute(
-            "SELECT pack_id FROM packs WHERE pack_id NOT IN ({})".format(
-                ",".join("?" for _ in pack_ids_in_files)
-            ),
-            tuple(pack_ids_in_files),
-        )
-        stale = [r[0] for r in cursor.fetchall()]
+        cursor.execute("SELECT pack_id FROM packs")
+        all_ids = [r[0] for r in cursor.fetchall()]
+        stale = []
+        for pid in all_ids:
+            if pid in pack_ids_in_files:
+                continue
+            # keep user packs: <lang>_user_<id>_mywords
+            if "_user_" in pid and pid.endswith("_mywords"):
+                continue
+            stale.append(pid)
         if stale:
             cursor.execute(
                 "DELETE FROM pack_items WHERE pack_id IN ({})".format(
@@ -999,6 +1002,22 @@ def get_due_count(user_id: int) -> int:
     conn.close()
     return int(count)
 
+
+def get_due_count_in_pack(user_id: int, pack_id: str) -> int:
+    """How many items are due today (or overdue) for a specific pack."""
+    conn = get_connection()
+    _cleanup_stale_reviews(conn, user_id)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM reviews r
+        JOIN pack_items pi ON pi.item_id = r.item_id
+        WHERE r.user_id = ? AND pi.pack_id = ? AND r.due_date <= ?
+    """, (user_id, pack_id, date.today().isoformat()))
+    (count,) = cursor.fetchone()
+    conn.close()
+    return int(count)
+
 def get_status_counts(user_id: int) -> dict:
     """Return counts grouped by status for active packs only."""
     conn = get_connection()
@@ -1582,6 +1601,183 @@ def get_random_terms_from_pack(pack_id: str, exclude_item_id: int, limit: int = 
     rows = cur.fetchall()
     conn.close()
     return [r[0] for r in rows if r and r[0]]
+
+
+def ensure_my_words_pack(user_id: int, target_language: str) -> str:
+    """
+    Creates (if missing) a personal "My Words" pack for the user.
+    Returns pack_id.
+    """
+    pack_id = f"{target_language}_user_{user_id}_mywords"
+    title = "My Words"
+    description = "Words and phrases you saved."
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO packs (pack_id, target_language, level, title, description, pack_type, chunk_size, missions_enabled)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(pack_id) DO UPDATE SET
+            title=excluded.title,
+            description=excluded.description
+    """, (pack_id, target_language, None, title, description, "mixed", None, 0))
+    conn.commit()
+    conn.close()
+    return pack_id
+
+
+def upsert_my_word_item(
+    *,
+    pack_id: str,
+    focus: str,
+    term: str,
+    meaning_en: str | None,
+    meaning_helper: str | None,
+    note_json: str | None,
+    category: str | None,
+    tags_json: str | None,
+    cultural_note: str | None,
+    trap: str | None,
+    native_sauce: str | None,
+    register: str | None,
+    risk: str | None,
+    source_uid: str,
+) -> int:
+    """
+    Insert/update a user word/phrase. Returns item_id.
+    """
+    chunk = term
+    lemma = term if focus == "word" else None
+    phrase = term if focus == "phrase" else None
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO pack_items (
+            pack_id, term, chunk, translation_en, note,
+            level, category, tags_json, cultural_note, translation_helper,
+            focus, lemma, phrase, register, risk, trap, native_sauce, source_uid
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(pack_id, source_uid) DO UPDATE SET
+            term=excluded.term,
+            chunk=excluded.chunk,
+            translation_en=excluded.translation_en,
+            note=excluded.note,
+            category=excluded.category,
+            tags_json=excluded.tags_json,
+            cultural_note=excluded.cultural_note,
+            translation_helper=excluded.translation_helper,
+            focus=excluded.focus,
+            lemma=excluded.lemma,
+            phrase=excluded.phrase,
+            register=excluded.register,
+            risk=excluded.risk,
+            trap=excluded.trap,
+            native_sauce=excluded.native_sauce
+    """, (
+        pack_id, term, chunk, meaning_en, note_json,
+        None, category, tags_json, cultural_note, meaning_helper,
+        focus, lemma, phrase, register, risk, trap, native_sauce, source_uid
+    ))
+    conn.commit()
+    cur.execute("SELECT item_id FROM pack_items WHERE pack_id = ? AND source_uid = ?", (pack_id, source_uid))
+    row = cur.fetchone()
+    conn.close()
+    return int(row[0]) if row else 0
+
+
+def upsert_card_context(item_id: int, sentence: str, lang: str = "it"):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO card_contexts (item_id, lang, sentence)
+        VALUES (?, ?, ?)
+    """, (item_id, lang, sentence))
+    conn.commit()
+    conn.close()
+
+
+def list_my_words_categories(pack_id: str) -> list[tuple[str, int]]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COALESCE(NULLIF(category, ''), 'General') AS cat, COUNT(*)
+        FROM pack_items
+        WHERE pack_id = ?
+        GROUP BY cat
+        ORDER BY COUNT(*) DESC
+    """, (pack_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return [(r[0] or "General", int(r[1] or 0)) for r in rows]
+
+
+def list_my_words_in_category(pack_id: str, category: str | None = None) -> list[str]:
+    conn = get_connection()
+    cur = conn.cursor()
+    if category:
+        cur.execute("""
+            SELECT term
+            FROM pack_items
+            WHERE pack_id = ? AND category = ?
+            ORDER BY term ASC
+        """, (pack_id, category))
+    else:
+        cur.execute("""
+            SELECT term
+            FROM pack_items
+            WHERE pack_id = ?
+            ORDER BY term ASC
+        """, (pack_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]]
+
+
+def list_my_words_search(pack_id: str, query: str) -> list[str]:
+    q = f"%{(query or '').strip()}%"
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT term
+        FROM pack_items
+        WHERE pack_id = ?
+          AND term LIKE ?
+        ORDER BY term ASC
+    """, (pack_id, q))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]]
+
+
+def list_my_words_all(pack_id: str, limit: int = 50) -> tuple[list[str], int]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM pack_items WHERE pack_id = ?", (pack_id,))
+    total = int((cur.fetchone() or [0])[0] or 0)
+    cur.execute("""
+        SELECT term
+        FROM pack_items
+        WHERE pack_id = ?
+        ORDER BY term ASC
+        LIMIT ?
+    """, (pack_id, limit))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]], total
+
+
+def rename_my_words_category(pack_id: str, old_category: str, new_category: str) -> int:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE pack_items SET category = ? WHERE pack_id = ? AND category = ?",
+        (new_category, pack_id, old_category),
+    )
+    conn.commit()
+    changed = cur.rowcount or 0
+    conn.close()
+    return int(changed)
 
 
 def get_item_holographic_meta(item_id: int) -> dict:

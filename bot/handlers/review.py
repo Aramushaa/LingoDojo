@@ -5,8 +5,11 @@ from html import escape
 from bot.db import (
     get_due_item, get_due_item_in_pack, get_item_by_id, set_session, get_session, clear_session,
     apply_grade, undo_last_grade, record_practice, get_pack_item_counts, upsert_user_pack_progress,
-    get_due_count, get_random_context_for_item, get_review_state, get_random_terms_from_pack
+    get_due_count, get_due_count_in_pack, get_random_context_for_item, get_review_state, get_random_terms_from_pack,
+    get_user_level,
 )
+from bot.services.ai_feedback import generate_sentence_upgrade, generate_learn_feedback
+from bot.services.lexicon_it import get_or_fetch_lexicon_it
 from bot.services.tts_edge import tts_it
 from telegram import InputFile
 from bot.utils.telegram import get_chat_sender
@@ -19,9 +22,14 @@ def h(text: str) -> str:
 def grade_keyboard(item_id: int, is_phrase: bool):
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🔴 Needed help" if is_phrase else "🔴 Hard", callback_data=f"GRADE|again|{item_id}"),
-            InlineKeyboardButton("🟡 Hesitated" if is_phrase else "🟡 Took effort", callback_data=f"GRADE|hard|{item_id}"),
-            InlineKeyboardButton("🟢 Used instantly" if is_phrase else "🟢 Easy", callback_data=f"GRADE|good|{item_id}")
+            InlineKeyboardButton("0 Hard", callback_data=f"GRADE|0|{item_id}"),
+            InlineKeyboardButton("1", callback_data=f"GRADE|1|{item_id}"),
+            InlineKeyboardButton("2", callback_data=f"GRADE|2|{item_id}"),
+        ],
+        [
+            InlineKeyboardButton("3", callback_data=f"GRADE|3|{item_id}"),
+            InlineKeyboardButton("4", callback_data=f"GRADE|4|{item_id}"),
+            InlineKeyboardButton("5 Perfect", callback_data=f"GRADE|5|{item_id}"),
         ]
     ])
 
@@ -42,14 +50,23 @@ def review_prompt_word(term: str, index: int | None = None, total: int | None = 
         f"{index_line}"
         "Step 1/2 — Write\n"
         f"🧱 Use the word: <b>{h(term)}</b>\n"
-        "Write a short, real sentence (max 6 words)."
+        "Write a short, real sentence (up to 12 words)."
     )
 
 def review_grade_prompt() -> str:
     return (
         "Step 2/2 — Rate yourself\n"
-        "How did it feel?"
+        "0 = hard, 5 = perfect"
     )
+
+
+def _next_level(level: str) -> str:
+    order = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    lvl = (level or "A1").upper()
+    if lvl not in order:
+        return "A2"
+    idx = order.index(lvl)
+    return order[min(idx + 1, len(order) - 1)]
 
 
 def review_actions_keyboard(item_id: int, is_phrase: bool) -> InlineKeyboardMarkup:
@@ -173,6 +190,7 @@ async def review_pack(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_i
     _, term, chunk, translation_en, note, pack_id, focus = item
     total, introduced = get_pack_item_counts(user.id, pack_id)
     upsert_user_pack_progress(user.id, pack_id, introduced, total)
+    due_count = get_due_count_in_pack(user.id, pack_id)
     is_phrase = (focus == "phrase") or (chunk and len(chunk.split()) > 1)
     review_state = get_review_state(user.id, item_id)
     status = review_state[0] if review_state else "new"
@@ -184,8 +202,7 @@ async def review_pack(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_i
             mode = "C"
         else:
             mode = "A"
-    set_session(user.id, mode="review", item_id=item_id, stage="await_sentence", meta={"due_total": due_count, "due_index": 1, "mode": mode})
-    due_count = get_due_count(user.id)
+    set_session(user.id, mode="review", item_id=item_id, stage="await_sentence", meta={"due_total": due_count, "due_index": 1, "mode": mode, "pack_id": pack_id})
 
     if is_phrase:
         if mode == "B":
@@ -195,7 +212,7 @@ async def review_pack(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_i
             while len(opts) < 3:
                 opts.append("Mi scusi, può aiutarmi?")
             opts = opts[:3]
-            set_session(user.id, mode="review", item_id=item_id, stage="await_choice", meta={"options": opts, "correct": 0, "due_total": due_count, "due_index": 1, "mode": mode})
+            set_session(user.id, mode="review", item_id=item_id, stage="await_choice", meta={"options": opts, "correct": 0, "due_total": due_count, "due_index": 1, "mode": mode, "pack_id": pack_id})
             kb = InlineKeyboardMarkup([
                 [InlineKeyboardButton(f"A) {opts[0]}", callback_data=f"REVIEW|CHOICE|{item_id}|0")],
                 [InlineKeyboardButton(f"B) {opts[1]}", callback_data=f"REVIEW|CHOICE|{item_id}|1")],
@@ -234,13 +251,65 @@ async def on_review_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     mode, item_id, stage, meta = session
     if mode == "review" and stage == "await_sentence" and item_id is not None:
-        # now ask the user to grade themselves (fast UX)
-        set_session(user.id, mode="review", item_id=item_id, stage="await_grade")
-
         item = get_item_by_id(item_id)
         focus = item[6] if item and len(item) > 6 else None
-        is_phrase = (focus == "phrase")
+        term = item[1] if item else ""
+        chunk = item[2] if item else ""
+        translation_en = item[3] if item else ""
+        is_phrase = (focus == "phrase") or (chunk and len(chunk.split()) > 1)
         msg = get_chat_sender(update)
+
+        if not is_phrase:
+            level_from = get_user_level(user.id)
+            level_to = _next_level(level_from)
+            upgrade = await generate_sentence_upgrade(
+                term=term or chunk,
+                user_sentence=text,
+                level_from=level_from,
+                level_to=level_to,
+            )
+            out = [
+                f"✅ <b>{h(term or chunk)}</b>",
+                "",
+                f"Your sentence:\n“{h(text)}”",
+            ]
+            if upgrade.get("ok"):
+                if upgrade.get("better"):
+                    out.append(f"\nBetter ({level_from}):\n{h(upgrade['better'])}")
+                if upgrade.get("level_up"):
+                    out.append(f"\nLevel‑up ({level_to}):\n{h(upgrade['level_up'])}")
+                if upgrade.get("native_sentence"):
+                    out.append(f"\nNative:\n{h(upgrade['native_sentence'])}")
+                if upgrade.get("tip"):
+                    out.append(f"\nTip:\n{h(upgrade['tip'])}")
+            else:
+                fb = await generate_learn_feedback(
+                    target_language="it",
+                    term=term or chunk,
+                    chunk=chunk or term,
+                    translation_en=translation_en,
+                    user_sentence=text,
+                    lexicon=get_or_fetch_lexicon_it(term or chunk),
+                )
+                if fb.get("correction"):
+                    out.append(f"\nFix:\n{h(fb['correction'])}")
+                elif fb.get("rewrite"):
+                    out.append(f"\nBetter:\n{h(fb['rewrite'])}")
+                examples = fb.get("examples") or []
+                if examples and examples[0]:
+                    out.append(f"\nNative:\n{h(examples[0])}")
+                if fb.get("notes"):
+                    out.append(f"\nTip:\n{h(fb['notes'])}")
+            await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML)
+        else:
+            expected = chunk or term
+            if expected:
+                await msg.reply_text(f"✅ Expected:\n{h(expected)}", parse_mode=ParseMode.HTML)
+            else:
+                await msg.reply_text("✅ Got it.")
+
+        # now ask the user to rate themselves
+        set_session(user.id, mode="review", item_id=item_id, stage="await_grade", meta=meta)
         await msg.reply_text(
             review_grade_prompt(),
             reply_markup=grade_keyboard(item_id, is_phrase)
@@ -251,7 +320,7 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     user = query.from_user
-    _, grade, item_id_str = query.data.split("|", 2)
+    _, grade_raw, item_id_str = query.data.split("|", 2)
     item_id = int(item_id_str)
 
     session = get_session(user.id)
@@ -265,6 +334,16 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
 
+    grade = grade_raw
+    if grade_raw.isdigit():
+        val = int(grade_raw)
+        if val <= 1:
+            grade = "again"
+        elif val <= 3:
+            grade = "hard"
+        else:
+            grade = "good"
+
     new_status, new_interval, new_due = apply_grade(user.id, item_id, grade)
     record_practice(user.id, "review", grade != "again")
 
@@ -277,7 +356,13 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     # Auto-continue: immediately send the next due item (keeps the undo message intact)
-    next_item_id = get_due_item(user.id)
+    pack_id = (meta or {}).get("pack_id")
+    if pack_id:
+        next_item_id = get_due_item_in_pack(user.id, pack_id)
+        due_total = get_due_count_in_pack(user.id, pack_id)
+    else:
+        next_item_id = get_due_item(user.id)
+        due_total = get_due_count(user.id)
 
     if not next_item_id:
         await query.message.reply_text("🎉 All done for today. Type /journey to add more.")
@@ -291,7 +376,6 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, term, chunk, translation_en, note, pack_id, focus = next_item
 
     meta = meta or {}
-    due_total = int(meta.get("due_total") or get_due_count(user.id))
     due_index = int(meta.get("due_index") or 1) + 1
     is_phrase = (focus == "phrase") or (chunk and len(chunk.split()) > 1)
     review_state = get_review_state(user.id, next_item_id)
@@ -304,9 +388,10 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             mode = "C"
         else:
             mode = "A"
-    set_session(user.id, mode="review", item_id=next_item_id, stage="await_sentence", meta={"due_total": due_total, "due_index": due_index, "mode": mode})
+    set_session(user.id, mode="review", item_id=next_item_id, stage="await_sentence", meta={"due_total": due_total, "due_index": due_index, "mode": mode, "pack_id": meta.get("pack_id")})
 
-    due_count = get_due_count(user.id)
+    due_count = due_total
+    title = "Pack Review" if meta.get("pack_id") else "Review"
     if is_phrase:
         if mode == "B":
             opts = [chunk] if chunk else []
@@ -315,13 +400,20 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             while len(opts) < 3:
                 opts.append("Mi scusi, può aiutarmi?")
             opts = opts[:3]
-            set_session(user.id, mode="review", item_id=next_item_id, stage="await_choice", meta={"options": opts, "correct": 0, "due_total": due_total, "due_index": due_index, "mode": mode})
+            set_session(user.id, mode="review", item_id=next_item_id, stage="await_choice", meta={
+                "options": opts,
+                "correct": 0,
+                "due_total": due_total,
+                "due_index": due_index,
+                "mode": mode,
+                "pack_id": meta.get("pack_id"),
+            })
             kb = InlineKeyboardMarkup([
                 [InlineKeyboardButton(f"A) {opts[0]}", callback_data=f"REVIEW|CHOICE|{next_item_id}|0")],
                 [InlineKeyboardButton(f"B) {opts[1]}", callback_data=f"REVIEW|CHOICE|{next_item_id}|1")],
                 [InlineKeyboardButton(f"C) {opts[2]}", callback_data=f"REVIEW|CHOICE|{next_item_id}|2")],
             ])
-            next_text = review_header("Review", due_count) + "\n" + "🧠 Which phrase fits?\n" + f"👉 {h(translation_en or 'Say this in Italian.')}"
+            next_text = review_header(title, due_count) + "\n" + "🧠 Which phrase fits?\n" + f"👉 {h(translation_en or 'Say this in Italian.')}"
             await query.message.reply_text(next_text, parse_mode=ParseMode.HTML, reply_markup=kb)
             return
         elif mode == "C":
@@ -337,9 +429,9 @@ async def on_grade_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{h(translation_en or 'You need help in a real situation.')}\n\n"
                 "What do you say?"
             )
-        next_text = review_header("Review", due_count) + "\n" + prompt
+        next_text = review_header(title, due_count) + "\n" + prompt
     else:
-        next_text = review_header("Review", due_count) + "\n" + review_prompt_word(term or chunk, due_index, due_total)
+        next_text = review_header(title, due_count) + "\n" + review_prompt_word(term or chunk, due_index, due_total)
 
     await query.message.reply_text(next_text, parse_mode=ParseMode.HTML, reply_markup=review_actions_keyboard(next_item_id, is_phrase))
 
@@ -384,7 +476,15 @@ async def resume_review(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     _, term, chunk, translation_en, note, pack_id, focus = item
     is_phrase = (focus == "phrase") or (chunk and len(chunk.split()) > 1)
-    due_total = int((meta or {}).get("due_total") or get_due_count(user.id))
+    pack_id = (meta or {}).get("pack_id")
+    if pack_id:
+        due_total = int((meta or {}).get("due_total") or get_due_count_in_pack(user.id, pack_id))
+        due_count = get_due_count_in_pack(user.id, pack_id)
+        title = "Pack Review"
+    else:
+        due_total = int((meta or {}).get("due_total") or get_due_count(user.id))
+        due_count = get_due_count(user.id)
+        title = "Review"
     due_index = int((meta or {}).get("due_index") or 1)
     if stage == "await_grade":
         await msg.reply_text(review_grade_prompt(), reply_markup=grade_keyboard(item_id, is_phrase))
@@ -409,9 +509,9 @@ async def resume_review(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{h(translation_en or 'You need help in a real situation.')}\n\n"
                 "What do you say?"
             )
-        text = review_header("Review", get_due_count(user.id)) + "\n" + prompt
+        text = review_header(title, due_count) + "\n" + prompt
     else:
-        text = review_header("Review", get_due_count(user.id)) + "\n" + review_prompt_word(term or chunk, due_index, due_total)
+        text = review_header(title, due_count) + "\n" + review_prompt_word(term or chunk, due_index, due_total)
     await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=review_actions_keyboard(item_id, is_phrase))
 
 
@@ -445,10 +545,18 @@ async def on_review_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             audio_path = await tts_it(chunk or term or "")
             await query.message.reply_voice(voice=InputFile(audio_path))
-        except Exception:
-            await query.message.reply_text("⚠️ Pronunciation unavailable right now.")
+        except Exception as e:
+            await query.message.reply_text(
+                f"Pronunciation unavailable ({type(e).__name__}).",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔁 Retry", callback_data=f"REVIEW|PRON|{item_id}")],
+                    [InlineKeyboardButton("🩺 TTS Check", callback_data="TTS|CHECK")],
+                ]),
+            )
         return
     if action == "OPTIONS" and is_phrase:
+        session = get_session(user.id)
+        meta = session[3] if session else {}
         opts = [chunk] if chunk else []
         opts += get_random_terms_from_pack(pack_id, item_id, limit=2)
         opts = [o for o in opts if o]
@@ -456,7 +564,14 @@ async def on_review_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
             opts.append("Mi scusi, può aiutarmi?")
         opts = opts[:3]
         correct = 0
-        set_session(user.id, mode="review", item_id=item_id, stage="await_choice", meta={"options": opts, "correct": correct})
+        set_session(user.id, mode="review", item_id=item_id, stage="await_choice", meta={
+            "options": opts,
+            "correct": correct,
+            "due_total": (meta or {}).get("due_total"),
+            "due_index": (meta or {}).get("due_index"),
+            "mode": (meta or {}).get("mode"),
+            "pack_id": (meta or {}).get("pack_id"),
+        })
         kb = InlineKeyboardMarkup([
             [InlineKeyboardButton(f"A) {opts[0]}", callback_data=f"REVIEW|CHOICE|{item_id}|0")],
             [InlineKeyboardButton(f"B) {opts[1]}", callback_data=f"REVIEW|CHOICE|{item_id}|1")],
@@ -497,7 +612,7 @@ async def on_review_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         right = options[correct] if correct < len(options) else ""
         await query.message.reply_text(f"❌ Correct: {h(right)}", parse_mode=ParseMode.HTML)
     # move to grade
-    set_session(query.from_user.id, mode="review", item_id=item_id, stage="await_grade")
+    set_session(query.from_user.id, mode="review", item_id=item_id, stage="await_grade", meta=meta)
     item = get_item_by_id(item_id)
     focus = item[6] if item and len(item) > 6 else None
     is_phrase = (focus == "phrase")

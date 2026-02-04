@@ -15,6 +15,8 @@ from bot.handlers.home import on_home_button
 from bot.handlers.reloadpacks import reloadpacks_command
 from bot.handlers.help import help_command, sos_command
 from bot.handlers.persona import persona_command, on_persona_text
+from bot.handlers.addword import add_command, mywords_command, on_addword_text, on_addword_button, on_addword_category, on_mywords_button
+from bot.handlers.tts import ttscheck_command, on_tts_button
 from bot.handlers.hints import hint_command, why_command
 from dotenv import load_dotenv
 from bot.handlers.setlevel import setlevel, on_setlevel_button
@@ -51,10 +53,14 @@ async def on_text_router(update, context):
         await on_onboarding_text(update, context)
     elif mode == "persona":
         await on_persona_text(update, context)
+    elif mode == "addword":
+        await on_addword_text(update, context)
 
 async def post_init(application):
     commands = [
         BotCommand("start", "Setup your profile (languages + level)"),
+        BotCommand("add", "Add your own word(s)"),
+        BotCommand("ttscheck", "Check TTS health"),
         BotCommand("journey", "Guided level‑up path"),
         BotCommand("packs", "Browse packs"),
         BotCommand("progress", "Stats + streak"),
@@ -62,6 +68,7 @@ async def post_init(application):
         BotCommand("settings", "Languages + level"),
         BotCommand("setlevel", "Set your level (A1/A2/B1/...)"),
         BotCommand("persona", "Edit your Alter‑Ego"),
+        BotCommand("mywords", "Browse your saved words"),
         BotCommand("hint", "Show a quick hint"),
         BotCommand("why", "Show extra context"),
         BotCommand("help", "Show command menu"),
@@ -93,6 +100,9 @@ def main():
     app.add_handler(CommandHandler("review", review))
     app.add_handler(CommandHandler("setlevel", setlevel))
     app.add_handler(CommandHandler("persona", persona_command))
+    app.add_handler(CommandHandler("add", add_command))
+    app.add_handler(CommandHandler("mywords", mywords_command))
+    app.add_handler(CommandHandler("ttscheck", ttscheck_command))
     app.add_handler(CommandHandler("hint", hint_command))
     app.add_handler(CommandHandler("why", why_command))
     app.add_handler(CommandHandler("help", help_command))
@@ -108,6 +118,10 @@ def main():
     app.add_handler(CallbackQueryHandler(on_review_choice, pattern=r"^REVIEW\|CHOICE\|"))
     app.add_handler(CallbackQueryHandler(on_review_action, pattern=r"^REVIEW\|"))
     app.add_handler(CallbackQueryHandler(on_review_flow, pattern=r"^REVIEWFLOW\|"))
+    app.add_handler(CallbackQueryHandler(on_addword_category, pattern=r"^ADDWORD\|CAT\|"))
+    app.add_handler(CallbackQueryHandler(on_addword_button, pattern=r"^ADDWORD\|"))
+    app.add_handler(CallbackQueryHandler(on_mywords_button, pattern=r"^MYWORDS\|"))
+    app.add_handler(CallbackQueryHandler(on_tts_button, pattern=r"^TTS\|"))
     # Settings callbacks
     app.add_handler(CallbackQueryHandler(on_settings_button,pattern=r"^(SET_(TARGET|UI|HELPER)\||SETTINGS\||SETLEVEL\||PACKCAT\||PACKMOD\||PACKLOCK\||PACKDARK\||PACKOPEN\||PACKSTART\||PACKSCENE\||PKTOG\|)"))
     # Learn callbacks
