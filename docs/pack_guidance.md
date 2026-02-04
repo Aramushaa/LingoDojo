@@ -40,7 +40,11 @@ Every Dark Mode card MUST include:
 - `cultural_note` (tone + context)
 
 ## Product UI guidance
-- Show packs by category (Foundation / Survival), then module, then level.
+- Show packs by category (Tools / Mindset / Voice), then module, then level.
 - Inside modules, list only pack title + level.
-- Dark Mode requires a warning gate.
+- Voice (dark / risky) requires a warning gate.
 
+## Pack families (current)
+- 📦 Tools: core words/phrases for action (survival + missions).
+- 🧠 Mindset: culture-as-usage (register, norms, why natives say it that way).
+- 🗣 Voice: slang, tone, native sauce, traps (risky content).

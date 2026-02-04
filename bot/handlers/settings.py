@@ -16,6 +16,7 @@ from bot.db import (
     get_user_level,
     set_user_level,
     get_pack_info,
+    get_pack_item_counts,
 )
 from bot.handlers.learn import start_pack_learn
 from bot.handlers.review import review_pack
@@ -73,6 +74,7 @@ def build_settings_keyboard(target: str, ui: str, helper: str | None):
 
     # Packs button
     rows.append([InlineKeyboardButton("📦 Packs", callback_data="SETTINGS|PACKS")])
+    rows.append([InlineKeyboardButton("🎭 Alter‑Ego", callback_data="SETTINGS|PERSONA")])
     rows.append([InlineKeyboardButton("🎯 Set Level", callback_data="SETTINGS|LEVEL")])
 
 
@@ -231,6 +233,9 @@ def build_pack_detail_text(pack_info, active: bool, user_level: str, user_id: in
     if not pack_info:
         return "Pack not found."
     pack_id, level, title, description, pack_type, chunk_size, missions_enabled, _ = pack_info
+    total, introduced = (0, 0)
+    if user_id is not None:
+        total, introduced = get_pack_item_counts(user_id, pack_id)
     # scenario progress (if any)
     pack_key = "generic"
     pid = (pack_id or "").lower()
@@ -251,24 +256,28 @@ def build_pack_detail_text(pack_info, active: bool, user_level: str, user_id: in
     if scenarios and user_id is not None:
         ids = [s.get("scenario_id") for s in scenarios if s.get("scenario_id")]
         done = count_completed_scenarios(user_id, ids)
-        scenario_line = f"\nScenarios: {done}/{len(ids)}"
+        scenario_line = f"\nScenes: {done}/{len(ids)}"
     elif scenarios:
-        scenario_line = f"\nScenarios: {len(scenarios)}"
+        scenario_line = f"\nScenes: {len(scenarios)}"
     return (
         f"📦 <b>{h(title)}</b>\n\n"
         f"Level: <b>{h(level or 'A1')}</b>\n"
+        f"Cards: <b>{introduced}/{total}</b>\n"
         f"Type: <b>{h(pack_type or 'word')}</b>\n"
-        f"Chunk size: <b>{h(str(chunk_size or '-'))}</b>\n"
         f"{scenario_line}\n"
-        f"{h(description or '')}"
+        f"What you'll be able to do: <b>{h(description or '')}</b>"
     )
 
 
-def build_pack_detail_keyboard(pack_id: str, module_key: str, active: bool):
+def build_pack_detail_keyboard(pack_id: str, module_key: str, active: bool, resume_label: str = "▶️ Start"):
+    back_cb = f"PACKMOD|{module_key}"
+    if module_key == "list":
+        back_cb = "SETTINGS|PACKS"
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("▶️ Start Pack", callback_data=f"PACKSTART|journey|{pack_id}|{module_key}")],
+        [InlineKeyboardButton(resume_label, callback_data=f"PACKSTART|journey|{pack_id}|{module_key}")],
+        [InlineKeyboardButton("🎭 Play scene", callback_data=f"PACKSCENE|{pack_id}")],
         [InlineKeyboardButton("🔁 Review this pack", callback_data=f"PACKSTART|review|{pack_id}|{module_key}")],
-        [InlineKeyboardButton("⬅️ Back", callback_data=f"PACKMOD|{module_key}")],
+        [InlineKeyboardButton("⬅️ Back", callback_data=back_cb)],
     ])
 
 
@@ -284,9 +293,9 @@ def build_module_keyboard(user_id: int, target: str, user_level: str, module_key
         elif module_key == "foundation_phrases":
             prefix = "foundation_phrases"
         elif module_key == "foundation_numbers":
-            prefix = "foundation_numbers"
+            prefix = "foundation_numbers_time_price"
         elif module_key == "foundation_repair":
-            prefix = "foundation_repair"
+            prefix = "foundation_repair_yesno"
         elif module_key == "foundation_response":
             prefix = "foundation_response_glue"
         else:
@@ -403,12 +412,15 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     # NAV
     if data == "SETTINGS|PACKS":
-        level = get_user_level(user.id)
         await query.edit_message_text(
             build_packs_text(target),
-            reply_markup=build_packs_keyboard(level),
+            reply_markup=build_packs_keyboard(get_user_level(user.id)),
             parse_mode="HTML",
         )
+        return
+    if data == "SETTINGS|PERSONA":
+        from bot.handlers.persona import persona_command
+        await persona_command(update, context)
         return
 
     if data == "SETTINGS|BACK":
@@ -467,10 +479,12 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         _, pack_id, module_key = data.split("|", 2)
         pack_info = get_pack_info(pack_id)
         level = get_user_level(user.id)
+        total, introduced = get_pack_item_counts(user.id, pack_id)
+        resume_label = "▶️ Resume" if introduced > 0 and introduced < total else "▶️ Start"
         await query.edit_message_text(
             build_pack_detail_text(pack_info, False, level, user.id),
             parse_mode="HTML",
-            reply_markup=build_pack_detail_keyboard(pack_id, module_key, False),
+            reply_markup=build_pack_detail_keyboard(pack_id, module_key, False, resume_label),
         )
         return
 
@@ -480,6 +494,12 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await start_pack_learn(update, context, pack_id)
         elif action == "review":
             await review_pack(update, context, pack_id)
+        return
+
+    if data.startswith("PACKSCENE|"):
+        _, pack_id = data.split("|", 1)
+        from bot.handlers.learn import start_pack_scene
+        await start_pack_scene(update, context, pack_id)
         return
 
     if data.startswith("PACKDARK|"):
@@ -534,7 +554,7 @@ async def on_settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         helper_code = None if code == "none" else code
         set_user_helper_language(user.id, helper_code)
     elif action == "PKTOG":
-        module_key = parts[2] if len(parts) > 2 else "survival"
+        module_key = parts[2] if len(parts) > 2 else "tools"
         await query.edit_message_text(
             "✅ Pack activation has been removed.\n\nStart a pack directly instead.",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data=f"PACKMOD|{module_key}")]]),

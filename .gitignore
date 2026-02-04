@@ -15,3 +15,6 @@ data/app.db
 .DS_Store
 .vscode/
 .idea/
+
+
+links.csv

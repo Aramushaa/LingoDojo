@@ -1,0 +1,76 @@
+{
+  "pack_id": "it_a2_mindset_service_norms",
+  "target_language": "it",
+  "level": "A2",
+  "type": "mindset",
+  "pack_type": "phrase",
+  "missions_enabled": 0,
+  "title": "Mindset: Service Norms (A2)",
+  "description": "Short notes that prevent friction in shops, bars, and services.",
+  "cards": [
+    {
+      "source_uid": "mindset_a2_acqua_naturale_gassata",
+      "card_id": "mindset_a2_acqua_naturale_gassata",
+      "focus": "phrase",
+      "phrase": "Acqua naturale o frizzante?",
+      "meaning_en": "Still or sparkling water?",
+      "contexts_it": ["Acqua naturale o frizzante?"],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": ["mindset", "service"]
+      },
+      "cultural_note": "In Italy, this question is standard at restaurants.",
+      "trap": "Don't answer just 'water' or you may get asked again.",
+      "native_sauce": "Naturale o frizzante?"
+    },
+    {
+      "source_uid": "mindset_a2_un_attimo",
+      "card_id": "mindset_a2_un_attimo",
+      "focus": "phrase",
+      "phrase": "Un attimo, grazie.",
+      "meaning_en": "One moment, thanks.",
+      "contexts_it": ["Un attimo, grazie."],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["mindset", "service", "politeness"]
+      },
+      "cultural_note": "This keeps you in control without sounding rude.",
+      "trap": "Avoid 'aspetta' with staff; it sounds too direct.",
+      "native_sauce": "Mi dia un attimo."
+    },
+    {
+      "source_uid": "mindset_a2_controllo_scontrino",
+      "card_id": "mindset_a2_controllo_scontrino",
+      "focus": "phrase",
+      "phrase": "Scusi, posso controllare lo scontrino?",
+      "meaning_en": "Excuse me, can I check the receipt?",
+      "contexts_it": ["Scusi, posso controllare lo scontrino?"],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["mindset", "service"]
+      },
+      "cultural_note": "Soften checks with 'posso' and 'scusi'.",
+      "trap": "Direct accusations sound aggressive.",
+      "native_sauce": "Posso dare un'occhiata allo scontrino?"
+    },
+    {
+      "source_uid": "mindset_a2_va_bene_cosi",
+      "card_id": "mindset_a2_va_bene_cosi",
+      "focus": "phrase",
+      "phrase": "Va bene così.",
+      "meaning_en": "That’s fine like this.",
+      "contexts_it": ["Va bene così, grazie."],
+      "meta": {
+        "register": "neutral",
+        "risk": "safe",
+        "tags": ["mindset", "service", "tone"]
+      },
+      "cultural_note": "A friendly closer that reduces back‑and‑forth.",
+      "trap": "Add 'grazie' to keep it warm.",
+      "native_sauce": "Così va benissimo."
+    }
+  ]
+}

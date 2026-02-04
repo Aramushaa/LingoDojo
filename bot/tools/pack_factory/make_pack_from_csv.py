@@ -150,7 +150,7 @@ if __name__ == "__main__":
     # Example usage (edit these values)
     make_pack_from_csv(
         csv_path="data/pack_sources/airport_a1_core_v2.csv",
-        out_path="data/packs/it_a1_mission_airport_v2.json",
+        out_path="data/packs/tools/it_a1_mission_airport_v2.json",
         pack_id="it_a1_mission_airport_v2",
         target_language="it",
         level="A1",
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/airport_a2_glue.csv",
-        out_path="data/packs/it_a2_mission_airport_glue_v1.json",
+        out_path="data/packs/tools/it_a2_mission_airport_glue_v1.json",
         pack_id="it_a2_mission_airport_glue_v1",
         target_language="it",
         level="A2",
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/airport_b1_pressure.csv",
-        out_path="data/packs/it_b1_mission_airport_pressure_v1.json",
+        out_path="data/packs/tools/it_b1_mission_airport_pressure_v1.json",
         pack_id="it_b1_mission_airport_pressure_v1",
         target_language="it",
         level="B1",
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/airport_b1_dark_mode.csv",
-        out_path="data/packs/it_b1_mission_airport_dark_v1.json",
+        out_path="data/packs/voice/it_b1_mission_airport_dark_v1.json",
         pack_id="it_b1_mission_airport_dark_v1",
         target_language="it",
         level="B1+",
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/hotel_a1_core.csv",
-        out_path="data/packs/it_a1_mission_hotel_v1.json",
+        out_path="data/packs/tools/it_a1_mission_hotel_v1.json",
         pack_id="it_a1_mission_hotel_v1",
         target_language="it",
         level="A1",
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/hotel_a2_glue.csv",
-        out_path="data/packs/it_a2_mission_hotel_glue_v1.json",
+        out_path="data/packs/tools/it_a2_mission_hotel_glue_v1.json",
         pack_id="it_a2_mission_hotel_glue_v1",
         target_language="it",
         level="A2",
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/hotel_b1_pressure.csv",
-        out_path="data/packs/it_b1_mission_hotel_pressure_v1.json",
+        out_path="data/packs/tools/it_b1_mission_hotel_pressure_v1.json",
         pack_id="it_b1_mission_hotel_pressure_v1",
         target_language="it",
         level="B1",
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     )
     make_pack_from_csv(
         csv_path="data/pack_sources/hotel_b1_dark_mode.csv",
-        out_path="data/packs/it_b1_mission_hotel_dark_v1.json",
+        out_path="data/packs/voice/it_b1_mission_hotel_dark_v1.json",
         pack_id="it_b1_mission_hotel_dark_v1",
         target_language="it",
         level="B1+",

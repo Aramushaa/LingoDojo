@@ -15,7 +15,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📦 <b>/packs</b> — Browse packs\n"
         "📊 <b>/progress</b> — Stats + streak\n"
         "⚙️ <b>/settings</b> — Languages + level\n"
-        "🧰 <b>/help</b> — Show this menu\n\n"
+        "🧰 <b>/help</b> — Show this menu\n"
+        "🎭 <b>/persona</b> — Edit your Alter‑Ego\n"
+        "🆘 <b>/sos</b> — Emergency help\n\n"
+        "How it works:\n"
+        "1) Learn → 2) Mission → 3) Review\n\n"
         "Tip: Journey is the recommended path. Packs are for custom training."
     )
 
@@ -27,3 +31,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
 
     await msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=kb)
+
+
+async def sos_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await help_command(update, context)

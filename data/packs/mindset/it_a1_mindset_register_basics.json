@@ -1,0 +1,76 @@
+{
+  "pack_id": "it_a1_mindset_register_basics",
+  "target_language": "it",
+  "level": "A1",
+  "type": "mindset",
+  "pack_type": "phrase",
+  "missions_enabled": 0,
+  "title": "Mindset: Register Basics (A1)",
+  "description": "Short, practical cultural notes that change how you speak (polite vs neutral).",
+  "cards": [
+    {
+      "source_uid": "mindset_a1_polite_mi_puo",
+      "card_id": "mindset_a1_polite_mi_puo",
+      "focus": "phrase",
+      "phrase": "Mi può aiutare?",
+      "meaning_en": "Can you help me? (polite)",
+      "contexts_it": ["Mi può aiutare, per favore?"],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["mindset", "register"]
+      },
+      "cultural_note": "Using Lei (mi può) is safer with strangers.",
+      "trap": "Don't use 'tu' with officials or older strangers.",
+      "native_sauce": "Mi può dare una mano?"
+    },
+    {
+      "source_uid": "mindset_a1_neutral_puoi",
+      "card_id": "mindset_a1_neutral_puoi",
+      "focus": "phrase",
+      "phrase": "Puoi aiutarmi?",
+      "meaning_en": "Can you help me? (casual)",
+      "contexts_it": ["Puoi aiutarmi un attimo?"],
+      "meta": {
+        "register": "neutral",
+        "risk": "caution",
+        "tags": ["mindset", "register"]
+      },
+      "cultural_note": "Tu-form is for friends, peers, or younger people.",
+      "trap": "Sounds rude if used with staff you don't know.",
+      "native_sauce": "Mi dai una mano?"
+    },
+    {
+      "source_uid": "mindset_a1_polite_per_favore",
+      "card_id": "mindset_a1_polite_per_favore",
+      "focus": "phrase",
+      "phrase": "Per favore.",
+      "meaning_en": "Please.",
+      "contexts_it": ["Un caffè, per favore."],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["mindset", "politeness"]
+      },
+      "cultural_note": "Small politeness markers reduce friction fast.",
+      "trap": "Don't overuse it in every sentence.",
+      "native_sauce": "Per piacere."
+    },
+    {
+      "source_uid": "mindset_a1_softener_se_possibile",
+      "card_id": "mindset_a1_softener_se_possibile",
+      "focus": "phrase",
+      "phrase": "Se possibile...",
+      "meaning_en": "If possible... (softener)",
+      "contexts_it": ["Se possibile, un tavolo vicino alla finestra."],
+      "meta": {
+        "register": "polite",
+        "risk": "safe",
+        "tags": ["mindset", "softener"]
+      },
+      "cultural_note": "Softeners make requests feel cooperative.",
+      "trap": "Don't sound uncertain; keep it short.",
+      "native_sauce": "Se si può..."
+    }
+  ]
+}

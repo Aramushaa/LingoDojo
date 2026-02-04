@@ -28,9 +28,14 @@ from bot.db import (
     mark_item_mature,
     get_learned_terms_for_pack,
     mark_scenario_completed,
+    record_practice,
+    upsert_user_pack_progress,
+    set_user_journey_progress,
+    get_user_persona,
 
 )
-from bot.scenarios import pick_scenario_for_pack
+from bot.scenarios import pick_scenario_for_pack, list_scenarios_by_pack_key
+from bot.storyline import get_current_story_beat, advance_story
 
 from bot.services.dictionary_it import validate_it_term
 from bot.services.ai_feedback import generate_learn_feedback,generate_reverse_context_quiz,generate_roleplay_feedback 
@@ -43,6 +48,18 @@ from bot.services.tts_edge import tts_it
 SCENE_EVERY_N_NEW_ITEMS = 3
 
 import time
+
+def _continue_quota_reached(meta: dict | None) -> bool:
+    if not meta:
+        return False
+    quota = int(meta.get("continue_quota") or 0)
+    used = int(meta.get("continue_used") or 0)
+    return quota > 0 and used >= quota
+
+def _increment_continue_used(meta: dict | None) -> dict:
+    meta = meta or {}
+    meta["continue_used"] = int(meta.get("continue_used") or 0) + 1
+    return meta
 
 def _max_scenarios_for_level(level: str) -> int:
     if (level or "").upper() == "A1":
@@ -110,17 +127,24 @@ async def _start_phrase_mission(user, msg, meta: dict):
     if not chunk_items:
         return
 
+    persona = get_user_persona(user.id) or (None, None, None)
+    p_name, p_city, p_role = persona
+    if p_name or p_city or p_role:
+        meta = meta or {}
+        meta["persona"] = {"name": p_name, "city": p_city, "role": p_role}
+
     pack_id = (meta or {}).get("pack_id") or ""
     chunk_terms = [ci.get("phrase") or "" for ci in chunk_items]
     learned_terms = list(get_learned_terms_for_pack(user.id, pack_id))
     scenario = pick_scenario_for_pack(user.id, pack_id, chunk_terms + learned_terms)
-
+    pack_info = get_pack_info(pack_id) if pack_id else None
+    pack_level = pack_info[1] if pack_info and len(pack_info) > 1 else None
     if scenario:
         turns = scenario.get("turns") or []
         meta["scene"] = {
             "pack_id": pack_id,
             "scene_id": scenario.get("scenario_id"),
-            "intro_lines": scenario.get("intro_lines") or [],
+            "intro_lines": (scenario.get("intro_lines") or []),
             "goal": scenario.get("goal"),
             "roleplay": {
                 "setting": scenario.get("location") or "Mission",
@@ -231,6 +255,9 @@ async def _send_next_learn_card(user, msg, target: str, pack_id: str | None, met
     ensure_review_row(user.id, item_id)
 
     lexicon = get_lexicon_cache_it(term)
+    if pack_id:
+        total, introduced = get_pack_item_counts(user.id, pack_id)
+        upsert_user_pack_progress(user.id, pack_id, introduced, total)
     if pack_id:
         distractors = get_random_meanings_from_pack(pack_id, item_id, limit=2)
     else:
@@ -375,6 +402,11 @@ async def send_scene_prompt(msg, meta: dict):
     turns = scene.get("turns") or []
     idx = int(scene.get("idx", 0))
 
+    persona = (meta or {}).get("persona") or {}
+    persona_name = persona.get("name") if isinstance(persona, dict) else None
+    persona_city = persona.get("city") if isinstance(persona, dict) else None
+    persona_role = persona.get("role") if isinstance(persona, dict) else None
+
     setting = roleplay.get("setting", "Scene")
     bot_role = roleplay.get("bot_role", "Bot")
 
@@ -384,17 +416,34 @@ async def send_scene_prompt(msg, meta: dict):
     if intro_lines and not scene.get("intro_shown"):
         out.extend(intro_lines)
         scene["intro_shown"] = True
-    out.append(f"🎭 <b>{h(setting)}</b>\n<b>Role:</b> {h(bot_role)}")
+
+    out.append(f"🎭 <b>{h(setting)}</b>")
+    if persona_name or persona_city:
+        who = f"{persona_name or 'You'}"
+        where = f" ({persona_city})" if persona_city else ""
+        out.append(f"👤 <b>You</b>: {h(who + where)}")
+    out.append(f"🧑‍💼 <b>NPC</b>: {h(bot_role)}")
 
     # Append any bot messages until first user_task
+    addressed = bool(scene.get("persona_addressed"))
+    user_task_found = False
+    expected_phrase = None
     while idx < len(turns):
         t = turns[idx]
         if "bot" in t:
-            out.append(f"🗣 <b>{h(bot_role)}</b>: {h(t['bot'])}")
+            bot_line = t["bot"]
+            if persona_name and not addressed:
+                bot_line = f"{persona_name}! {bot_line}"
+                addressed = True
+                scene["persona_addressed"] = True
+            out.append(f"🗣 <b>{h(bot_role)}</b>: {h(bot_line)}")
             idx += 1
             continue
         if "user_task" in t:
-            out.append(f"\n🗣 <b>Your turn</b>: {h(t['user_task'])}")
+            turn_label = f"{persona_name}, your turn" if persona_name else "Your turn"
+            out.append(f"\n🗣 <b>{h(turn_label)}</b>: {h(t['user_task'])}")
+            user_task_found = True
+            expected_phrase = t.get("expected_phrase")
             break
         idx += 1
 
@@ -402,7 +451,14 @@ async def send_scene_prompt(msg, meta: dict):
     scene["idx"] = idx
     meta["scene"] = scene
 
-    await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML)
+    kb = None
+    if user_task_found:
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💡 Hint", callback_data="SCENEACT|HINT"),
+             InlineKeyboardButton("🧩 2 options", callback_data="SCENEACT|OPTIONS")],
+            [InlineKeyboardButton("⏭ Skip", callback_data="SCENEACT|SKIP")],
+        ])
+    await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML, reply_markup=kb)
 
 
 
@@ -649,6 +705,17 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     count = get_learn_since_scene(user.id) + 1
     set_learn_since_scene(user.id, count)
 
+    meta = _increment_continue_used(meta or {})
+    if _continue_quota_reached(meta):
+        clear_session(user.id)
+        await msg.reply_text(
+            "✅ Continue complete. Back to Journey.",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("▶️ Continue", callback_data="home:journey")]
+            ])
+        )
+        return
+
     # If it's time, offer scene (do NOT auto-start)
     if count >= SCENE_EVERY_N_NEW_ITEMS:
         set_learn_since_scene(user.id, 0)
@@ -701,6 +768,135 @@ async def on_scene_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Send the actual first prompt
     msg = get_chat_sender(update)
     await send_scene_prompt(msg, meta)
+
+
+async def on_scene_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+    action = (query.data or "").split("|", 1)[1] if "|" in (query.data or "") else ""
+
+    session = get_session(user.id)
+    if not session:
+        await query.edit_message_text("No active scene.")
+        return
+    mode, item_id, stage, meta = session
+    if mode != "learn" or stage != "scene_turn":
+        await query.edit_message_text("No active scene.")
+        return
+
+    scene = (meta or {}).get("scene") or {}
+    roleplay = scene.get("roleplay") or {}
+    turns = scene.get("turns") or []
+    idx = int(scene.get("idx", 0))
+
+    expected = None
+    if idx < len(turns) and "user_task" in turns[idx]:
+        expected = turns[idx].get("expected_phrase")
+
+    if action == "HINT":
+        if expected:
+            await query.message.reply_text(f"💡 Hint: <b>{h(expected)}</b>", parse_mode=ParseMode.HTML)
+        else:
+            await query.message.reply_text("💡 Hint: Try a simple question.")
+        return
+    if action == "OPTIONS":
+        opt_a = expected or "Dov'è il gate?"
+        opt_b = "Mi scusi, può aiutarmi?"
+        await query.message.reply_text(f"🧩 Options:\nA) {h(opt_a)}\nB) {h(opt_b)}", parse_mode=ParseMode.HTML)
+        return
+    if action == "SKIP":
+        # Advance scene without validation
+        out = ["⏭ Skipped."]
+        # Advance idx past the current user_task
+        while idx < len(turns) and "user_task" not in turns[idx]:
+            idx += 1
+        if idx < len(turns) and "user_task" in turns[idx]:
+            idx += 1
+
+        # Append next bot lines and next user task
+        while idx < len(turns):
+            t = turns[idx]
+            if "bot" in t:
+                out.append(f"\n🗣 <b>{h(roleplay.get('bot_role', 'Bot'))}</b>: {h(t['bot'])}")
+                idx += 1
+                continue
+            if "user_task" in t:
+                out.append(f"\n✅ <b>Your turn</b>: {h(t['user_task'])}")
+                break
+            idx += 1
+
+        if idx >= len(turns):
+            out.append("\n🏁 <b>Scene complete.</b>")
+            scene_id = scene.get("scene_id")
+            if scene_id:
+                mark_scenario_completed(user.id, scene_id)
+            clear_session(user.id)
+            kb = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔁 Try again", callback_data=f"SCENEREPLAY|{scene.get('pack_id') or ''}")],
+                [InlineKeyboardButton("▶️ Continue", callback_data="home:journey")],
+            ])
+            await query.message.reply_text("\n".join(out), parse_mode=ParseMode.HTML, reply_markup=kb)
+            return
+
+        scene["idx"] = idx
+        meta["scene"] = scene
+        set_session(user.id, mode="learn", item_id=item_id, stage="scene_turn", meta=meta)
+        await query.message.reply_text("\n".join(out), parse_mode=ParseMode.HTML)
+
+
+async def start_pack_scene(update: Update, context: ContextTypes.DEFAULT_TYPE, pack_id: str):
+    user = update.effective_user
+    msg = get_chat_sender(update)
+
+    pack_key = "generic"
+    pk = (pack_id or "").lower()
+    if "airport" in pk and "a1" in pk:
+        pack_key = "airport_a1"
+    elif "airport" in pk and "a2" in pk:
+        pack_key = "airport_a2"
+    elif "airport" in pk and "b1" in pk:
+        pack_key = "airport_b1"
+    elif "hotel" in pk and "a1" in pk:
+        pack_key = "hotel_a1"
+    elif "hotel" in pk and "a2" in pk:
+        pack_key = "hotel_a2"
+    elif "hotel" in pk and "b1" in pk:
+        pack_key = "hotel_b1"
+
+    scenarios = list_scenarios_by_pack_key(pack_key)
+    if not scenarios:
+        await msg.reply_text("No scenes found for this pack yet.")
+        return
+    scenario = scenarios[0]
+
+    persona = get_user_persona(user.id) or (None, None, None)
+    p_name, p_city, p_role = persona
+    meta = {
+        "persona": {"name": p_name, "city": p_city, "role": p_role},
+        "scene": {
+            "pack_id": pack_id,
+            "scene_id": scenario.get("scenario_id"),
+            "intro_lines": scenario.get("intro_lines") or [],
+            "roleplay": scenario.get("roleplay") or {},
+            "turns": (scenario.get("roleplay") or {}).get("turns") or [],
+            "idx": 0,
+        }
+    }
+    set_session(user.id, mode="learn", item_id=None, stage="scene_turn", meta=meta)
+    await send_scene_prompt(msg, meta)
+
+
+async def on_scene_replay(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+    pack_id = (query.data or "").split("|", 1)[1] if "|" in (query.data or "") else ""
+    if not pack_id:
+        await query.edit_message_text("No pack found.")
+        return
+    await query.edit_message_text("🔁 Restarting scene…")
+    await start_pack_scene(update, context, pack_id)
 
 
 async def on_ai_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -909,6 +1105,7 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ok = (picked == correct)
     status = "🟢 Correct" if ok else "⚠️ Almost"
+    record_practice(user.id, "learn", ok)
 
     holo = (meta or {}).get("holo") or {}
     drills = holo.get("drills") or {}
@@ -954,7 +1151,7 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         scenarios_done = int((meta or {}).get("scenarios_done") or 0)
 
         correct_streak = int((meta or {}).get("correct_streak") or 0)
-        streak_trigger = correct_streak >= 4
+        streak_trigger = correct_streak >= 3
 
         chunk_terms = [ci.get("phrase") or "" for ci in chunk_items]
         learned_terms = list(get_learned_terms_for_pack(user.id, pack_id or ""))
@@ -973,6 +1170,16 @@ async def on_guess_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         # otherwise continue to next card in this pack
+        meta = _increment_continue_used(meta or {})
+        if _continue_quota_reached(meta):
+            clear_session(user.id)
+            await msg.reply_text(
+                "✅ Continue complete. Back to Journey.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("▶️ Continue", callback_data="home:journey")]
+                ])
+            )
+            return
         profile = get_user_profile(user.id)
         target = profile[0] if profile else "it"
         msg = get_chat_sender(update)
@@ -1046,11 +1253,20 @@ async def start_pack_learn(update: Update, context: ContextTypes.DEFAULT_TYPE, p
 
     target, ui, helper = profile
     activate_pack(user.id, pack_id)
+    total, introduced = get_pack_item_counts(user.id, pack_id)
+    upsert_user_pack_progress(user.id, pack_id, introduced, total)
 
     clear_session(user.id)
-    meta = {"pack_id": pack_id, "chunk_items": []}
+    persona = get_user_persona(user.id) or (None, None, None)
+    p_name, p_city, p_role = persona
+    meta = {
+        "pack_id": pack_id,
+        "chunk_items": [],
+        "persona": {"name": p_name, "city": p_city, "role": p_role},
+    }
     if journey_meta:
         meta.update(journey_meta)
+        set_user_journey_progress(user.id, pack_id)
     await _send_next_learn_card(user, msg, target, pack_id=pack_id, meta=meta)
 
 
@@ -1141,6 +1357,9 @@ async def handle_scene_reply(update, context, item_id: int, meta: dict):
         await msg.reply_text("⚠️ AI feedback unavailable — continuing scene.", parse_mode=ParseMode.HTML)
 
     out = []
+    persona = (meta or {}).get("persona") or {}
+    persona_name = persona.get("name") if isinstance(persona, dict) else None
+
     if fb.get("correction"):
         out.append(f"⚠️ Fix: {h(fb['correction'])}")
     elif fb.get("rewrite"):
@@ -1162,18 +1381,24 @@ async def handle_scene_reply(update, context, item_id: int, meta: dict):
             idx += 1
             continue
         if "user_task" in t:
-            out.append(f"\n✅ <b>Your turn</b>: {h(t['user_task'])}")
+            turn_label = f"{persona_name}, your turn" if persona_name else "Your turn"
+            out.append(f"\n✅ <b>{h(turn_label)}</b>: {h(t['user_task'])}")
             break
         idx += 1
 
     # Scene finished
     if idx >= len(turns):
-        out.append("\n🏁 <b>Scene complete.</b> Type /learn to continue or /review to practice.")
+        out.append("\n🏁 <b>Scene complete.</b>")
         scene_id = scene.get("scene_id")
         if scene_id:
             mark_scenario_completed(user.id, scene_id)
+        advance_story(user.id, pack_level)
         clear_session(user.id)
-        await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML)
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔁 Try again", callback_data=f"SCENEREPLAY|{scene.get('pack_id') or ''}")],
+            [InlineKeyboardButton("▶️ Continue", callback_data="home:journey")],
+        ])
+        await msg.reply_text("\n".join(out), parse_mode=ParseMode.HTML, reply_markup=kb)
         return
 
     # Save updated index

@@ -36,7 +36,12 @@ def init_db():
         target_language TEXT NOT NULL DEFAULT 'it',
         ui_language TEXT NOT NULL DEFAULT 'en',
         helper_language TEXT DEFAULT NULL,
-        user_level TEXT DEFAULT 'A1'
+        user_level TEXT DEFAULT 'A1',
+        alter_ego_name TEXT,
+        alter_ego_city TEXT,
+        alter_ego_role TEXT,
+        journey_current_pack_id TEXT,
+        journey_updated_at TEXT
     )
     """)
 
@@ -128,6 +133,11 @@ def init_db():
     _add_column_if_missing(cursor, "users", "target_language", "TEXT NOT NULL DEFAULT 'it'")
     _add_column_if_missing(cursor, "users", "ui_language", "TEXT NOT NULL DEFAULT 'en'")
     _add_column_if_missing(cursor, "users", "learn_since_scene", "INTEGER NOT NULL DEFAULT 0")
+    _add_column_if_missing(cursor, "users", "alter_ego_name", "TEXT")
+    _add_column_if_missing(cursor, "users", "alter_ego_city", "TEXT")
+    _add_column_if_missing(cursor, "users", "alter_ego_role", "TEXT")
+    _add_column_if_missing(cursor, "users", "journey_current_pack_id", "TEXT")
+    _add_column_if_missing(cursor, "users", "journey_updated_at", "TEXT")
     _add_column_if_missing(cursor, "packs", "pack_type", "TEXT")
     _add_column_if_missing(cursor, "packs", "chunk_size", "INTEGER")
     _add_column_if_missing(cursor, "packs", "missions_enabled", "INTEGER")
@@ -205,6 +215,44 @@ def init_db():
         status TEXT NOT NULL,
         completed_at TEXT,
         PRIMARY KEY (user_id, scenario_id)
+    )
+    """)
+
+    # --- user pack progress (open world) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_pack_progress (
+        user_id INTEGER NOT NULL,
+        pack_id TEXT NOT NULL,
+        started_at TEXT,
+        last_activity_at TEXT,
+        introduced_count INTEGER NOT NULL DEFAULT 0,
+        total_items INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, pack_id)
+    )
+    """)
+
+    # --- user practice stats ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_practice_stats (
+        user_id INTEGER PRIMARY KEY,
+        total_practice INTEGER NOT NULL DEFAULT 0,
+        total_reviews INTEGER NOT NULL DEFAULT 0,
+        total_learn INTEGER NOT NULL DEFAULT 0,
+        total_correct INTEGER NOT NULL DEFAULT 0,
+        total_wrong INTEGER NOT NULL DEFAULT 0,
+        last_practice_date TEXT,
+        current_streak INTEGER NOT NULL DEFAULT 0,
+        longest_streak INTEGER NOT NULL DEFAULT 0
+    )
+    """)
+
+    # --- storyline progress (gossip engine) ---
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_story_progress (
+        user_id INTEGER PRIMARY KEY,
+        arc_index INTEGER NOT NULL DEFAULT 0,
+        beat_index INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT
     )
     """)
 
@@ -1045,6 +1093,220 @@ def get_user_profile(user_id: int):
     return row  # (target, ui, helper) or None
 
 
+def get_user_persona(user_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT alter_ego_name, alter_ego_city, alter_ego_role FROM users WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row  # (name, city, role) or None
+
+
+def set_user_persona(user_id: int, name: str | None, city: str | None, role: str | None):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET alter_ego_name = ?, alter_ego_city = ?, alter_ego_role = ? WHERE user_id = ?",
+        (name, city, role, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def set_user_journey_progress(user_id: int, pack_id: str | None):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE users SET journey_current_pack_id = ?, journey_updated_at = ? WHERE user_id = ?",
+        (pack_id, utc_now_iso(), user_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_user_journey_progress(user_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT journey_current_pack_id, journey_updated_at FROM users WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row  # (pack_id, updated_at) or None
+
+
+def upsert_user_pack_progress(user_id: int, pack_id: str, introduced: int, total: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO user_pack_progress (user_id, pack_id, started_at, last_activity_at, introduced_count, total_items)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id, pack_id) DO UPDATE SET
+            started_at = COALESCE(user_pack_progress.started_at, excluded.started_at),
+            last_activity_at = excluded.last_activity_at,
+            introduced_count = excluded.introduced_count,
+            total_items = excluded.total_items
+        """,
+        (user_id, pack_id, utc_now_iso(), utc_now_iso(), int(introduced), int(total))
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_user_pack_progress(user_id: int, pack_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT introduced_count, total_items, started_at, last_activity_at
+        FROM user_pack_progress
+        WHERE user_id = ? AND pack_id = ?
+        """,
+        (user_id, pack_id)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row  # (introduced, total, started_at, last_activity_at) or None
+
+
+def get_practice_stats(user_id: int) -> dict:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT total_practice, total_reviews, total_learn, total_correct, total_wrong,
+               last_practice_date, current_streak, longest_streak
+        FROM user_practice_stats
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return {
+            "total_practice": 0,
+            "total_reviews": 0,
+            "total_learn": 0,
+            "total_correct": 0,
+            "total_wrong": 0,
+            "last_practice_date": None,
+            "current_streak": 0,
+            "longest_streak": 0,
+        }
+    return {
+        "total_practice": int(row[0] or 0),
+        "total_reviews": int(row[1] or 0),
+        "total_learn": int(row[2] or 0),
+        "total_correct": int(row[3] or 0),
+        "total_wrong": int(row[4] or 0),
+        "last_practice_date": row[5],
+        "current_streak": int(row[6] or 0),
+        "longest_streak": int(row[7] or 0),
+    }
+
+
+def record_practice(user_id: int, kind: str, ok: bool):
+    """
+    kind: 'review' | 'learn'
+    ok: True if correct/success, False otherwise
+    """
+    stats = get_practice_stats(user_id)
+    total_practice = stats["total_practice"] + 1
+    total_reviews = stats["total_reviews"] + (1 if kind == "review" else 0)
+    total_learn = stats["total_learn"] + (1 if kind == "learn" else 0)
+    total_correct = stats["total_correct"] + (1 if ok else 0)
+    total_wrong = stats["total_wrong"] + (0 if ok else 1)
+
+    today = date.today().isoformat()
+    last = stats["last_practice_date"]
+    current_streak = stats["current_streak"]
+    longest_streak = stats["longest_streak"]
+
+    if last == today:
+        # streak unchanged
+        pass
+    else:
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        if last == yesterday:
+            current_streak = current_streak + 1 if current_streak > 0 else 1
+        else:
+            current_streak = 1
+        if current_streak > longest_streak:
+            longest_streak = current_streak
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO user_practice_stats (
+            user_id, total_practice, total_reviews, total_learn,
+            total_correct, total_wrong, last_practice_date,
+            current_streak, longest_streak
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            total_practice = excluded.total_practice,
+            total_reviews = excluded.total_reviews,
+            total_learn = excluded.total_learn,
+            total_correct = excluded.total_correct,
+            total_wrong = excluded.total_wrong,
+            last_practice_date = excluded.last_practice_date,
+            current_streak = excluded.current_streak,
+            longest_streak = excluded.longest_streak
+        """,
+        (
+            user_id,
+            total_practice,
+            total_reviews,
+            total_learn,
+            total_correct,
+            total_wrong,
+            today,
+            current_streak,
+            longest_streak,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_story_progress(user_id: int) -> tuple[int, int]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT arc_index, beat_index FROM user_story_progress WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return 0, 0
+    return int(row[0] or 0), int(row[1] or 0)
+
+
+def set_story_progress(user_id: int, arc_index: int, beat_index: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO user_story_progress (user_id, arc_index, beat_index, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            arc_index = excluded.arc_index,
+            beat_index = excluded.beat_index,
+            updated_at = excluded.updated_at
+        """,
+        (user_id, int(arc_index), int(beat_index), utc_now_iso())
+    )
+    conn.commit()
+    conn.close()
+
 def set_user_helper_language(user_id: int, helper_language: str | None):
     conn = get_connection()
     cur = conn.cursor()
@@ -1123,10 +1385,8 @@ def get_active_items_total(user_id: int, target_language: str) -> int:
         SELECT COUNT(*)
         FROM pack_items pi
         JOIN packs p ON p.pack_id = pi.pack_id
-        JOIN user_packs up ON up.pack_id = p.pack_id
-        WHERE up.user_id = ?
-          AND p.target_language = ?
-    """, (user_id, target_language))
+        WHERE p.target_language = ?
+    """, (target_language,))
     (cnt,) = cur.fetchone()
     conn.close()
     return int(cnt)
@@ -1140,11 +1400,9 @@ def get_active_items_introduced(user_id: int, target_language: str) -> int:
         FROM reviews r
         JOIN pack_items pi ON pi.item_id = r.item_id
         JOIN packs p ON p.pack_id = pi.pack_id
-        JOIN user_packs up ON up.pack_id = p.pack_id
         WHERE r.user_id = ?
-          AND up.user_id = ?
           AND p.target_language = ?
-    """, (user_id, user_id, target_language))
+    """, (user_id, target_language))
     (cnt,) = cur.fetchone()
     conn.close()
     return int(cnt)
@@ -1152,7 +1410,7 @@ def get_active_items_introduced(user_id: int, target_language: str) -> int:
 
 def pick_next_new_item_for_user(user_id: int, target_language: str):
     """
-    Pick the next *not-yet-introduced* item from active packs in a stable order.
+    Pick the next *not-yet-introduced* item in a stable order.
     Stable order MVP:
       - pack level, pack title (so A1 packs first)
       - then pack_items.item_id (import order)
@@ -1165,9 +1423,7 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
         SELECT pi.item_id, pi.term, pi.chunk, pi.translation_en, pi.note, pi.pack_id, pi.focus
         FROM pack_items pi
         JOIN packs p ON p.pack_id = pi.pack_id
-        JOIN user_packs up ON up.pack_id = p.pack_id
-        WHERE up.user_id = ?
-          AND p.target_language = ?
+        WHERE p.target_language = ?
           AND (p.level IS NULL OR p.level = '' OR p.level <= ?)
           AND NOT EXISTS (
               SELECT 1 FROM reviews r
@@ -1178,7 +1434,7 @@ def pick_next_new_item_for_user(user_id: int, target_language: str):
           p.title ASC,
           pi.item_id ASC
         LIMIT 1
-    """, (user_id, target_language, user_level, user_id))
+    """, (target_language, user_level, user_id))
 
     row = cur.fetchone()
     conn.close()
@@ -1308,6 +1564,24 @@ def get_random_context_for_item(item_id: int, lang: str = "it") -> str | None:
     row = cur.fetchone()
     conn.close()
     return row[0] if row else None
+
+
+def get_random_terms_from_pack(pack_id: str, exclude_item_id: int, limit: int = 2) -> list[str]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT term
+        FROM pack_items
+        WHERE pack_id = ?
+          AND item_id != ?
+          AND term IS NOT NULL
+          AND TRIM(term) != ''
+        ORDER BY RANDOM()
+        LIMIT ?
+    """, (pack_id, exclude_item_id, limit))
+    rows = cur.fetchall()
+    conn.close()
+    return [r[0] for r in rows if r and r[0]]
 
 
 def get_item_holographic_meta(item_id: int) -> dict:
